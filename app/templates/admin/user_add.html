@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block page_content %}
+    <section class="content-header">
+        <h1> 门店管理系统</h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> 员工管理</a></li>
+            <li class="active">添加员工</li>
+        </ol>
+    </section>
+    <section class="content" id="showcontent">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">添加员工</h3>
+                    </div>
+                    <form role="form" method="post">
+                        <!--启动CSRF-->
+                        {{ form.hidden_tag() }}
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label for="input_name" style="color: red">*</label>
+                                <label for="input_name">{{ form.name.label }}</label>
+                                {{ form.name }}
+                                {% for err in form.name.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="form-group">
+                                <label for="input_phone" style="color: red">*</label>
+                                <label for="input_phone">{{ form.phone.label }}</label>
+                                {{ form.phone }}
+                                {% for err in form.phone.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="form-group">
+                                <label for="input_pwd" style="color: red">*</label>
+                                <label for="input_pwd">{{ form.pwd.label }}</label>
+                                {{ form.pwd }}
+                                {% for err in form.pwd.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="form-group">
+                                <label for="input_re_pwd" style="color: red">*</label>
+                                <label for="input_re_pwd">{{ form.repwd.label }}</label>
+                                {{ form.repwd }}
+                                {% for err in form.repwd.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="form-group">
+                                <label for="input_id_card" style="color: red">*</label>
+                                <label for="input_id_card">{{ form.id_card.label }}</label>
+                                {{ form.id_card }}
+                                {% for err in form.id_card.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+{#                            <div class="form-group">#}
+{#                                <label for="input_jobs" style="color: red">*</label>#}
+{#                                <label for="input_jobs">{{ form.jobs.label }}</label>#}
+{#                                {{ form.jobs }}#}
+{#                                {% for err in form.jobs.errors %}#}
+{#                                    <div class="col-md-12">#}
+{#                                        <p style="color: red">{{ err }}</p>#}
+{#                                    </div>#}
+{#                                {% endfor %}#}
+{#                            </div>#}
+                            <div class="form-group">
+                                <label for="input_salary">{{ form.salary.label }}</label>
+                                {{ form.salary }}
+                                {% for err in form.salary.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="input_role_id" style="color: red">*</label>
+                                <label for="input_role_id">{{ form.role_id.label }}</label>
+                                {{ form.role_id }}
+                                {% for err in form.role_id.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                        </div>
+                        <div class="box-footer">
+                            {{ form.submit }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block js %}
+    <script>
+        $(document).ready(function () {
+            $("#g-user").addClass("active")
+            $("#g-user-add").addClass("active")
+            $('.select2').select2()
+        })
+    </script>
+{% endblock %}

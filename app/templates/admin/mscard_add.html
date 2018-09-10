@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block page_content %}
+    <section class="content-header">
+        <h1> 门店管理系统</h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> 设置</a></li>
+            <li><a href="{{ url_for('admin.mscard_list') }}"> 会员卡</a></li>
+            <li class="active"> 添加会员卡</li>
+        </ol>
+    </section>
+    <section class="content" id="showcontent">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"> 添加会员卡</h3>
+                    </div>
+                    <form role="form" method="post">
+                        <!--启动CSRF-->
+                        {{ form.hidden_tag() }}
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label for="input_name" style="color: red">*</label>
+                                <label for="input_name">{{ form.name.label }}</label>
+                                {{ form.name }}
+                                {% for err in form.name.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="form-group">
+                                <label for="input_payment" style="color: red">*</label>
+                                <label for="input_payment">{{ form.payment.label }}</label>
+                                {{ form.payment }}
+                                {% for err in form.payment.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="form-group">
+                                <label for="input_interval" style="color: red">*</label>
+                                <label for="input_interval">{{ form.interval.label }}</label>
+                                {{ form.interval }}
+                                {% for err in form.interval.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="form-group">
+                                <label for="input_scorerule" style="color: red">*</label>
+                                <label for="input_scorerule">{{ form.scorerule.label }}</label>
+                                {{ form.scorerule }}
+                                {% for err in form.scorerule.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="form-group">
+                                <label for="input_scorelimit" style="color: red">*</label>
+                                <label for="input_scorelimit">{{ form.scorelimit.label }}</label>
+                                {{ form.scorelimit }}
+                                {% for err in form.scorelimit.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="box-footer">
+                            {{ form.submit }}
+                            <a href="{{ url_for('admin.mscard_list') }}" class="btn btn-default pull-right" role="button"> 返回</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block js %}
+    <script>
+        $(document).ready(function () {
+            $("#g-option").addClass("active")
+            $("#g-option-mscard").addClass("active")
+        })
+    </script>
+{% endblock %}

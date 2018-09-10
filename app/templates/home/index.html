@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% block page_content %}
+    <section class="content-header">
+        <h1>
+            首页
+            <small>营业汇总</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
+            <li class="active">Here</li>
+        </ol>
+    </section>
+
+    <section class="content container-fluid">
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">汇总报告</h3>
+                        <div class="box-tools pull-right">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i
+                                    class="fa fa-minus"></i>
+                            </button>
+
+                            <button type="button" class="btn btn-box-tool" data-widget="remove"><i
+                                    class="fa fa-times"></i></button>
+                        </div>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-md-6 col-md-offset-3">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" class="form-control pull-right" id="datepicker_from"
+                                           data-date-format="yyyy/mm/dd">
+
+                                    <span class="input-group-addon">至</span>
+
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" class="form-control pull-right" id="datepicker_to"
+                                           data-date-format="yyyy/mm/dd">
+                                    <span class="input-group-btn">
+                                            <button class="btn btn-primary" type="button">查询</button>
+                                        </span>
+                                </div>
+                                <!-- /.input group -->
+                            </div>
+                        </div>
+                        <!-- /.row -->
+                    </div>
+                    <!-- ./box-body -->
+                    <div class="box-footer">
+                        <div class="row">
+                            <div class="col-sm-4 col-xs-6">
+                                <div class="description-block border-right">
+                                <span class="description-percentage text-green"><i
+                                        class="fa fa-caret-up"></i> 15%</span>
+                                    <h5 class="description-header">35210.43</h5>
+                                    <span class="description-text">实收金额</span>
+                                </div>
+                                <!-- /.description-block -->
+                            </div>
+                            <!-- /.col -->
+                            <div class="col-sm-4 col-xs-6">
+                                <div class="description-block border-right">
+                                        <span class="description-percentage text-yellow"><i
+                                                class="fa fa-caret-left"></i> 0%</span>
+                                    <h5 class="description-header">15</h5>
+                                    <span class="description-text">会员车辆</span>
+                                </div>
+                                <!-- /.description-block -->
+                            </div>
+                            <!-- /.col -->
+                            <div class="col-sm-4 col-xs-6">
+                                <div class="description-block border-right">
+                                <span class="description-percentage text-green"><i
+                                        class="fa fa-caret-up"></i> 20%</span>
+                                    <h5 class="description-header">10</h5>
+                                    <span class="description-text">散客车辆</span>
+                                </div>
+                                <!-- /.description-block -->
+                            </div>
+
+                        </div>
+                        <!-- /.row -->
+                    </div>
+                    <!-- /.box-footer -->
+                </div>
+                <!-- /.box -->
+            </div>
+            <!-- /.col -->
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">销售金额占比</h3>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body no-padding">
+                        <table class="table">
+                            <tbody>
+                            <tr>
+                                <th style="width: 5%">#</th>
+                                <th style="width: 40%">实收项目</th>
+                                <th style="width: 25%">实收金额</th>
+                                <th style="width: 30%">占比</th>
+                            </tr>
+                            <tr>
+                                <td>1.</td>
+                                <td> 会员售卡</td>
+                                <td>
+                                    1000
+                                </td>
+                                <td>
+                                    <div class="progress progress-xs">
+                                        <div class="progress-bar progress-bar-danger"
+                                             style="width: 50%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2.</td>
+                                <td>会员续费</td>
+                                <td>
+                                    200
+                                </td>
+                                <td>
+                                    <div class="progress progress-xs">
+                                        <div class="progress-bar progress-bar-info"
+                                             style="width: 20%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>3.</td>
+                                <td>挂账还款</td>
+                                <td>
+                                    100
+                                </td>
+                                <td>
+                                    <div class="progress progress-xs">
+                                        <div class="progress-bar progress-bar-blue"
+                                             style="width: 10%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>4.</td>
+                                <td>服务项目/产品销售</td>
+                                <td>
+                                    300
+                                </td>
+                                <td>
+                                    <div class="progress progress-xs">
+                                        <div class="progress-bar progress-bar-light-green"
+                                             style="width: 20%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+
+            </div>
+
+            <div class="col-md-6">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">客户结算方式</h3>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body no-padding">
+                        <table class="table">
+                            <tbody>
+                            <tr>
+                                <td> 现金: 1000</td>
+                                <td> 储值卡扣： 2000</td>
+                            </tr>
+                            <tr>
+                                <td> 刷银行卡: 2000</td>
+                                <td> 计次卡扣： 2000</td>
+                            </tr>
+                            <tr>
+                                <td> 支付宝: 1000</td>
+                                <td> 售卡优惠： 2000</td>
+                            </tr>
+                            <tr>
+                                <td> 微信: 1000</td>
+                                <td> 消费优惠： 2000</td>
+                            </tr>
+                            <tr>
+                                <td> 挂账: 1000</td>
+                                <td> 折扣金额： 2000</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+{% endblock %}
+
+{% block js %}
+    <script>
+        $('#datepicker_from').datepicker({
+            "autoclose": true,
+            "language": "zh-CN",
+        })
+        $('#datepicker_from').val(moment().startOf('month').format("YYYY/MM/DD"))
+        $('#datepicker_to').datepicker({
+            "autoclose": true,
+            "language": "zh-CN",
+        })
+        $('#datepicker_to').val(moment().format("YYYY/MM/DD"))
+    </script>
+    <script>
+        $(document).ready(function () {
+            $("#g-index").addClass("active")
+        })
+    </script>
+{% endblock %}

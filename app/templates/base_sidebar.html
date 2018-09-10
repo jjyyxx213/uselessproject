@@ -1,0 +1,131 @@
+<ul class="sidebar-menu" data-widget="tree">
+                <!--<li class="header"> 管理菜单</li>-->
+                <li id="g-index"><a href="{{ url_for('home.index') }}"><i class="fa fa-home"></i> <span> 首页</span></a></li>
+                <li class="treeview" id="g-2">
+                    <a href="#"><i class="fa fa-money"></i> <span> 收银管理</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li id="g-2-1"><a href="#"><i class="fa fa-circle-o"></i> 收银开单</a></li>
+                        <li id="g-2-2"><a href="#"><i class="fa fa-circle-o"></i> 待结算单据</a></li>
+                        <li id="g-2-3"><a href="#"><i class="fa fa-circle-o"></i> 已结算单据</a></li>
+                    </ul>
+                </li>
+                <li class="treeview" id="g-3">
+                    <a href="#"><i class="fa fa-th-list"></i> <span> 库存管理</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li id="g-3-1"><a href="#"><i class="fa fa-circle-o"></i> 采购入库</a></li>
+                        <li id="g-3-2"><a href="#"><i class="fa fa-circle-o"></i> 库存列表</a></li>
+                        <li id="g-3-3"><a href="#"><i class="fa fa-circle-o"></i> 领料出库</a></li>
+                        <li id="g-3-4"><a href="#"><i class="fa fa-circle-o"></i> 调拨管理</a></li>
+                        <li id="g-3-5"><a href="#"><i class="fa fa-circle-o"></i> 报损管理</a></li>
+                        <li id="g-3-6"><a href="#"><i class="fa fa-circle-o"></i> 采购退货</a></li>
+                    </ul>
+                </li>
+                <li class="treeview" id="g-4">
+                    <a href="#"><i class="fa fa-briefcase"></i> <span> 客户管理</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li id="g-4-1"><a href="#"><i class="fa fa-circle-o"></i> 添加客户</a></li>
+                        <li id="g-4-2"><a href="#"><i class="fa fa-circle-o"></i> 客户列表</a></li>
+                    </ul>
+                </li>
+                <li class="treeview">
+                    <a href="#"><i class="fa fa-id-card"></i> <span> 会员管理</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li><a href="#"><i class="fa fa-circle-o"></i> 会员办卡</a></li>
+                        <li><a href="#"><i class="fa fa-circle-o"></i> 会员列表</a></li>
+                    </ul>
+                </li>
+                <li class="treeview">
+                    <a href="#"><i class="fa fa-handshake-o"></i> <span> 供应商管理</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li><a href="#"><i class="fa fa-circle-o"></i> 添加供应商</a></li>
+                        <li><a href="#"><i class="fa fa-circle-o"></i> 供应商管理</a></li>
+                    </ul>
+                </li>
+                <li class="treeview">
+                    <a href="#"><i class="fa fa-link"></i> <span> 商品/服务管理</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li><a href="#"><i class="fa fa-circle-o"></i> 商品列表</a></li>
+                        <li><a href="#"><i class="fa fa-circle-o"></i> 服务项目列表</a></li>
+                    </ul>
+                </li>
+                <li class="treeview" id="g-user">
+                    <a href="#"><i class="fa fa-users"></i> <span> 员工管理</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li id="g-user-add"><a href="{{ url_for('admin.user_add') }}"><i class="fa fa-circle-o"></i> 添加员工</a></li>
+                        <li id="g-user-list"><a href="{{ url_for('admin.user_list') }}"><i class="fa fa-circle-o"></i> 员工列表</a></li>
+                    </ul>
+                </li>
+                <li class="treeview" id="g-option">
+                    <a href="#"><i class="fa fa-cog"></i> <span> 设置</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li id="g-option-mscard"><a href="{{ url_for('admin.mscard_list') }}"><i class="fa fa-circle-o"></i> 会员卡</a></li>
+                        <li><a href="#"><i class="fa fa-circle-o"></i> 商品分类</a></li>
+                        <li><a href="#"><i class="fa fa-circle-o"></i> 服务项目分类</a></li>
+                    </ul>
+                </li>
+                <li class="treeview" id="g-log">
+                    <a href="#"><i class="fa fa-file-text"></i> <span> 日志管理</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li id="g-log-op"><a href="{{ url_for('admin.oplog_list') }}"><i class="fa fa-circle-o"></i> 操作日志列表</a></li>
+                        <li id="g-log-login"><a href="{{ url_for('admin.userloginlog_list') }}"><i class="fa fa-circle-o"></i> 员工登录日志列表</a></li>
+                    </ul>
+                </li>
+                <li class="treeview" id="g-auth">
+                    <a href="#"><i class="fa fa-lock"></i> <span> 权限管理</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li id="g-auth-add"><a href="{{ url_for('admin.auth_add') }}"><i class="fa fa-circle-o"></i> 添加权限</a></li>
+                        <li id="g-auth-list"><a href="{{ url_for('admin.auth_list') }}"><i class="fa fa-circle-o"></i> 权限列表</a></li>
+                    </ul>
+                </li>
+                <li class="treeview" id="g-role">
+                    <a href="#"><i class="fa fa-user-secret"></i> <span> 角色管理</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li id="g-role-add"><a href="{{ url_for('admin.role_add') }}"><i class="fa fa-circle-o"></i> 添加角色</a></li>
+                        <li id="g-role-list"><a href="{{ url_for('admin.role_list') }}"><i class="fa fa-circle-o"></i> 角色列表</a></li>
+                    </ul>
+                </li>
+            </ul>
