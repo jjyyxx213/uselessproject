@@ -100,11 +100,38 @@
                     location.href = "{{ url_for("admin.mscard_list") }}?key=" + key
                 }
             })
+
+            var pendingRequests = {}
+            $.ajaxPrefilter(function (options, originalOptions, jqXHR) {
+                var key = options.url
+                console.log(key)
+                console.log(!pendingRequests[key])
+                if (!pendingRequests[key]) {
+                    pendingRequests[key] = jqXHR
+                } else {
+                    //jqXHR.abort();    //放弃后触发的提交
+                    pendingRequests[key].abort()   // 放弃先触发的提交
+                }
+
+                var complete = options.complete
+                options.complete = function (jqXHR, textStatus) {
+                    pendingRequests[key] = null
+                    if (jQuery.isFunction(complete)) {
+                        complete.apply(this, arguments)
+                    }
+                }
+            })
+            {#Prefilters是一个预过滤器，在每个请求之前被发送和$.ajax()处理它们前处理。#}
+            {#options 是请求的选项#}
+            {#originalOptions 值作为提供给Ajax方法未经修改的选项，因此，没有ajaxSettings设置中的默认值#}
+            {#jqXHR 是请求的jqXHR对象#}
+            {#核心思想是维护一个队列，发送请求时，将请求加入队列，请求响应后，从队列中清除，这就保证了在任一时刻只能有一个同样的请求发送.#}
+            {#调用abort后jquery会执行error的方法，抛出abort的异常信息。#}
+            {#按钮每次点击都会向后端发送请求，下面的demo实现了多次点击按钮之后，只保证最后一次点击的请求能够成功。#}
             // 会员卡停用
             $("a[name='btn-block']").on("click", function () {
                 //获取父元素第一个兄弟的text，就是id
                 var msid = $(this).parent().siblings().first().text()
-                console.log(msid)
                 //var x = $(this).parent().siblings().eq(0).text()//eq(0)也可以
                 $.ajax({
                     url: "{{ url_for('admin.mscard_block') }}",
@@ -116,8 +143,16 @@
                             // 停用成功
                             $("#" + msid).text("失效")
                         }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        if (errorThrown != 'abort') {
+                            alert('失败了，您操作的太频繁');
+                        }
                     }
                 })
+                //error: function () {
+                //ajax_lock = false; //失败也需要将标志标记为可提交状态
+                //}
             })
         })
     </script>
