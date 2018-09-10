@@ -361,3 +361,8 @@ def mscard_add():
         flash(u'会员卡添加成功', 'ok')
         return redirect(url_for('admin.mscard_add'))
     return render_template('admin/mscard_add.html', form=form)
+
+@admin.route('/mscard/edit', methods=['GET', 'POST'])
+def mscard_edit():
+    print('1123')
+    pass
