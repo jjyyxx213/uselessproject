@@ -57,9 +57,9 @@
                                     {% endif %}
                                     <td>{{ v.addtime }}</td>
                                     <td>
-                                        <a id="btn-unfrozen"
+                                        <a name="btn-unfrozen"
                                            class="label label-success">解冻</a>
-                                        <a id="btn-frozen"
+                                        <a name="btn-frozen"
                                            class="label label-danger">冻结</a>
                                     </td>
                                 </tr>
@@ -96,7 +96,7 @@
                 }
             })
             // 员工冻结
-            $("#btn-frozen").on("click", function () {
+            $("a[name='btn-frozen']").on("click", function () {
                 //获取父元素第一个兄弟的text，就是id
                 var uid = $(this).parent().siblings().first().text()
                 //var x = $(this).parent().siblings().eq(0).text()//eq(0)也可以
@@ -114,7 +114,7 @@
                 })
             })
             // 员工解冻
-            $("#btn-unfrozen").on("click", function () {
+            $("a[name='btn-unfrozen']").on("click", function () {
                 //获取父元素第一个兄弟的text，就是id
                 var uid = $(this).parent().siblings().first().text()
                 $.ajax({

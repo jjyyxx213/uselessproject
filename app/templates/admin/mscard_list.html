@@ -17,7 +17,8 @@
                         <h3 class="box-title"> 会员卡列表</h3>
                         <div class="box-tools">
                             <div class="pull-left border-right">
-                                <a href="{{ url_for('admin.mscard_add') }}" class="btn btn-info btn-sm" role="button"> 添加</a>
+                                <a href="{{ url_for('admin.mscard_add') }}" class="btn btn-info btn-sm" role="button">
+                                    添加</a>
                             </div>
                             <div class="input-group input-group-sm" style="width: 150px;">
                                 <input type="text" name="table_search" class="form-control pull-right"
@@ -31,6 +32,7 @@
                             </div>
                         </div>
                     </div>
+
                     <div class="box-body table-responsive no-padding">
                         <table class="table table-hover">
                             <tbody>
@@ -50,20 +52,20 @@
                                     <td>{{ v.id }}</td>
                                     <td>{{ v.name }}</td>
                                     <td>{{ v.payment }}</td>
-                                    <td>{{ v.interval }}月</td>
+                                    <td>{{ v.interval }} 月</td>
                                     <td>{{ v.scorerule }}</td>
                                     <td>{{ v.scorelimit }}</td>
                                     {% if v.valid == 1 %}
-                                        <td>有效</td>
+                                        <td id="{{ v.id }}">有效</td>
                                     {% else %}
-                                        <td>失效</td>
+                                        <td id="{{ v.id }}">失效</td>
                                     {% endif %}
                                     <td>{{ v.addtime }}</td>
                                     <td>
-                                        <a href="#" class="label label-success"> 修改</a>
+                                        <a href="{{ url_for('admin.mscard_edit', id=v.id) }}"
+                                           class="label label-success"> 修改</a>
                                         &nbsp;
-                                        <a href="#"
-                                           class="label label-danger"> 停用</a>
+                                        <a name="btn-block" class="label label-danger"> 停用</a>
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -97,6 +99,25 @@
                     var key = $("#search_key").val()
                     location.href = "{{ url_for("admin.mscard_list") }}?key=" + key
                 }
+            })
+            // 会员卡停用
+            $("a[name='btn-block']").on("click", function () {
+                //获取父元素第一个兄弟的text，就是id
+                var msid = $(this).parent().siblings().first().text()
+                console.log(msid)
+                //var x = $(this).parent().siblings().eq(0).text()//eq(0)也可以
+                $.ajax({
+                    url: "{{ url_for('admin.mscard_block') }}",
+                    type: "GET",
+                    data: "msid=" + msid,
+                    dataType: "json",
+                    success: function (result) {
+                        if (result.valid == 0) {
+                            // 停用成功
+                            $("#" + msid).text("失效")
+                        }
+                    }
+                })
             })
         })
     </script>

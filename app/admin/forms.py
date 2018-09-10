@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, FileField, TextAreaField, SelectField, \
-    SelectMultipleField
+    SelectMultipleField, RadioField
 from wtforms.validators import DataRequired, ValidationError, EqualTo, Regexp, Length
 from app.models import User, Auth, Role
 
@@ -199,7 +199,6 @@ class MscardForm(FlaskForm):
         render_kw={
             'class': 'form-control',
             'placeholder': u'请输入开卡金额',
-            'value': 0
         }
     )
     interval = StringField(
@@ -211,7 +210,6 @@ class MscardForm(FlaskForm):
         render_kw={
             'class': 'form-control',
             'placeholder': u'请输入有效期(月)',
-            'value': 1
         }
     )
     scorerule = StringField(
@@ -224,7 +222,6 @@ class MscardForm(FlaskForm):
         render_kw={
             'class': 'form-control',
             'placeholder': u'请输入积分生成规则',
-            'value': 1
         }
     )
     scorelimit = StringField(
@@ -236,8 +233,17 @@ class MscardForm(FlaskForm):
         render_kw={
             'class': 'form-control',
             'placeholder': u'请输入积分上限',
-            'value': 1
         }
+    )
+    valid = RadioField(
+        label=u'卡状态',
+        validators=[
+            DataRequired(message=u'请选择卡状态')
+        ],
+        description=u'卡状态',
+        coerce=int,
+        choices=[( 1,u'有效'), (0, u'停用')],
+        default=1,
     )
     submit = SubmitField(
         label=u'添加',

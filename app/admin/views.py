@@ -362,7 +362,50 @@ def mscard_add():
         return redirect(url_for('admin.mscard_add'))
     return render_template('admin/mscard_add.html', form=form)
 
-@admin.route('/mscard/edit', methods=['GET', 'POST'])
-def mscard_edit():
-    print('1123')
-    pass
+@admin.route('/mscard/edit/<int:id>', methods=['GET', 'POST'])
+def mscard_edit(id=None):
+    # 修改会员卡
+    form = MscardForm()
+    form.submit.label.text = u'修改'
+    mscard = Mscard.query.filter_by(id=id).first_or_404()
+    if request.method == 'GET':
+        # get时进行赋值。应对RadioField无法模板中赋初值
+        form.valid.data = mscard.valid
+    if form.validate_on_submit():
+        if mscard.name != form.name.data and Mscard.query.filter_by(name=form.name.data).first():
+            flash(u'您输入的会员卡已存在', 'err')
+            return redirect(url_for('admin.mscard_edit', id=mscard.id))
+        mscard.name = form.name.data
+        mscard.payment = form.payment.data
+        mscard.interval = form.interval.data
+        mscard.scorerule = form.scorerule.data
+        mscard.scorelimit = form.scorelimit.data
+        mscard.valid = form.valid.data
+        db.session.add(mscard)
+        oplog = Oplog(
+            user_id=session['user_id'],
+            ip=request.remote_addr,
+            reason=u'修改会员卡:%s' % form.name.data
+        )
+        db.session.add(oplog)
+        db.session.commit()
+        flash(u'会员卡修改成功', 'ok')
+        return redirect(url_for('admin.mscard_list'))
+    return render_template('admin/mscard_edit.html', form=form, mscard=mscard)
+
+@admin.route('/mscard/block')
+def mscard_block():
+    # 会员卡停用
+    msid = request.args.get('msid', '')
+    mscard = Mscard.query.filter_by(id=msid).first_or_404()
+    mscard.valid = 0
+    db.session.add(mscard)
+    oplog = Oplog(
+        user_id=session['user_id'],
+        ip=request.remote_addr,
+        reason=u'停用会员卡:%s' % mscard.name
+    )
+    db.session.add(oplog)
+    db.session.commit()
+    data = {"valid": 0}
+    return dumps(data)

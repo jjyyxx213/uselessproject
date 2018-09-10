@@ -22,8 +22,8 @@
                         <div class="box-body">
                             <div class="form-group">
                                 <label for="input_name" style="color: red">*</label>
-                                <label for="input_name">{{ form.name.label }}</label>
-                                {{ form.name }}
+                                {{ form.name.label }}
+                                {{ form.name(value=mscard.name) }}
                                 {% for err in form.name.errors %}
                                     <div class="col-md-12">
                                         <p style="color: red">{{ err }}</p>
@@ -32,8 +32,8 @@
                             </div>
                             <div class="form-group">
                                 <label for="input_payment" style="color: red">*</label>
-                                <label for="input_payment">{{ form.payment.label }}</label>
-                                {{ form.payment }}
+                                {{ form.payment.label }}
+                                {{ form.payment(value=mscard.payment) }}
                                 {% for err in form.payment.errors %}
                                     <div class="col-md-12">
                                         <p style="color: red">{{ err }}</p>
@@ -42,8 +42,10 @@
                             </div>
                             <div class="form-group">
                                 <label for="input_interval" style="color: red">*</label>
-                                <label for="input_interval">{{ form.interval.label }}</label>
-                                {{ form.interval }}
+                                {{ form.interval.label }}
+                                <label for="input_interval" class="badge bg-green" data-toggle="tooltip"
+                                       title="单位：月">?</label>
+                                {{ form.interval(value=mscard.interval) }}
                                 {% for err in form.interval.errors %}
                                     <div class="col-md-12">
                                         <p style="color: red">{{ err }}</p>
@@ -52,8 +54,10 @@
                             </div>
                             <div class="form-group">
                                 <label for="input_scorerule" style="color: red">*</label>
-                                <label for="input_scorerule">{{ form.scorerule.label }}</label>
-                                {{ form.scorerule }}
+                                {{ form.scorerule.label }}
+                                <label for="input_scorerule" class="badge bg-green" data-toggle="tooltip"
+                                       title="积分=消费金额*积分生成规则">?</label>
+                                {{ form.scorerule(value=mscard.scorerule) }}
                                 {% for err in form.scorerule.errors %}
                                     <div class="col-md-12">
                                         <p style="color: red">{{ err }}</p>
@@ -62,9 +66,27 @@
                             </div>
                             <div class="form-group">
                                 <label for="input_scorelimit" style="color: red">*</label>
-                                <label for="input_scorelimit">{{ form.scorelimit.label }}</label>
-                                {{ form.scorelimit }}
+                                {{ form.scorelimit.label }}
+                                <label for="input_scorerule" class="badge bg-green" data-toggle="tooltip"
+                                       title="积分积攒到上限，可消耗积分额度升级会员卡等级">?</label>
+                                {{ form.scorelimit(value=mscard.scorelimit) }}
                                 {% for err in form.scorelimit.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="form-group">
+                                <label for="input_valid" style="color: red">*</label>
+                                {% for valid in form.valid %}
+                                    {{ valid }}
+                                    {% if valid.data == 1 %}
+                                        <label for="input_valid">有效</label>
+                                    {% else %}
+                                        <label for="input_valid">失效</label>
+                                    {% endif %}
+                                {% endfor %}
+                                {% for err in form.valid.errors %}
                                     <div class="col-md-12">
                                         <p style="color: red">{{ err }}</p>
                                     </div>
@@ -73,7 +95,8 @@
                         </div>
                         <div class="box-footer">
                             {{ form.submit }}
-                            <a href="{{ url_for('admin.mscard_list') }}" class="btn btn-default pull-right" role="button"> 返回</a>
+                            <a href="{{ url_for('admin.mscard_list') }}" class="btn btn-default pull-right"
+                               role="button"> 返回</a>
                         </div>
                     </form>
                 </div>
@@ -87,6 +110,12 @@
         $(document).ready(function () {
             $("#g-option").addClass("active")
             $("#g-option-mscard").addClass("active")
+
+            //只要遇到radio,checkbox 直接转换为icheck
+            $('input[type="checkbox"], input[type="radio"]').iCheck({
+                checkboxClass: 'icheckbox_square-blue',
+                radioClass: 'iradio_square-blue'
+            })
         })
     </script>
 {% endblock %}
