@@ -155,6 +155,14 @@ class UserForm(FlaskForm):
         }
     )
 
+    frozen = RadioField(
+        label=u'员工状态',
+        description=u'员工状态',
+        coerce=int,
+        choices=[(0, u'有效'), (1, u'冻结')],
+        default=0,
+    )
+
     submit = SubmitField(
         label=u'添加',
         render_kw={
@@ -237,9 +245,6 @@ class MscardForm(FlaskForm):
     )
     valid = RadioField(
         label=u'卡状态',
-        validators=[
-            DataRequired(message=u'请选择卡状态')
-        ],
         description=u'卡状态',
         coerce=int,
         choices=[( 1,u'有效'), (0, u'停用')],

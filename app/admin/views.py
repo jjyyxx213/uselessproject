@@ -164,7 +164,7 @@ def role_edit(id=None):
     return render_template('admin/role_edit.html', form=form, role=role)
 
 
-@admin.route("/role/del/<int:id>/", methods=["GET"])
+@admin.route("/role/del/<int:id>/", methods=['GET', 'POST'])
 def role_del(id=None):
     # 角色删除
     role = Role.query.filter_by(id=id).first_or_404()
@@ -216,6 +216,7 @@ def user_add():
             # jobs=form.jobs.data,
             pwd=generate_password_hash(form.pwd.data),
             role_id=form.role_id.data,
+            frozen=int(form.frozen.data),
             uuid=uuid.uuid4().hex
         )
         db.session.add(user)
@@ -227,7 +228,47 @@ def user_add():
         db.session.add(oplog)
         db.session.commit()
         flash(u'添加员工成功', 'ok')
+        return redirect(url_for('admin.user_add'))
     return render_template('admin/user_add.html', form=form)
+
+@admin.route('/user/edit/<int:id>', methods=['GET', 'POST'])
+def user_edit(id=None):
+    # 员工修改
+    form = UserForm()
+    form.submit.label.text = u'修改'
+    user = User.query.get_or_404(id)
+    if request.method == 'GET':
+        # get时进行赋值。应对SelectField无法模板中赋初值
+        form.role_id.data = user.role_id
+        form.frozen.data = user.frozen
+    if form.validate_on_submit():
+        if user.phone != form.phone.data and User.query.filter_by(phone=form.phone.data).first():
+            flash(u'您输入的手机已存在', 'err')
+            return redirect(url_for('admin.user_edit', id=user.id))
+        if user.id_card != form.id_card.data and User.query.filter_by(id_card=form.id_card.data).first():
+            flash(u'您输入的身份证已存在', 'err')
+            return redirect(url_for('admin.user_edit', id=user.id))
+
+        user.name=form.name.data
+        user.phone=form.phone.data
+        user.id_card=form.id_card.data
+        user.salary=form.salary.data
+        # user.jobs=form.jobs.data
+        user.pwd=generate_password_hash(form.pwd.data)
+        user.role_id=form.role_id.data
+        user.frozen=form.frozen.data
+
+        db.session.add(user)
+        oplog = Oplog(
+            user_id=session['user_id'],
+            ip=request.remote_addr,
+            reason=u'修改员工:%s' % user.name
+        )
+        db.session.add(oplog)
+        db.session.commit()
+        flash(u'修改员工成功', 'ok')
+        return redirect(url_for('admin.user_list'))
+    return render_template('admin/user_edit.html', form=form, user=user)
 
 
 @admin.route('/user/list', methods=['GET'])
@@ -266,23 +307,22 @@ def user_frozen():
     data = {"frozen": 1}
     return dumps(data)
 
-
-@admin.route('/user/unfrozen')
-def user_unfrozen():
-    # 员工解冻
-    uid = request.args.get('uid', '')
-    user = User.query.filter_by(id=uid).first_or_404()
-    user.frozen = 0
-    db.session.add(user)
-    oplog = Oplog(
-        user_id=session['user_id'],
-        ip=request.remote_addr,
-        reason=u'解冻员工:%s' % user.name
-    )
-    db.session.add(oplog)
-    db.session.commit()
-    data = {"unfrozen": 1}
-    return dumps(data)
+# @admin.route('/user/unfrozen')
+# def user_unfrozen():
+#     # 员工解冻
+#     uid = request.args.get('uid', '')
+#     user = User.query.filter_by(id=uid).first_or_404()
+#     user.frozen = 0
+#     db.session.add(user)
+#     oplog = Oplog(
+#         user_id=session['user_id'],
+#         ip=request.remote_addr,
+#         reason=u'解冻员工:%s' % user.name
+#     )
+#     db.session.add(oplog)
+#     db.session.commit()
+#     data = {"unfrozen": 1}
+#     return dumps(data)
 
 @admin.route('/oplog/list', methods=['GET'])
 def oplog_list():
@@ -349,6 +389,7 @@ def mscard_add():
             interval=float(form.interval.data),
             scorerule=float(form.scorerule.data),
             scorelimit=float(form.scorelimit.data),
+            valid=int(form.valid.data),
         )
         oplog = Oplog(
             user_id=session['user_id'],

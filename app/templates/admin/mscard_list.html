@@ -133,6 +133,10 @@
                 //获取父元素第一个兄弟的text，就是id
                 var msid = $(this).parent().siblings().first().text()
                 //var x = $(this).parent().siblings().eq(0).text()//eq(0)也可以
+                //获取状态，如果是失效直接返回不再提交
+                if ($("#" + msid).text() == "失效") {
+                    return
+                }
                 $.ajax({
                     url: "{{ url_for('admin.mscard_block') }}",
                     type: "GET",
@@ -150,9 +154,6 @@
                         }
                     }
                 })
-                //error: function () {
-                //ajax_lock = false; //失败也需要将标志标记为可提交状态
-                //}
             })
         })
     </script>

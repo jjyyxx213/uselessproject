@@ -57,8 +57,8 @@
                                     {% endif %}
                                     <td>{{ v.addtime }}</td>
                                     <td>
-                                        <a name="btn-unfrozen"
-                                           class="label label-success">解冻</a>
+                                        <a href="{{ url_for('admin.user_edit', id=v.id) }}" name="btn-unfrozen"
+                                           class="label label-success">修改</a>
                                         <a name="btn-frozen"
                                            class="label label-danger">冻结</a>
                                     </td>
@@ -100,6 +100,12 @@
                 //获取父元素第一个兄弟的text，就是id
                 var uid = $(this).parent().siblings().first().text()
                 //var x = $(this).parent().siblings().eq(0).text()//eq(0)也可以
+                //获取状态，如果是失效直接返回不再提交
+                if ($("#" + uid).text() == "失效") {
+                    console.log('success')
+                    return
+                }
+                console.log('error')
                 $.ajax({
                     url: "{{ url_for('admin.user_frozen') }}",
                     type: "GET",
@@ -113,23 +119,24 @@
                     }
                 })
             })
-            // 员工解冻
-            $("a[name='btn-unfrozen']").on("click", function () {
-                //获取父元素第一个兄弟的text，就是id
-                var uid = $(this).parent().siblings().first().text()
-                $.ajax({
-                    url: "{{ url_for('admin.user_unfrozen') }}",
-                    type: "GET",
-                    data: "uid=" + uid,
-                    dataType: "json",
-                    success: function (result) {
-                        if (result.unfrozen == 1) {
-                            // 解冻成功
-                            $("#" + uid).text("有效")
-                        }
-                    }
-                })
-            })
+            {#// 员工解冻#}
+            {#$("a[name='btn-unfrozen']").on("click", function () {#}
+            {#    //获取父元素第一个兄弟的text，就是id#}
+            {#    var uid = $(this).parent().siblings().first().text()#}
+            {#    $.ajax({#}
+            {#        url: "{{ url_for('admin.user_unfrozen') }}",#}
+            {#        type: "GET",#}
+            {#        data: "uid=" + uid,#}
+            {#        dataType: "json",#}
+            {#        success: function (result) {#}
+            {#            if (result.unfrozen == 1) {#}
+            {#                // 解冻成功#}
+            {#                $("#" + uid).text("有效")#}
+            {#            }#}
+            {#        }#}
+            {#    })#}
+            {#})
+        #}
 
         })
     </script>

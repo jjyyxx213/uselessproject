@@ -5,7 +5,7 @@
         <h1> 门店管理系统</h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> 员工管理</a></li>
-            <li class="active"> 添加员工</li>
+            <li class="active"> 修改员工</li>
         </ol>
     </section>
     <section class="content" id="showcontent">
@@ -13,7 +13,7 @@
             <div class="col-md-12">
                 <div class="box box-primary">
                     <div class="box-header with-border">
-                        <h3 class="box-title"> 添加员工</h3>
+                        <h3 class="box-title"> 修改员工</h3>
                     </div>
                     <form role="form" method="post">
                         <!--启动CSRF-->
@@ -22,7 +22,7 @@
                             <div class="form-group">
                                 <label for="input_name" style="color: red">*</label>
                                 {{ form.name.label }}
-                                {{ form.name }}
+                                {{ form.name(value=user.name) }}
                                 {% for err in form.name.errors %}
                                     <div class="col-md-12">
                                         <p style="color: red">{{ err }}</p>
@@ -32,7 +32,7 @@
                             <div class="form-group">
                                 <label for="input_phone" style="color: red">*</label>
                                 {{ form.phone.label }}
-                                {{ form.phone }}
+                                {{ form.phone(value=user.phone) }}
                                 {% for err in form.phone.errors %}
                                     <div class="col-md-12">
                                         <p style="color: red">{{ err }}</p>
@@ -42,6 +42,8 @@
                             <div class="form-group">
                                 <label for="input_pwd" style="color: red">*</label>
                                 {{ form.pwd.label }}
+                                <label for="input_scorerule" class="badge bg-green" data-toggle="tooltip"
+                                       title="会直接更改员工登录密码，请您务必谨慎">?</label>
                                 {{ form.pwd }}
                                 {% for err in form.pwd.errors %}
                                     <div class="col-md-12">
@@ -62,7 +64,7 @@
                             <div class="form-group">
                                 <label for="input_id_card" style="color: red">*</label>
                                 {{ form.id_card.label }}
-                                {{ form.id_card }}
+                                {{ form.id_card(value=user.id_card) }}
                                 {% for err in form.id_card.errors %}
                                     <div class="col-md-12">
                                         <p style="color: red">{{ err }}</p>
@@ -81,7 +83,7 @@
                             {#                            </div>#}
                             <div class="form-group">
                                 {{ form.salary.label }}
-                                {{ form.salary }}
+                                {{ form.salary(value=user.salary) }}
                                 {% for err in form.salary.errors %}
                                     <div class="col-md-12">
                                         <p style="color: red">{{ err }}</p>
@@ -131,11 +133,10 @@
             $("#g-user").addClass("active")
             $("#g-user-add").addClass("active")
             $('.select2').select2()
-            //只要遇到radio,checkbox 直接转换为icheck
-            $('input[type="checkbox"], input[type="radio"]').iCheck({
-                checkboxClass: 'icheckbox_square-blue',
-                radioClass: 'iradio_square-blue'
-            })
+        })
+        // 弹出提示初始化
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
         })
     </script>
 {% endblock %}
