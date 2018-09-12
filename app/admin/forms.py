@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, FileField, TextAreaField, SelectField, \
-    SelectMultipleField, RadioField
-from wtforms.validators import DataRequired, ValidationError, EqualTo, Regexp, Length
+    SelectMultipleField, RadioField, FieldList, FormField
+from wtforms.validators import DataRequired, EqualTo, Regexp, Length
 from app.models import User, Auth, Role
 
 class AuthForm(FlaskForm):
@@ -28,6 +28,7 @@ class AuthForm(FlaskForm):
             'placeholder': u'请输入权限地址',
         }
     )
+
     submit = SubmitField(
         label=u'添加',
         render_kw={
@@ -252,6 +253,61 @@ class MscardForm(FlaskForm):
     )
     submit = SubmitField(
         label=u'添加',
+        render_kw={
+            'class': 'btn btn-primary',
+        }
+    )
+
+class MsdetailListForm(FlaskForm):
+    id = StringField(
+        label=u'ID',
+        description=u'ID',
+    )
+    item_id = StringField(
+        label=u'商品/服务ID',
+        description=u'商品/服务ID',
+    )
+    discountprice = StringField(
+        label=u'优惠后销售价',
+        validators=[
+            DataRequired(message=u'请输入优惠后销售价'),
+            Regexp('[\d+\.\d]', message=u'请输入数字'),
+        ],
+        description=u'优惠后销售价',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入优惠后销售价',
+        }
+    )
+    quantity = StringField(
+        label=u'次数',
+        validators=[
+            Regexp('[\d+]', message=u'请输入使用次数'),
+        ],
+        description=u'次数',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入次数',
+        }
+    )
+    interval = StringField(
+        label=u'有效期',
+        validators=[
+            Regexp('[\d+\.\d]', message=u'请输入数字'),
+        ],
+        description=u'有效期',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入有效期(月)',
+        }
+    )
+
+class MsdetailForm(FlaskForm):
+    inputrows = FieldList(
+        FormField(MsdetailListForm), min_entries=1
+    )
+    submit = SubmitField(
+        label=u'保存',
         render_kw={
             'class': 'btn btn-primary',
         }

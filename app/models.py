@@ -141,7 +141,7 @@ class Msdetail(db.Model):
     # 使用次数
     quantity = db.Column(db.Integer, default=9999)
     # 有效期 数字类型(月)
-    dates = db.Column(db.Integer, default=0)
+    interval = db.Column(db.Float, default=0)
 
     def __repr__(self):
         return '<Msdetail %r>' % self.name

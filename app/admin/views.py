@@ -1,13 +1,14 @@
 # -*- coding:utf-8 -*-
 from . import admin
 from flask import render_template, url_for, redirect, flash, session, request, current_app, abort
-from forms import UserForm, AuthForm, RoleForm, MscardForm
+from forms import UserForm, AuthForm, RoleForm, MscardForm, MsdetailForm, MsdetailListForm
 from app.models import User, Auth, Role, Oplog, Userlog, Mscard, Msdetail
 from werkzeug.security import generate_password_hash
 from app import db
 import os, stat, uuid
 from datetime import datetime
 from json import dumps
+
 
 @admin.route("/", methods=["GET"])
 def index():
@@ -231,6 +232,7 @@ def user_add():
         return redirect(url_for('admin.user_add'))
     return render_template('admin/user_add.html', form=form)
 
+
 @admin.route('/user/edit/<int:id>', methods=['GET', 'POST'])
 def user_edit(id=None):
     # 员工修改
@@ -249,14 +251,14 @@ def user_edit(id=None):
             flash(u'您输入的身份证已存在', 'err')
             return redirect(url_for('admin.user_edit', id=user.id))
 
-        user.name=form.name.data
-        user.phone=form.phone.data
-        user.id_card=form.id_card.data
-        user.salary=form.salary.data
+        user.name = form.name.data
+        user.phone = form.phone.data
+        user.id_card = form.id_card.data
+        user.salary = form.salary.data
         # user.jobs=form.jobs.data
-        user.pwd=generate_password_hash(form.pwd.data)
-        user.role_id=form.role_id.data
-        user.frozen=form.frozen.data
+        user.pwd = generate_password_hash(form.pwd.data)
+        user.role_id = form.role_id.data
+        user.frozen = form.frozen.data
 
         db.session.add(user)
         oplog = Oplog(
@@ -307,6 +309,7 @@ def user_frozen():
     data = {"frozen": 1}
     return dumps(data)
 
+
 # @admin.route('/user/unfrozen')
 # def user_unfrozen():
 #     # 员工解冻
@@ -331,7 +334,7 @@ def oplog_list():
     key = request.args.get('key', '')
     pagination = Oplog.query.join(User).filter(Oplog.user_id == User.id)
     # 如果查询了增加查询条件
-    if key :
+    if key:
         print key
         pagination = pagination.filter(User.name.ilike('%' + key + '%'))
     pagination = pagination.order_by(
@@ -340,6 +343,7 @@ def oplog_list():
                per_page=current_app.config['POSTS_PER_PAGE'],
                error_out=False)
     return render_template('admin/oplog_list.html', pagination=pagination, key=key)
+
 
 @admin.route('/userloginlog/list', methods=['GET'])
 def userloginlog_list():
@@ -359,6 +363,7 @@ def userloginlog_list():
                error_out=False)
     return render_template('admin/userloginlog_list.html', pagination=pagination, key=key)
 
+
 @admin.route('/mscard/list', methods=['GET'])
 def mscard_list():
     # 会员卡列表
@@ -374,6 +379,7 @@ def mscard_list():
                per_page=current_app.config['POSTS_PER_PAGE'],
                error_out=False)
     return render_template('admin/mscard_list.html', pagination=pagination, key=key)
+
 
 @admin.route('/mscard/add', methods=['GET', 'POST'])
 def mscard_add():
@@ -402,6 +408,7 @@ def mscard_add():
         flash(u'会员卡添加成功', 'ok')
         return redirect(url_for('admin.mscard_add'))
     return render_template('admin/mscard_add.html', form=form)
+
 
 @admin.route('/mscard/edit/<int:id>', methods=['GET', 'POST'])
 def mscard_edit(id=None):
@@ -434,6 +441,7 @@ def mscard_edit(id=None):
         return redirect(url_for('admin.mscard_list'))
     return render_template('admin/mscard_edit.html', form=form, mscard=mscard)
 
+
 @admin.route('/mscard/block')
 def mscard_block():
     # 会员卡停用
@@ -450,3 +458,27 @@ def mscard_block():
     db.session.commit()
     data = {"valid": 0}
     return dumps(data)
+
+
+@admin.route('/mscard/msdetail/edit/<int:id>', methods=['GET', 'POST'])
+def msdetail_edit(id=None):
+    # 编辑会员卡套餐明细
+    form = MsdetailForm()
+    mscard = Mscard.query.filter_by(id=id).first_or_404()
+    msdetails = Msdetail.query.filter_by(mscard_id=id).order_by(Msdetail.item_id.asc()).all()
+    if request.method == 'GET' and msdetails:
+        # 先把空行去除
+        while len(form.inputrows) > 0:
+            form.inputrows.pop_entry()
+        # 对FormField赋值，要使用append_entry方法
+        for detail in msdetails:
+            listform = MsdetailListForm()
+            listform.id = detail.id
+            listform.item_id = detail.item_id
+            listform.discountprice = detail.discountprice
+            listform.quantity = detail.quantity
+            listform.interval = detail.interval
+            form.inputrows.append_entry(listform)
+    if form.validate_on_submit():
+        pass
+    return render_template('admin/msdetail_edit.html', form=form, mscard=mscard)

@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block page_content %}
+    <section class="content-header">
+        <h1> 门店管理系统</h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> 设置</a></li>
+            <li><a href="{{ url_for('admin.mscard_list') }}"> 会员卡</a></li>
+            <li class="active"> 编辑会员卡套餐</li>
+        </ol>
+    </section>
+    <section class="content" id="showcontent">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"> 编辑会员卡套餐</h3>
+                    </div>
+                    <form role="form" method="post">
+                        <!--启动CSRF-->
+                        {{ form.hidden_tag() }}
+                        <div class="box-body">
+                            <div class="row" style="margin-bottom: 5px">
+                                <div class="col-md-4">
+                                    <label> 产品</label>
+                                </div>
+                                <div class="col-md-2">
+                                   <label> 优惠价</label>
+                                </div>
+                                <div class="col-md-2">
+                                   <label> 次数</label>
+                                </div>
+                                <div class="col-md-2">
+                                   <label> 有效期</label>
+                                </div>
+                                <div class="col-md-1">
+                                   <div><i class="fa fa-plus-square fa-lg" aria-hidden="true"></i></div>
+                                </div>
+                            </div>
+                            {% for v in range(0,19) %}
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control"
+                                               placeholder="请选择产品或服务" aria-describedby="basic-addon2">
+                                        <span class="input-group-addon" id="basic-addon2">点我</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <input class="form-control" placeholder="请输入优惠价" type="text">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <input class="form-control" placeholder="请输入优惠次数" type="text">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <input class="form-control" placeholder="请输入有效期" type="text">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                   <div><i class="fa fa-minus-square fa-lg" aria-hidden="true"></i></div>
+                                </div>
+                            </div>
+                            {% endfor %}
+
+                            <div class="form-group">
+                                {{ form.inputrows }}
+                                {% for err in form.inputrows.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="box-footer">
+                            {{ form.submit }}
+                            <a href="{{ url_for('admin.mscard_list') }}" class="btn btn-default pull-right"
+                               role="button"> 返回</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block js %}
+    <script>
+        $(document).ready(function () {
+            $("#g-option").addClass("active")
+            $("#g-option-mscard").addClass("active")
+            // 弹出提示初始化
+            $(function () {
+                $('[data-toggle="tooltip"]').tooltip()
+            })
+            //只要遇到radio,checkbox 直接转换为icheck
+            $('input[type="checkbox"], input[type="radio"]').iCheck({
+                checkboxClass: 'icheckbox_square-blue',
+                radioClass: 'iradio_square-blue'
+            })
+        })
+    </script>
+{% endblock %}
