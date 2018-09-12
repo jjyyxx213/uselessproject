@@ -475,10 +475,14 @@ def msdetail_edit(id=None):
             listform = MsdetailListForm()
             listform.id = detail.id
             listform.item_id = detail.item_id
+            listform.item_name = detail.item.name
+            listform.salesprice = detail.item.salesprice
             listform.discountprice = detail.discountprice
             listform.quantity = detail.quantity
             listform.interval = detail.interval
             form.inputrows.append_entry(listform)
+    # 计算动态input的初值
+    form_count = len(form.inputrows)
     if form.validate_on_submit():
         pass
-    return render_template('admin/msdetail_edit.html', form=form, mscard=mscard)
+    return render_template('admin/msdetail_edit.html', form=form, form_count=form_count, mscard=mscard)

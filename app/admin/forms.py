@@ -1,9 +1,10 @@
 # -*- coding:utf-8 -*-
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, FileField, TextAreaField, SelectField, \
-    SelectMultipleField, RadioField, FieldList, FormField
+    SelectMultipleField, RadioField, FieldList, FormField, HiddenField
 from wtforms.validators import DataRequired, EqualTo, Regexp, Length
 from app.models import User, Auth, Role
+
 
 class AuthForm(FlaskForm):
     name = StringField(
@@ -35,6 +36,7 @@ class AuthForm(FlaskForm):
             'class': 'btn btn-primary'
         }
     )
+
 
 class RoleForm(FlaskForm):
     name = StringField(
@@ -76,6 +78,7 @@ class RoleForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(RoleForm, self).__init__(*args, **kwargs)
         self.auths.choices = [(v.id, v.name) for v in Auth.query.order_by(Auth.name).all()]
+
 
 class UserForm(FlaskForm):
     name = StringField(
@@ -124,7 +127,7 @@ class UserForm(FlaskForm):
     salary = StringField(
         label=u'底薪',
         validators=[
-          Regexp('[\d+\.\d]', message=u'请输入数字'),
+            Regexp('[\d+\.\d]', message=u'请输入数字'),
         ],
         description=u'底薪',
         render_kw={
@@ -187,6 +190,7 @@ class UserForm(FlaskForm):
         super(UserForm, self).__init__(*args, **kwargs)
         self.role_id.choices = [(v.id, v.name) for v in Role.query.order_by(Role.name).all()]
 
+
 class MscardForm(FlaskForm):
     name = StringField(
         label=u'名称',
@@ -248,7 +252,7 @@ class MscardForm(FlaskForm):
         label=u'卡状态',
         description=u'卡状态',
         coerce=int,
-        choices=[( 1,u'有效'), (0, u'停用')],
+        choices=[(1, u'有效'), (0, u'停用')],
         default=1,
     )
     submit = SubmitField(
@@ -258,17 +262,26 @@ class MscardForm(FlaskForm):
         }
     )
 
+
 class MsdetailListForm(FlaskForm):
-    id = StringField(
+    id = HiddenField(
         label=u'ID',
         description=u'ID',
     )
-    item_id = StringField(
+    item_id = HiddenField(
         label=u'商品/服务ID',
         description=u'商品/服务ID',
     )
+    item_name = StringField(
+        label=u'商品/服务名称',
+        description=u'商品/服务名称',
+    )
+    salesprice = HiddenField(
+        label=u'原售价',
+        description=u'原售价',
+    )
     discountprice = StringField(
-        label=u'优惠后销售价',
+        label=u'优惠后售价',
         validators=[
             DataRequired(message=u'请输入优惠后销售价'),
             Regexp('[\d+\.\d]', message=u'请输入数字'),
@@ -301,6 +314,7 @@ class MsdetailListForm(FlaskForm):
             'placeholder': u'请输入有效期(月)',
         }
     )
+
 
 class MsdetailForm(FlaskForm):
     inputrows = FieldList(

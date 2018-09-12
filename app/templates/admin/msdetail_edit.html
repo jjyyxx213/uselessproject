@@ -1,4 +1,12 @@
 {% extends 'base.html' %}
+{% block css %}
+    <style>
+        .padding-defined {
+            padding-left: 10px;
+            padding-right: 0px;
+        }
+    </style>
+{% endblock %}
 
 {% block page_content %}
     <section class="content-header">
@@ -14,67 +22,94 @@
             <div class="col-md-12">
                 <div class="box box-primary">
                     <div class="box-header with-border">
-                        <h3 class="box-title"> 编辑会员卡套餐</h3>
+                        <h3 class="box-title"> 编辑<strong>{{ mscard.name }}</strong>套餐</h3>
                     </div>
                     <form role="form" method="post">
                         <!--启动CSRF-->
                         {{ form.hidden_tag() }}
-                        <div class="box-body">
+                        <div class="box-body" id="inputs">
                             <div class="row" style="margin-bottom: 5px">
-                                <div class="col-md-4">
+                                <div class="col-md-3 padding-defined">
                                     <label> 产品</label>
                                 </div>
-                                <div class="col-md-2">
-                                   <label> 优惠价</label>
+                                <div class="col-md-2 padding-defined">
+                                    <label> 原售价</label>
                                 </div>
-                                <div class="col-md-2">
-                                   <label> 次数</label>
+                                <div class="col-md-2 padding-defined">
+                                    <label> 优惠价</label>
                                 </div>
-                                <div class="col-md-2">
-                                   <label> 有效期</label>
+                                <div class="col-md-1 padding-defined">
+                                    <label> 次数</label>
                                 </div>
-                                <div class="col-md-1">
-                                   <div><i class="fa fa-plus-square fa-lg" aria-hidden="true"></i></div>
+                                <div class="col-md-1 padding-defined">
+                                    <label> 有效期</label>
+                                    <label for="input_interval" class="badge bg-green" data-toggle="tooltip"
+                                           title="单位：月">?</label>
                                 </div>
-                            </div>
-                            {% for v in range(0,19) %}
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="input-group">
-                                        <input type="text" class="form-control"
-                                               placeholder="请选择产品或服务" aria-describedby="basic-addon2">
-                                        <span class="input-group-addon" id="basic-addon2">点我</span>
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="form-group">
-                                        <input class="form-control" placeholder="请输入优惠价" type="text">
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="form-group">
-                                        <input class="form-control" placeholder="请输入优惠次数" type="text">
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="form-group">
-                                        <input class="form-control" placeholder="请输入有效期" type="text">
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                   <div><i class="fa fa-minus-square fa-lg" aria-hidden="true"></i></div>
+                                <div class="col-md-1" style="padding-left: 5px">
+                                    <button type="button" class="btn btn-box-tool" data-widget="collapse" id="row-plus">
+                                        <i class="fa fa-plus-square fa-lg"></i>
+                                    </button>
                                 </div>
                             </div>
+                            {% for v in form.inputrows.data %}
+                                <div class="row">
+                                    <div class="col-md-3 padding-defined">
+                                        <div class="input-group">
+                                            <input id="inputrows-{{ loop.index0 }}-item_name"
+                                                   name="inputrows-{{ loop.index0 }}-item_name" type="text"
+                                                   class="form-control"
+                                                   placeholder="请选择产品或服务" aria-describedby="basic-addon2"
+                                                   value="{{ v.item_name or '' }}" readonly>
+                                            <span class="input-group-addon" id="basic-addon2">点我</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 padding-defined">
+                                        <div class="form-group">
+                                            <input id="inputrows-{{ loop.index0 }}-salesprice"
+                                                   name="inputrows-{{ loop.index0 }}-salesprice" class="form-control"
+                                                   placeholder="原售价" type="text" value="{{ v.salesprice or '' }}"
+                                                   readonly>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 padding-defined">
+                                        <div class="form-group">
+                                            <input id="inputrows-{{ loop.index0 }}-discountprice"
+                                                   name="inputrows-{{ loop.index0 }}-discountprice" class="form-control"
+                                                   placeholder="优惠价" type="text" value="{{ v.discountprice or '' }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-1 padding-defined">
+                                        <div class="form-group">
+                                            <input id="inputrows-{{ loop.index0 }}-quantity"
+                                                   name="inputrows-{{ loop.index0 }}-quantity" class="form-control"
+                                                   placeholder="次数" type="text" value="{{ v.quantity or '' }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-1 padding-defined">
+                                        <div class="form-group">
+                                            <input id="inputrows-{{ loop.index0 }}-interval"
+                                                   name="inputrows-{{ loop.index0 }}-interval" class="form-control"
+                                                   placeholder="有效期(月)" type="text" value="{{ v.interval or '' }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-1" style="padding-left: 5px">
+                                        <button type="button" class="btn btn-box-tool" data-widget="collapse"
+                                                name="row-minus">
+                                            <i class="fa fa-minus-square fa-lg" aria-hidden="true"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             {% endfor %}
 
-                            <div class="form-group">
-                                {{ form.inputrows }}
-                                {% for err in form.inputrows.errors %}
-                                    <div class="col-md-12">
-                                        <p style="color: red">{{ err }}</p>
-                                    </div>
-                                {% endfor %}
-                            </div>
+{#                            <div class="form-group">#}
+{#                                {{ form.inputrows }}#}
+{#                                {% for err in form.inputrows.errors %}#}
+{#                                    <div class="col-md-12">#}
+{#                                        <p style="color: red">{{ err }}</p>#}
+{#                                    </div>#}
+{#                                {% endfor %}#}
+{#                            </div>#}
                         </div>
                         <div class="box-footer">
                             {{ form.submit }}
@@ -97,10 +132,77 @@
             $(function () {
                 $('[data-toggle="tooltip"]').tooltip()
             })
-            //只要遇到radio,checkbox 直接转换为icheck
-            $('input[type="checkbox"], input[type="radio"]').iCheck({
-                checkboxClass: 'icheckbox_square-blue',
-                radioClass: 'iradio_square-blue'
+
+            var MaxInputs = 20; //maximum input boxes allowed
+            var InputsWrapper = $("#inputs") //Input boxes wrapper ID
+            var id_ins = {{ form_count }} //initlal text box count
+            var row_ins = {{ form_count }}
+            console.log(row_ins)
+            //只有一个+，可以通过ID获取
+            $('#row-plus').on('click', (function (e) //on add input button click
+            {
+                if (row_ins <= MaxInputs) //max input box allowed
+                {
+                    InputsWrapper.append('<div class="row">\n' +
+                        '                                    <div class="col-md-3 padding-defined">\n' +
+                        '                                        <div class="input-group">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-item_name"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-item_name" type="text"\n' +
+                        '                                                   class="form-control"\n' +
+                        '                                                   placeholder="请选择产品或服务" aria-describedby="basic-addon2"\n' +
+                        '                                                   value="" readonly>\n' +
+                        '                                            <span class="input-group-addon" id="basic-addon2">点我</span>\n' +
+                        '                                        </div>\n' +
+                        '                                    </div>\n' +
+                        '                                    <div class="col-md-2 padding-defined">\n' +
+                        '                                        <div class="form-group">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-salesprice"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-salesprice" class="form-control"\n' +
+                        '                                                   placeholder="原售价" type="text" readonly>\n' +
+                        '                                        </div>\n' +
+                        '                                    </div>\n' +
+                        '                                    <div class="col-md-2 padding-defined">\n' +
+                        '                                        <div class="form-group">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-discountprice"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-discountprice" class="form-control"\n' +
+                        '                                                   placeholder="优惠价" type="text" >\n' +
+                        '                                        </div>\n' +
+                        '                                    </div>\n' +
+                        '                                    <div class="col-md-1 padding-defined">\n' +
+                        '                                        <div class="form-group">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-quantity"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-quantity" class="form-control"\n' +
+                        '                                                   placeholder="次数" type="text">\n' +
+                        '                                        </div>\n' +
+                        '                                    </div>\n' +
+                        '                                    <div class="col-md-1 padding-defined">\n' +
+                        '                                        <div class="form-group">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-interval"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-interval" class="form-control"\n' +
+                        '                                                   placeholder="有效期(月)" type="text">\n' +
+                        '                                        </div>\n' +
+                        '                                    </div>\n' +
+                        '                                    <div class="col-md-1" style="padding-left: 5px">\n' +
+                        '                                        <button type="button" class="btn btn-box-tool" data-widget="collapse"\n' +
+                        '                                                name="row-minus">\n' +
+                        '                                            <i class="fa fa-minus-square fa-lg" aria-hidden="true"></i>\n' +
+                        '                                        </button>\n' +
+                        '                                    </div>\n' +
+                        '                                </div>')
+                }
+                id_ins++
+                row_ins++ //text box added increment
+                console.log(row_ins)
+                return false
+            }))
+            // 监听函数，是在网页加载的时候就指定了对象。通过jQuery动态生成的元素是没办法匹配的，因此要找到原来加载的元素通过委托的方式处理
+            $("#inputs").on("click", "button[name='row-minus']", function () {
+                if (row_ins > 1) {
+                    $(this).parent('div').parent('div').remove() //remove text box
+                    row_ins-- //decrement textbox
+                    console.log(row_ins)
+                }
+                return false
             })
         })
     </script>
