@@ -484,5 +484,5 @@ def msdetail_edit(id=None):
     # 计算动态input的初值
     form_count = len(form.inputrows)
     if form.validate_on_submit():
-        pass
+        print form
     return render_template('admin/msdetail_edit.html', form=form, form_count=form_count, mscard=mscard)

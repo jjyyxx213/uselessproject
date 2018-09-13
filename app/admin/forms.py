@@ -314,6 +314,10 @@ class MsdetailListForm(FlaskForm):
             'placeholder': u'请输入有效期(月)',
         }
     )
+    #FieldList里的对象也是FormField，不知道怎么给CSRF_TOKEN赋值，关掉验证
+    def __init__(self, *args, **kwargs):
+        kwargs['csrf_enabled'] = False
+        FlaskForm.__init__(self, *args, **kwargs)
 
 
 class MsdetailForm(FlaskForm):

@@ -55,6 +55,11 @@
                             {% for v in form.inputrows.data %}
                                 <div class="row">
                                     <div class="col-md-3 padding-defined">
+                                        <input id="inputrows-{{ loop.index0 }}-id" name="inputrows-{{ loop.index0 }}-id"
+                                               type="hidden" value="{{ v.id or '' }}">
+                                        <input id="inputrows-{{ loop.index0 }}-item_id"
+                                               name="inputrows-{{ loop.index0 }}-item_id" type="hidden"
+                                               value="{{ v.item_id or '' }}">
                                         <div class="input-group">
                                             <input id="inputrows-{{ loop.index0 }}-item_name"
                                                    name="inputrows-{{ loop.index0 }}-item_name" type="text"
@@ -135,9 +140,10 @@
 
             var MaxInputs = 20; //maximum input boxes allowed
             var InputsWrapper = $("#inputs") //Input boxes wrapper ID
-            var id_ins = {{ form_count }} //initlal text box count
+            var id_ins =
+            {{ form_count }} //initlal text box count
             var row_ins = {{ form_count }}
-            console.log(row_ins)
+                console.log(row_ins)
             //只有一个+，可以通过ID获取
             $('#row-plus').on('click', (function (e) //on add input button click
             {
@@ -145,6 +151,8 @@
                 {
                     InputsWrapper.append('<div class="row">\n' +
                         '                                    <div class="col-md-3 padding-defined">\n' +
+                        '    <input id="inputrows-' + id_ins + '-id" name="inputrows-' + id_ins + '-id" type="hidden">' +
+                        '               <input id="inputrows-' + id_ins + '-item_id" name="inputrows-' + id_ins + '-item_id" type="hidden">' +
                         '                                        <div class="input-group">\n' +
                         '                                            <input id="inputrows-' + id_ins + '-item_name"\n' +
                         '                                                   name="inputrows-' + id_ins + '-item_name" type="text"\n' +
