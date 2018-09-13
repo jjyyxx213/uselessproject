@@ -139,12 +139,11 @@
                 $('[data-toggle="tooltip"]').tooltip()
             })
 
-            var MaxInputs = 20; //maximum input boxes allowed
-            var InputsWrapper = $("#inputs") //Input boxes wrapper ID
-            var id_ins =
+            let MaxInputs = 20; //maximum input boxes allowed
+            let InputsWrapper = $("#inputs") //Input boxes wrapper ID
+            let id_ins = {{ form_count }}
             {{ form_count }} //initlal text box count
             var row_ins = {{ form_count }}
-                console.log(row_ins)
             //只有一个+，可以通过ID获取
             $('#row-plus').on('click', (function (e) //on add input button click
             {
@@ -201,7 +200,7 @@
                 }
                 id_ins++
                 row_ins++ //text box added increment
-                console.log(row_ins)
+                console.log(id_ins)
                 return false
             }))
             // 监听函数，是在网页加载的时候就指定了对象。通过jQuery动态生成的元素是没办法匹配的，因此要找到原来加载的元素通过委托的方式处理
@@ -209,10 +208,10 @@
                 if (row_ins > 1) {
                     $(this).parent('div').parent('div').remove() //remove text box
                     row_ins-- //decrement textbox
-                    console.log(row_ins)
                 }
                 return false
             })
+            //todo 这里要处理产品和服务下拉
         })
     </script>
 {% endblock %}

@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 from . import admin
-from flask import render_template, url_for, redirect, flash, session, request, current_app, abort, jsonify
+from flask import render_template, url_for, redirect, flash, session, request, current_app, abort
 from forms import UserForm, AuthForm, RoleForm, MscardForm, MsdetailForm, MsdetailListForm
 from app.models import User, Auth, Role, Oplog, Userlog, Mscard, Msdetail, Item
 from werkzeug.security import generate_password_hash
@@ -509,14 +509,25 @@ def item_get():
         ).paginate(page=page,
                    per_page=current_app.config['POSTS_PER_PAGE'],
                    error_out=False)
+
+        # 返回的数据格式为
+        # {
+        # "pages": 1,
+        # "data": [
+        #         {"id": "1",
+        #         "name": "xx"}
+        #         ]
+        # }
+        data = []
+        for v in pagination.items:
+            data.append(
+                {
+                    "id": v.id,
+                    "name": v.name
+                }
+            )
         res = {
-            "total": pagination.pages,
-            "data": pagination.items,
+            "pages": pagination.pages,
+            "data": data,
         }
-        # todo
-    # res = {"total": 100, "data": [{"id": "10001", "name": "zhangsan"}, {"id": "10002", "name": "lis4"},
-    #                                 {"id": "10003", "name": "zhangs11an"}, {"id": "10004", "name": "asd"},
-    #                                 {"id": "10005", "name": "55"}, {"id": "10006", "name": "dsa"}]}
-    # # 转换为json字符串, 并且设置响应头Content-Type: application/json
-    print '请求了'
     return dumps(res)
