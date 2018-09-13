@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
 from . import admin
-from flask import render_template, url_for, redirect, flash, session, request, current_app, abort
+from flask import render_template, url_for, redirect, flash, session, request, current_app, abort, jsonify
 from forms import UserForm, AuthForm, RoleForm, MscardForm, MsdetailForm, MsdetailListForm
-from app.models import User, Auth, Role, Oplog, Userlog, Mscard, Msdetail
+from app.models import User, Auth, Role, Oplog, Userlog, Mscard, Msdetail, Item
 from werkzeug.security import generate_password_hash
 from app import db
 import os, stat, uuid
@@ -486,3 +486,37 @@ def msdetail_edit(id=None):
     if form.validate_on_submit():
         print form
     return render_template('admin/msdetail_edit.html', form=form, form_count=form_count, mscard=mscard)
+
+
+@admin.route('/item/get', methods=['GET', 'POST'])
+def item_get():
+    # 获取产品分页清单
+    # items = Item.query.order_by(Item.id.asc()).all()
+    # data = []
+    # for item in items:
+    #     data.append(item.to_json())
+    if request.method == 'POST':
+        params = request.form.to_dict()
+        page = int(params['curPage']) if (params.has_key('curPage')) else 1
+        key = params['selectInput'] if (params.has_key('selectInput')) else ''
+
+        pagination = Item.query
+        # 如果查询了增加查询条件
+        if key:
+            pagination = pagination.filter(Item.name.ilike('%' + key + '%'))
+        pagination = pagination.order_by(
+            Item.id.asc()
+        ).paginate(page=page,
+                   per_page=current_app.config['POSTS_PER_PAGE'],
+                   error_out=False)
+        res = {
+            "total": pagination.pages,
+            "data": pagination.items,
+        }
+        # todo
+    # res = {"total": 100, "data": [{"id": "10001", "name": "zhangsan"}, {"id": "10002", "name": "lis4"},
+    #                                 {"id": "10003", "name": "zhangs11an"}, {"id": "10004", "name": "asd"},
+    #                                 {"id": "10005", "name": "55"}, {"id": "10006", "name": "dsa"}]}
+    # # 转换为json字符串, 并且设置响应头Content-Type: application/json
+    print '请求了'
+    return dumps(res)

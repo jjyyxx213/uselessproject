@@ -48,6 +48,7 @@
             </div>
         </div>
     </section>
+    <select id="test2" style="width: 20%"/>
 {% endblock %}
 
 {% block js %}
@@ -55,6 +56,15 @@
         $(document).ready(function () {
             $("#g-auth").addClass("active")
             $("#g-auth-add").addClass("active")
+
+            var options = {
+                url: "{{ url_for('admin.item_get') }}",      // 数据接口url
+                pageSize: 10, // 每次加载的数据条数
+                value: "id",  // 下拉框value字段名称
+                name: "name", // 下拉框显示字段名称
+                selected: []  // 默认选中项，格式：[{id:1,text:"选项1"},{id:2,text:"选项2"}]
+            };
+            ajaxSelect2("test2", options);
         })
     </script>
 {% endblock %}

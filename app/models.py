@@ -278,6 +278,13 @@ class Item(db.Model):
     def __repr__(self):
         return '<Item %r>' % self.name
 
+    def to_json(self):
+        dict = self.__dict__
+        if '_sa_instance_state' in dict:
+            del dict['_sa_instance_state']
+        return dict
+
+
 # 销售订单主表 todo
 class Order(db.Model):
     __tablename__ = 'tb_order'
