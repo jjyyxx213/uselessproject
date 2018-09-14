@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 from . import admin
-from flask import render_template, url_for, redirect, flash, session, request, current_app, abort
-from forms import UserForm, AuthForm, RoleForm, MscardForm, MsdetailForm, MsdetailListForm
+from flask import render_template, url_for, redirect, flash, session, request, current_app, abort, jsonify
+from forms import UserForm, AuthForm, RoleForm, MscardForm, MsdetailForm, MsdetailListForm, PwdModForm
 from app.models import User, Auth, Role, Oplog, Userlog, Mscard, Msdetail, Item
 from werkzeug.security import generate_password_hash
 from app import db
@@ -18,6 +18,31 @@ def index():
 @admin.route("/login", methods=["GET", "POST"])
 def login():
     return redirect(url_for('home.login'))
+
+
+# 20180913 liuqq 修改密码
+@admin.route('/user/pwd_edit',methods=['GET', 'POST'])
+def pwd_edit():
+    form = PwdModForm()
+    if form.validate_on_submit():
+        # 验证密码
+        user = User.query.filter_by(id=session.get('user_id')).first()
+        if user.verify_password(form.old_pwd.data) != 1:
+            flash(u'旧密码输入错误', 'err')
+            return redirect(url_for('admin.pwd_edit'))
+        if form.new_pwd.data != form.re_pwd.data:
+            flash(u'您两次输入的密码不一致!', 'err')
+            return redirect(url_for('admin.pwd_edit'))
+        if form.new_pwd.data == form.old_pwd.data:
+            flash(u'新密码与旧密码一致！', 'err')
+            return redirect(url_for('admin.pwd_edit'))
+        new_pwd = generate_password_hash(form.new_pwd.data)
+        user.pwd = new_pwd
+        db.session.add(user)
+        db.session.commit()
+        flash(u'密码修改成功', 'ok')
+        return redirect(url_for('home.index'))
+    return render_template('admin/pwd_edit.html', form=form)
 
 
 @admin.route('/auth/add', methods=['GET', 'POST'])
@@ -473,6 +498,7 @@ def msdetail_edit(id=None):
         # 对FormField赋值，要使用append_entry方法
         for detail in msdetails:
             listform = MsdetailListForm()
+            listform.id = detail.id
             listform.item_id = detail.item_id
             listform.item_name = detail.item.name
             listform.salesprice = detail.item.salesprice
@@ -483,22 +509,7 @@ def msdetail_edit(id=None):
     # 计算动态input的初值
     form_count = len(form.inputrows)
     if form.validate_on_submit():
-        # 删除所有明细
-        for iter_del in msdetails:
-            db.session.delete(iter_del)
-        # 新增明细
-        for iter_add in form.inputrows:
-            msdetail = Msdetail(
-                mscard_id=mscard.id,
-                item_id=iter_add.item_id.data,
-                discountprice=iter_add.discountprice.data,
-                quantity=iter_add.quantity.data,
-                interval=iter_add.interval.data,
-            )
-            db.session.add(msdetail)
-        db.session.commit()
-        flash(u'套餐明细保存成功', 'ok')
-        return redirect(url_for('admin.mscard_list'))
+        print form
     return render_template('admin/msdetail_edit.html', form=form, form_count=form_count, mscard=mscard)
 
 
@@ -523,25 +534,14 @@ def item_get():
         ).paginate(page=page,
                    per_page=current_app.config['POSTS_PER_PAGE'],
                    error_out=False)
-
-        # 返回的数据格式为
-        # {
-        # "pages": 1,
-        # "data": [
-        #         {"id": "1",
-        #         "name": "xx"}
-        #         ]
-        # }
-        data = []
-        for v in pagination.items:
-            data.append(
-                {
-                    "id": v.id,
-                    "name": v.name
-                }
-            )
         res = {
-            "pages": pagination.pages,
-            "data": data,
+            "total": pagination.pages,
+            "data": pagination.items,
         }
+        # todo
+    # res = {"total": 100, "data": [{"id": "10001", "name": "zhangsan"}, {"id": "10002", "name": "lis4"},
+    #                                 {"id": "10003", "name": "zhangs11an"}, {"id": "10004", "name": "asd"},
+    #                                 {"id": "10005", "name": "55"}, {"id": "10006", "name": "dsa"}]}
+    # # 转换为json字符串, 并且设置响应头Content-Type: application/json
+    print '请求了'
     return dumps(res)
