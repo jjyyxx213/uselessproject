@@ -3,7 +3,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, FileField, TextAreaField, SelectField, \
     SelectMultipleField, RadioField, FieldList, FormField, HiddenField
 from wtforms.validators import DataRequired, EqualTo, Regexp, Length
-from app.models import User, Auth, Role, Item
+from app.models import User, Auth, Role
 
 
 class AuthForm(FlaskForm):
@@ -264,37 +264,38 @@ class MscardForm(FlaskForm):
 
 
 class MsdetailListForm(FlaskForm):
+    id = HiddenField(
+        label=u'ID',
+        description=u'ID',
+    )
     item_id = HiddenField(
-        label=u'产品/服务ID',
-        description=u'产品/服务ID',
-        validators=[
-            DataRequired(message=u'请选择产品或服务'),
-        ],
+        label=u'商品/服务ID',
+        description=u'商品/服务ID',
     )
-    item_name = HiddenField(
-        label=u'产品/服务',
-        description=u'产品/服务',
+    item_name = StringField(
+        label=u'商品/服务名称',
+        description=u'商品/服务名称',
     )
-    salesprice = StringField(
+    salesprice = HiddenField(
         label=u'原售价',
         description=u'原售价',
     )
     discountprice = StringField(
-        label=u'优惠价',
+        label=u'优惠后售价',
         validators=[
-            DataRequired(message=u'请输入优惠价'),
+            DataRequired(message=u'请输入优惠后销售价'),
             Regexp('[\d+\.\d]', message=u'请输入数字'),
         ],
-        description=u'优惠价',
+        description=u'优惠后销售价',
         render_kw={
             'class': 'form-control',
-            'placeholder': u'请输入优惠价',
+            'placeholder': u'请输入优惠后销售价',
         }
     )
     quantity = StringField(
         label=u'次数',
         validators=[
-            Regexp('[\d+]', message=u'请输入次数'),
+            Regexp('[\d+]', message=u'请输入使用次数'),
         ],
         description=u'次数',
         render_kw={
@@ -318,6 +319,7 @@ class MsdetailListForm(FlaskForm):
         kwargs['csrf_enabled'] = False
         FlaskForm.__init__(self, *args, **kwargs)
 
+
 class MsdetailForm(FlaskForm):
     inputrows = FieldList(
         FormField(MsdetailListForm), min_entries=1
@@ -326,5 +328,49 @@ class MsdetailForm(FlaskForm):
         label=u'保存',
         render_kw={
             'class': 'btn btn-primary',
+        }
+    )
+
+
+# 20180913 liuqq 修改密码表单
+class PwdModForm(FlaskForm):
+    old_pwd = StringField(
+        label=u'旧密码',
+        validators=[
+            DataRequired(message=u'请输入旧密码')
+        ],
+        description=u'旧密码',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入旧密码',
+        }
+    )
+    new_pwd = StringField(
+        label=u'新密码',
+        validators=[
+            DataRequired(message=u'请输入新密码')
+        ],
+        description=u'新密码',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入新密码',
+        }
+    )
+    re_pwd = StringField(
+        label=u'确认新密码',
+        validators=[
+            DataRequired(message=u'请再次输入新密码')
+        ],
+        description=u'确认密码',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请再次输入新密码',
+        }
+    )
+
+    submit = SubmitField(
+        label=u'修改',
+        render_kw={
+            'class': 'btn btn-primary'
         }
     )
