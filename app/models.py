@@ -135,7 +135,7 @@ class Msdetail(db.Model):
     # 会员卡号
     mscard_id = db.Column(db.Integer, db.ForeignKey('tb_mscard.id'), nullable=False)
     # 服务/项目id
-    item_id = db.Column(db.Integer, db.ForeignKey('tb_item.id'), unique=True)
+    item_id = db.Column(db.Integer, db.ForeignKey('tb_item.id'), nullable=True)
     # 优惠后销售价
     discountprice = db.Column(db.Float, default=0)
     # 使用次数

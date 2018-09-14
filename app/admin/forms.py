@@ -265,33 +265,36 @@ class MscardForm(FlaskForm):
 
 class MsdetailListForm(FlaskForm):
     item_id = HiddenField(
-        label=u'商品/服务ID',
-        description=u'商品/服务ID',
+        label=u'产品/服务ID',
+        description=u'产品/服务ID',
+        validators=[
+            DataRequired(message=u'请选择产品或服务'),
+        ],
     )
     item_name = HiddenField(
-        label=u'商品/服务',
-        description=u'商品/服务',
+        label=u'产品/服务',
+        description=u'产品/服务',
     )
     salesprice = StringField(
         label=u'原售价',
         description=u'原售价',
     )
     discountprice = StringField(
-        label=u'优惠后售价',
+        label=u'优惠价',
         validators=[
-            DataRequired(message=u'请输入优惠后销售价'),
+            DataRequired(message=u'请输入优惠价'),
             Regexp('[\d+\.\d]', message=u'请输入数字'),
         ],
-        description=u'优惠后销售价',
+        description=u'优惠价',
         render_kw={
             'class': 'form-control',
-            'placeholder': u'请输入优惠后销售价',
+            'placeholder': u'请输入优惠价',
         }
     )
     quantity = StringField(
         label=u'次数',
         validators=[
-            Regexp('[\d+]', message=u'请输入使用次数'),
+            Regexp('[\d+]', message=u'请输入次数'),
         ],
         description=u'次数',
         render_kw={
@@ -313,7 +316,7 @@ class MsdetailListForm(FlaskForm):
     #FieldList里的对象也是FormField，不知道怎么给CSRF_TOKEN赋值，关掉验证
     def __init__(self, *args, **kwargs):
         kwargs['csrf_enabled'] = False
-        FlaskForm.__init__(self, *args, **kwargs)\
+        FlaskForm.__init__(self, *args, **kwargs)
 
 class MsdetailForm(FlaskForm):
     inputrows = FieldList(

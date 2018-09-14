@@ -23,6 +23,8 @@
                 <div class="box box-primary">
                     <div class="box-header with-border">
                         <h3 class="box-title"> 编辑<strong>{{ mscard.name }}</strong>套餐</h3>
+                        <div class="pull-right">总行数：<strong id="cnt">{{ form_count }}</strong>/<strong>20</strong>
+                        </div>
                     </div>
                     <form role="form" method="post">
                         <!--启动CSRF-->
@@ -30,21 +32,25 @@
                         <div class="box-body" id="inputs">
                             <div class="row" style="margin-bottom: 5px">
                                 <div class="col-md-3 padding-defined">
-                                    <label> 产品</label>
+                                    <label for="input_url" style="color: red">*</label>
+                                    <label> 产品/服务</label>
                                 </div>
                                 <div class="col-md-2 padding-defined">
                                     <label> 原售价</label>
                                 </div>
                                 <div class="col-md-2 padding-defined">
+                                    <label for="input_url" style="color: red">*</label>
                                     <label> 优惠价</label>
                                 </div>
-                                <div class="col-md-1 padding-defined">
+                                <div class="col-md-2 padding-defined">
+                                    <label for="input_url" style="color: red">*</label>
                                     <label> 次数</label>
                                 </div>
-                                <div class="col-md-1 padding-defined">
+                                <div class="col-md-2 padding-defined">
+                                    <label for="input_url" style="color: red">*</label>
                                     <label> 有效期</label>
                                     <label for="input_interval" class="badge bg-green" data-toggle="tooltip"
-                                           title="单位：月">?</label>
+                                           title="月">?</label>
                                 </div>
                                 <div class="col-md-1" style="padding-left: 5px">
                                     <button type="button" class="btn btn-box-tool" data-widget="collapse" id="row-plus">
@@ -52,26 +58,31 @@
                                     </button>
                                 </div>
                             </div>
-                            {% for v in form.inputrows.data %}
+                            {% for v in form.inputrows %}
                                 <div class="row">
                                     <div class="col-md-3 padding-defined">
                                         <input id="inputrows-{{ loop.index0 }}-item_id"
                                                name="inputrows-{{ loop.index0 }}-item_id" type="hidden"
-                                               value="{{ v.item_id or '' }}">
+                                               value="{{ v.data.item_id or '' }}">
                                         <input id="inputrows-{{ loop.index0 }}-item_name"
                                                name="inputrows-{{ loop.index0 }}-item_name" type="hidden"
-                                               value="{{ v.item_name or '' }}">
+                                               value="{{ v.data.item_name or '' }}">
                                         <select class="form-control select2 item-choice"
                                                 id="inputrows-{{ loop.index0 }}-item"
                                                 name="inputrows-{{ loop.index0 }}-item"
                                                 data-placeholder="请选择产品或服务">
                                         </select>
+                                        {% for err in v.item_id.errors %}
+                                                <div class="col-md-12">
+                                                    <p style="color: red" class="small">{{ err }}</p>
+                                                </div>
+                                            {% endfor %}
                                     </div>
                                     <div class="col-md-2 padding-defined">
                                         <div class="form-group">
                                             <input id="inputrows-{{ loop.index0 }}-salesprice"
                                                    name="inputrows-{{ loop.index0 }}-salesprice" class="form-control"
-                                                   placeholder="原售价" type="text" value="{{ v.salesprice or '' }}"
+                                                   placeholder="原售价" type="text" value="{{ v.data.salesprice or '' }}"
                                                    readonly>
                                         </div>
                                     </div>
@@ -79,21 +90,36 @@
                                         <div class="form-group">
                                             <input id="inputrows-{{ loop.index0 }}-discountprice"
                                                    name="inputrows-{{ loop.index0 }}-discountprice" class="form-control"
-                                                   placeholder="优惠价" type="text" value="{{ v.discountprice or '' }}">
+                                                   placeholder="优惠价" type="text" value="{{ v.data.discountprice or '' }}">
+                                            {% for err in v.discountprice.errors %}
+                                                <div class="col-md-12">
+                                                    <p style="color: red" class="small">{{ err }}</p>
+                                                </div>
+                                            {% endfor %}
                                         </div>
                                     </div>
-                                    <div class="col-md-1 padding-defined">
+                                    <div class="col-md-2 padding-defined">
                                         <div class="form-group">
                                             <input id="inputrows-{{ loop.index0 }}-quantity"
                                                    name="inputrows-{{ loop.index0 }}-quantity" class="form-control"
-                                                   placeholder="次数" type="text" value="{{ v.quantity or '' }}">
+                                                   placeholder="次数" type="text" value="{{ v.data.quantity or '' }}">
+                                        {% for err in v.quantity.errors %}
+                                                <div class="col-md-12">
+                                                    <p style="color: red" class="small">{{ err }}</p>
+                                                </div>
+                                            {% endfor %}
                                         </div>
                                     </div>
-                                    <div class="col-md-1 padding-defined">
+                                    <div class="col-md-2 padding-defined">
                                         <div class="form-group">
                                             <input id="inputrows-{{ loop.index0 }}-interval"
                                                    name="inputrows-{{ loop.index0 }}-interval" class="form-control"
-                                                   placeholder="有效期(月)" type="text" value="{{ v.interval or '' }}">
+                                                   placeholder="有效期(月)" type="text" value="{{ v.data.interval or '' }}">
+                                        {% for err in v.interval.errors %}
+                                                <div class="col-md-12">
+                                                    <p style="color: red" class="small">{{ err }}</p>
+                                                </div>
+                                        {% endfor %}
                                         </div>
                                     </div>
                                     <div class="col-md-1" style="padding-left: 5px">
@@ -104,15 +130,6 @@
                                     </div>
                                 </div>
                             {% endfor %}
-
-                            {#                            <div class="form-group">#}
-                            {#                                {{ form.inputrows }}#}
-                            {#                                {% for err in form.inputrows.errors %}#}
-                            {#                                    <div class="col-md-12">#}
-                            {#                                        <p style="color: red">{{ err }}</p>#}
-                            {#                                    </div>#}
-                            {#                                {% endfor %}#}
-                            {#                            </div>#}
                         </div>
                         <div class="box-footer">
                             {{ form.submit }}
@@ -124,14 +141,13 @@
             </div>
         </div>
     </section>
-
 {% endblock %}
 
 {% block js %}
     <script>
         $(document).ready(function () {
-            $("#g-option").addClass("active")
-            $("#g-option-mscard").addClass("active")
+            $("#g-option").addClass("active");
+            $("#g-option-mscard").addClass("active");
             // 弹出提示初始化
             $(function () {
                 $('[data-toggle="tooltip"]').tooltip()
@@ -144,12 +160,12 @@
             //只有一个+，可以通过ID获取
             $('#row-plus').on('click', (function (e) //on add input button click
             {
-                if (row_ins <= MaxInputs) //max input box allowed
+                if (row_ins < MaxInputs) //max input box allowed
                 {
                     InputsWrapper.append('<div class="row">\n' +
                         '                                    <div class="col-md-3 padding-defined">\n' +
-                        '                                       <input id="inputrows-' + id_ins + '-name" name="inputrows-' + id_ins + '-name" type="hidden">' +
                         '                                       <input id="inputrows-' + id_ins + '-item_id" name="inputrows-' + id_ins + '-item_id" type="hidden">' +
+                        '                                       <input id="inputrows-' + id_ins + '-name" name="inputrows-' + id_ins + '-name" type="hidden">' +
                         '                                       <select class="form-control select2 item-choice" id="inputrows-' + id_ins + '-item"' +
                         '                                               name="inputrows-' + id_ins + '-item"' +
                         '                                               data-placeholder="请选择产品或服务">' +
@@ -169,14 +185,14 @@
                         '                                                   placeholder="优惠价" type="text" >\n' +
                         '                                        </div>\n' +
                         '                                    </div>\n' +
-                        '                                    <div class="col-md-1 padding-defined">\n' +
+                        '                                    <div class="col-md-2 padding-defined">\n' +
                         '                                        <div class="form-group">\n' +
                         '                                            <input id="inputrows-' + id_ins + '-quantity"\n' +
                         '                                                   name="inputrows-' + id_ins + '-quantity" class="form-control"\n' +
                         '                                                   placeholder="次数" type="text">\n' +
                         '                                        </div>\n' +
                         '                                    </div>\n' +
-                        '                                    <div class="col-md-1 padding-defined">\n' +
+                        '                                    <div class="col-md-2 padding-defined">\n' +
                         '                                        <div class="form-group">\n' +
                         '                                            <input id="inputrows-' + id_ins + '-interval"\n' +
                         '                                                   name="inputrows-' + id_ins + '-interval" class="form-control"\n' +
@@ -189,29 +205,32 @@
                         '                                            <i class="fa fa-minus-square fa-lg" aria-hidden="true"></i>\n' +
                         '                                        </button>\n' +
                         '                                    </div>\n' +
-                        '                                </div>')
+                        '                                </div>');
+                    // 动态添加行后，要处理select2下拉框初始化
+                    var options = {
+                        url: "{{ url_for('admin.item_get') }}",      // 数据接口url
+                        pageSize: 10, // 每次加载的数据条数[屏蔽，目前从后台获取]
+                        value: "id",  // 下拉框value字段名称
+                        name: "name", // 下拉框显示字段名称
+                        selected: []  // 默认选中项，格式：[{id:1,text:"选项1"},{id:2,text:"选项2"}]
+                    };
+                    console.log("inputrows-" + id_ins + "-item");
+                    ajaxSelect2("inputrows-" + id_ins + "-item", options);
+                    id_ins++; //这个要放到select2监听后面，否则id错误
+                    row_ins++;
+                    $("#cnt").text(row_ins)//显示总行数
                 }
-                // 处理select2监听
-                var options = {
-                url: "{{ url_for('admin.item_get') }}",      // 数据接口url
-                pageSize: 10, // 每次加载的数据条数[屏蔽，目前从后台获取]
-                value: "id",  // 下拉框value字段名称
-                name: "name", // 下拉框显示字段名称
-                selected: []  // 默认选中项，格式：[{id:1,text:"选项1"},{id:2,text:"选项2"}]
-                };
-                ajaxSelect2("inputrows-" + id_ins + "-item", options);
-                id_ins++;
-                row_ins++; //text box added increment
                 return false;
-            }))
+            }));
             // 监听函数，是在网页加载的时候就指定了对象。通过jQuery动态生成的元素是没办法匹配的，因此要找到原来加载的元素通过委托的方式处理
             $("#inputs").on("click", "button[name='row-minus']", function () {
                 if (row_ins > 1) {
                     $(this).parent('div').parent('div').remove(); //remove text box
-                    row_ins-- //decrement textbox
+                    row_ins--; //decrement textbox
+                    $("#cnt").text(row_ins) //显示总行数
                 }
                 return false;
-            })
+            });
             //这里要处理产品和服务下拉
             var options = {
                 url: "{{ url_for('admin.item_get') }}",      // 数据接口url
@@ -220,12 +239,24 @@
                 name: "name", // 下拉框显示字段名称
                 selected: []  // 默认选中项，格式：[{id:1,text:"选项1"},{id:2,text:"选项2"}]
             };
+            //遍历.item-choice，为进入时所有的下拉框动态初始化
             $(".item-choice").each(function () {
                 id = $(this).attr("id");
                 ajaxSelect2(id, options);
                 setSelect2Value(id);
             });
+            // 点击保存是，如果有校验信息。要为item_id/item_name赋值。否则setSelect2Value获取不到值，下拉框为空
+            $("#inputs").on("change", ".item-choice", function () {
+                // 获取下拉选中的值和文本
+                let select_val = $(this).val();
+                let select_text = $(this).find("option:selected").text();
+                // 给item_id赋值
+                $(this).siblings().eq(0).val(select_val);
+                // 给item_name赋值
+                $(this).siblings().eq(1).val(select_text);
+            })
         });
+
         // select2为已有的数据设置初值
         function setSelect2Value(select_id) {
             let select = $("#" + select_id);

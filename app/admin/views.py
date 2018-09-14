@@ -483,7 +483,22 @@ def msdetail_edit(id=None):
     # 计算动态input的初值
     form_count = len(form.inputrows)
     if form.validate_on_submit():
-        print form
+        # 删除所有明细
+        for iter_del in msdetails:
+            db.session.delete(iter_del)
+        # 新增明细
+        for iter_add in form.inputrows:
+            msdetail = Msdetail(
+                mscard_id=mscard.id,
+                item_id=iter_add.item_id.data,
+                discountprice=iter_add.discountprice.data,
+                quantity=iter_add.quantity.data,
+                interval=iter_add.interval.data,
+            )
+            db.session.add(msdetail)
+        db.session.commit()
+        flash(u'套餐明细保存成功', 'ok')
+        return redirect(url_for('admin.mscard_list'))
     return render_template('admin/msdetail_edit.html', form=form, form_count=form_count, mscard=mscard)
 
 
