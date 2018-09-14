@@ -89,3 +89,15 @@ function ajaxSelect2(selectId, options, formatResult, formatSelected) {
         }
     }
 }
+
+/*
+调用举例
+var options = {
+    url: "",      // 数据接口url
+    pageSize: 10, // 每次加载的数据条数
+    value: "id",  // 下拉框value字段名称
+    name: "name", // 下拉框显示字段名称
+    selected: []  // 默认选中项，格式：[{id:1,text:"选项1"},{id:2,text:"选项2"}]
+};
+ajaxSelect2("下拉框id",options);
+*/

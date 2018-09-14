@@ -55,19 +55,17 @@
                             {% for v in form.inputrows.data %}
                                 <div class="row">
                                     <div class="col-md-3 padding-defined">
-                                        <input id="inputrows-{{ loop.index0 }}-id" name="inputrows-{{ loop.index0 }}-id"
-                                               type="hidden" value="{{ v.id or '' }}">
                                         <input id="inputrows-{{ loop.index0 }}-item_id"
                                                name="inputrows-{{ loop.index0 }}-item_id" type="hidden"
                                                value="{{ v.item_id or '' }}">
-                                        <div class="input-group">
-                                            <input id="inputrows-{{ loop.index0 }}-item_name"
-                                                   name="inputrows-{{ loop.index0 }}-item_name" type="text"
-                                                   class="form-control"
-                                                   placeholder="请选择产品或服务" aria-describedby="basic-addon2"
-                                                   value="{{ v.item_name or '' }}" readonly>
-                                            <span class="input-group-addon" id="basic-addon2">点我</span>
-                                        </div>
+                                        <input id="inputrows-{{ loop.index0 }}-item_name"
+                                               name="inputrows-{{ loop.index0 }}-item_name" type="hidden"
+                                               value="{{ v.item_name or '' }}">
+                                        <select class="form-control select2 item-choice"
+                                                id="inputrows-{{ loop.index0 }}-item"
+                                                name="inputrows-{{ loop.index0 }}-item"
+                                                data-placeholder="请选择产品或服务">
+                                        </select>
                                     </div>
                                     <div class="col-md-2 padding-defined">
                                         <div class="form-group">
@@ -107,14 +105,14 @@
                                 </div>
                             {% endfor %}
 
-{#                            <div class="form-group">#}
-{#                                {{ form.inputrows }}#}
-{#                                {% for err in form.inputrows.errors %}#}
-{#                                    <div class="col-md-12">#}
-{#                                        <p style="color: red">{{ err }}</p>#}
-{#                                    </div>#}
-{#                                {% endfor %}#}
-{#                            </div>#}
+                            {#                            <div class="form-group">#}
+                            {#                                {{ form.inputrows }}#}
+                            {#                                {% for err in form.inputrows.errors %}#}
+                            {#                                    <div class="col-md-12">#}
+                            {#                                        <p style="color: red">{{ err }}</p>#}
+                            {#                                    </div>#}
+                            {#                                {% endfor %}#}
+                            {#                            </div>#}
                         </div>
                         <div class="box-footer">
                             {{ form.submit }}
@@ -137,13 +135,12 @@
             // 弹出提示初始化
             $(function () {
                 $('[data-toggle="tooltip"]').tooltip()
-            })
+            });
 
             let MaxInputs = 20; //maximum input boxes allowed
-            let InputsWrapper = $("#inputs") //Input boxes wrapper ID
-            let id_ins = {{ form_count }}
-            {{ form_count }} //initlal text box count
-            var row_ins = {{ form_count }}
+            let InputsWrapper = $("#inputs"); //Input boxes wrapper ID
+            let id_ins = {{ form_count }}; //initlal text box count
+            let row_ins = {{ form_count }};
             //只有一个+，可以通过ID获取
             $('#row-plus').on('click', (function (e) //on add input button click
             {
@@ -151,16 +148,12 @@
                 {
                     InputsWrapper.append('<div class="row">\n' +
                         '                                    <div class="col-md-3 padding-defined">\n' +
-                        '    <input id="inputrows-' + id_ins + '-id" name="inputrows-' + id_ins + '-id" type="hidden">' +
-                        '               <input id="inputrows-' + id_ins + '-item_id" name="inputrows-' + id_ins + '-item_id" type="hidden">' +
-                        '                                        <div class="input-group">\n' +
-                        '                                            <input id="inputrows-' + id_ins + '-item_name"\n' +
-                        '                                                   name="inputrows-' + id_ins + '-item_name" type="text"\n' +
-                        '                                                   class="form-control"\n' +
-                        '                                                   placeholder="请选择产品或服务" aria-describedby="basic-addon2"\n' +
-                        '                                                   value="" readonly>\n' +
-                        '                                            <span class="input-group-addon" id="basic-addon2">点我</span>\n' +
-                        '                                        </div>\n' +
+                        '                                       <input id="inputrows-' + id_ins + '-name" name="inputrows-' + id_ins + '-name" type="hidden">' +
+                        '                                       <input id="inputrows-' + id_ins + '-item_id" name="inputrows-' + id_ins + '-item_id" type="hidden">' +
+                        '                                       <select class="form-control select2 item-choice" id="inputrows-' + id_ins + '-item"' +
+                        '                                               name="inputrows-' + id_ins + '-item"' +
+                        '                                               data-placeholder="请选择产品或服务">' +
+                        '                                       </select>' +
                         '                                    </div>\n' +
                         '                                    <div class="col-md-2 padding-defined">\n' +
                         '                                        <div class="form-group">\n' +
@@ -198,20 +191,47 @@
                         '                                    </div>\n' +
                         '                                </div>')
                 }
-                id_ins++
-                row_ins++ //text box added increment
-                console.log(id_ins)
-                return false
+                // 处理select2监听
+                var options = {
+                url: "{{ url_for('admin.item_get') }}",      // 数据接口url
+                pageSize: 10, // 每次加载的数据条数[屏蔽，目前从后台获取]
+                value: "id",  // 下拉框value字段名称
+                name: "name", // 下拉框显示字段名称
+                selected: []  // 默认选中项，格式：[{id:1,text:"选项1"},{id:2,text:"选项2"}]
+                };
+                ajaxSelect2("inputrows-" + id_ins + "-item", options);
+                id_ins++;
+                row_ins++; //text box added increment
+                return false;
             }))
             // 监听函数，是在网页加载的时候就指定了对象。通过jQuery动态生成的元素是没办法匹配的，因此要找到原来加载的元素通过委托的方式处理
             $("#inputs").on("click", "button[name='row-minus']", function () {
                 if (row_ins > 1) {
-                    $(this).parent('div').parent('div').remove() //remove text box
+                    $(this).parent('div').parent('div').remove(); //remove text box
                     row_ins-- //decrement textbox
                 }
-                return false
+                return false;
             })
-            //todo 这里要处理产品和服务下拉
-        })
+            //这里要处理产品和服务下拉
+            var options = {
+                url: "{{ url_for('admin.item_get') }}",      // 数据接口url
+                pageSize: 10, // 每次加载的数据条数[屏蔽，目前从后台获取]
+                value: "id",  // 下拉框value字段名称
+                name: "name", // 下拉框显示字段名称
+                selected: []  // 默认选中项，格式：[{id:1,text:"选项1"},{id:2,text:"选项2"}]
+            };
+            $(".item-choice").each(function () {
+                id = $(this).attr("id");
+                ajaxSelect2(id, options);
+                setSelect2Value(id);
+            });
+        });
+        // select2为已有的数据设置初值
+        function setSelect2Value(select_id) {
+            let select = $("#" + select_id);
+            item_id = select.siblings().eq(0).val();
+            item_name = select.siblings().eq(1).val();
+            select.append(new Option(item_name, item_id, false, true));
+        }
     </script>
 {% endblock %}

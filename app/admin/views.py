@@ -473,7 +473,6 @@ def msdetail_edit(id=None):
         # 对FormField赋值，要使用append_entry方法
         for detail in msdetails:
             listform = MsdetailListForm()
-            listform.id = detail.id
             listform.item_id = detail.item_id
             listform.item_name = detail.item.name
             listform.salesprice = detail.item.salesprice

@@ -3,7 +3,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, FileField, TextAreaField, SelectField, \
     SelectMultipleField, RadioField, FieldList, FormField, HiddenField
 from wtforms.validators import DataRequired, EqualTo, Regexp, Length
-from app.models import User, Auth, Role
+from app.models import User, Auth, Role, Item
 
 
 class AuthForm(FlaskForm):
@@ -264,19 +264,15 @@ class MscardForm(FlaskForm):
 
 
 class MsdetailListForm(FlaskForm):
-    id = HiddenField(
-        label=u'ID',
-        description=u'ID',
-    )
     item_id = HiddenField(
         label=u'商品/服务ID',
         description=u'商品/服务ID',
     )
-    item_name = StringField(
-        label=u'商品/服务名称',
-        description=u'商品/服务名称',
+    item_name = HiddenField(
+        label=u'商品/服务',
+        description=u'商品/服务',
     )
-    salesprice = HiddenField(
+    salesprice = StringField(
         label=u'原售价',
         description=u'原售价',
     )
@@ -317,8 +313,7 @@ class MsdetailListForm(FlaskForm):
     #FieldList里的对象也是FormField，不知道怎么给CSRF_TOKEN赋值，关掉验证
     def __init__(self, *args, **kwargs):
         kwargs['csrf_enabled'] = False
-        FlaskForm.__init__(self, *args, **kwargs)
-
+        FlaskForm.__init__(self, *args, **kwargs)\
 
 class MsdetailForm(FlaskForm):
     inputrows = FieldList(
