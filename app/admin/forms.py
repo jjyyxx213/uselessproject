@@ -331,7 +331,7 @@ class MsdetailForm(FlaskForm):
 
 
 # 20180913 liuqq 修改密码表单
-class PwdModForm(FlaskForm):
+class PwdForm(FlaskForm):
     old_pwd = StringField(
         label=u'旧密码',
         validators=[

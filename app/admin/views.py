@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 from . import admin
 from flask import render_template, url_for, redirect, flash, session, request, current_app, abort
-from forms import UserForm, AuthForm, RoleForm, MscardForm, MsdetailForm, MsdetailListForm, PwdModForm
+from forms import UserForm, AuthForm, RoleForm, MscardForm, MsdetailForm, MsdetailListForm, PwdForm
 from app.models import User, Auth, Role, Oplog, Userlog, Mscard, Msdetail, Item
 from werkzeug.security import generate_password_hash
 from app import db
@@ -23,7 +23,7 @@ def login():
 # 20180913 liuqq 修改密码
 @admin.route('/user/pwd_edit',methods=['GET', 'POST'])
 def pwd_edit():
-    form = PwdModForm()
+    form = PwdForm()
     if form.validate_on_submit():
         # 验证密码
         user = User.query.filter_by(id=session.get('user_id')).first()
