@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 from . import admin
 from flask import render_template, url_for, redirect, flash, session, request, current_app, abort
-from forms import UserForm, AuthForm, RoleForm, MscardForm, MsdetailForm, MsdetailListForm
+from forms import UserForm, AuthForm, RoleForm, MscardForm, MsdetailForm, MsdetailListForm, PwdModForm
 from app.models import User, Auth, Role, Oplog, Userlog, Mscard, Msdetail, Item
 from werkzeug.security import generate_password_hash
 from app import db
@@ -18,6 +18,31 @@ def index():
 @admin.route("/login", methods=["GET", "POST"])
 def login():
     return redirect(url_for('home.login'))
+
+
+# 20180913 liuqq 修改密码
+@admin.route('/user/pwd_edit',methods=['GET', 'POST'])
+def pwd_edit():
+    form = PwdModForm()
+    if form.validate_on_submit():
+        # 验证密码
+        user = User.query.filter_by(id=session.get('user_id')).first()
+        if user.verify_password(form.old_pwd.data) != 1:
+            flash(u'旧密码输入错误', 'err')
+            return redirect(url_for('admin.pwd_edit'))
+        if form.new_pwd.data != form.re_pwd.data:
+            flash(u'您两次输入的密码不一致!', 'err')
+            return redirect(url_for('admin.pwd_edit'))
+        if form.new_pwd.data == form.old_pwd.data:
+            flash(u'新密码与旧密码一致！', 'err')
+            return redirect(url_for('admin.pwd_edit'))
+        new_pwd = generate_password_hash(form.new_pwd.data)
+        user.pwd = new_pwd
+        db.session.add(user)
+        db.session.commit()
+        flash(u'密码修改成功', 'ok')
+        return redirect(url_for('home.index'))
+    return render_template('admin/pwd_edit.html', form=form)
 
 
 @admin.route('/auth/add', methods=['GET', 'POST'])
