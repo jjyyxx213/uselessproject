@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% import 'ui/admin_page.html' as macros %}
+
+{% block page_content %}
+    <section class="content-header">
+        <h1> 门店管理系统</h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> 客户管理</a></li>
+            <li class="active"> 客户列表</li>
+        </ol>
+    </section>
+    <section class="content" id="showcontent">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="box-header">
+                        <h3 class="box-title"> 客户列表</h3>
+                        <div class="box-tools">
+                            <div class="pull-left border-right">
+                                <a href="#" class="btn btn-primary btn-sm" role="button">
+                                    添加</a>&nbsp;&nbsp;&nbsp;
+                            </div>
+                            <div class="input-group input-group-sm" style="width: 280px;">
+                                <input type="text" name="table_search" class="form-control pull-right"
+                                       placeholder="请输入关键字...(姓名/手机/邮箱/车牌号)" id="search_key" value="{{ key }}">
+
+                                <div class="input-group-btn">
+                                    <button type="submit" class="btn btn-default" id="do_search">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-hover">
+                            <tbody>
+                            <tr>
+                                <th> 编号</th>
+                                <th> 姓名</th>
+                                <th> 性别</th>
+                                <th> 手机号</th>
+                                <th> 到店次数</th>
+                                <th> 累计消费</th>
+                                <th> 车牌号</th>
+                                <th> 车架号</th>
+                                <th> 品牌类型</th>
+                                <th> 邮箱</th>
+                                <th> 客户经理</th>
+                                <th> 会员卡</th>
+                                <th> 添加时间</th>
+                                <th> 操作事项</th>
+                            </tr>
+                            {% for v in pagination.items %}
+                                <tr>
+                                    <td>{{ v.id }}</td>
+                                    <td>{{ v.name }}</td>
+                                    <td>{{ v.sex }}</td>
+                                    <td>{{ v.phone }}</td>
+                                    <td>{{ v.freq }}</td>
+                                    <td>{{ v.summary }}</td>
+                                    <td>{{ v.pnumber }}</td>
+                                    <td>{{ v.vin }}</td>
+                                    <td>{{ v.brand }}</td>
+                                    <td>{{ v.email }}</td>
+                                    <td>{{ v.user.name }}</td>
+                                    <td>{{ v.vip_id }}</td>
+                                    <td>{{ v.addtime }}</td>
+                                    <td>
+                                        <a href="#" name="btn-unfrozen"
+                                           class="label label-success">修改</a>
+                                        <a href="#" name="btn-frozen"
+                                           class="label label-danger">会员卡</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="box-footer clearfix">
+                        <ul class="pagination pagination-sm no-margin pull-right">
+                            {{ macros.pagination_widget(pagination, 'admin.customer_list', key=key) }}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block js %}
+    <script>
+        $(document).ready(function () {
+            $("#g-customer").addClass("active");
+            $("#g-customer-list").addClass("active");
+            // 搜索按钮
+            $("#do_search").click(function () {
+                var key = $("#search_key").val();
+                location.href = "{{ url_for('admin.customer_list') }}?key=" + key;
+            })
+            $("#search_key").bind("keyup", function (event) {
+                if (event.keyCode == "13") {
+                    //回车执行查询
+                    var key = $("#search_key").val()
+                    location.href = "{{ url_for("admin.customer_list") }}?key=" + key
+                }
+            })
+        })
+    </script>
+{% endblock %}

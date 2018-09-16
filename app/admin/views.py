@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
 from . import admin
 from flask import render_template, url_for, redirect, flash, session, request, current_app, abort
-from forms import UserForm, AuthForm, RoleForm, MscardForm, MsdetailForm, MsdetailListForm
-from app.models import User, Auth, Role, Oplog, Userlog, Mscard, Msdetail, Item
+from forms import UserForm, AuthForm, RoleForm, MscardForm, MsdetailForm, MsdetailListForm, PwdForm
+from app.models import User, Auth, Role, Oplog, Userlog, Mscard, Msdetail, Item, Customer
 from werkzeug.security import generate_password_hash
 from app import db
 import os, stat, uuid
@@ -18,6 +18,31 @@ def index():
 @admin.route("/login", methods=["GET", "POST"])
 def login():
     return redirect(url_for('home.login'))
+
+
+# 20180913 liuqq 修改密码
+@admin.route('/user/pwd_edit',methods=['GET', 'POST'])
+def pwd_edit():
+    form = PwdForm()
+    if form.validate_on_submit():
+        # 验证密码
+        user = User.query.filter_by(id=session.get('user_id')).first()
+        if user.verify_password(form.old_pwd.data) != 1:
+            flash(u'旧密码输入错误', 'err')
+            return redirect(url_for('admin.pwd_edit'))
+        if form.new_pwd.data != form.re_pwd.data:
+            flash(u'您两次输入的密码不一致!', 'err')
+            return redirect(url_for('admin.pwd_edit'))
+        if form.new_pwd.data == form.old_pwd.data:
+            flash(u'新密码与旧密码一致！', 'err')
+            return redirect(url_for('admin.pwd_edit'))
+        new_pwd = generate_password_hash(form.new_pwd.data)
+        user.pwd = new_pwd
+        db.session.add(user)
+        db.session.commit()
+        flash(u'密码修改成功', 'ok')
+        return redirect(url_for('home.index'))
+    return render_template('admin/pwd_edit.html', form=form)
 
 
 @admin.route('/auth/add', methods=['GET', 'POST'])
@@ -275,7 +300,7 @@ def user_edit(id=None):
 
 @admin.route('/user/list', methods=['GET'])
 def user_list():
-    # 用户列表
+    # 员工列表
     key = request.args.get('key', '')
     page = request.args.get('page', 1, type=int)
     pagination = User.query
@@ -292,7 +317,7 @@ def user_list():
     return render_template('admin/user_list.html', pagination=pagination, key=key)
 
 
-@admin.route('/user/frozen')
+@admin.route('/user/frozen', methods=['GET'])
 def user_frozen():
     # 员工冻结
     uid = request.args.get('uid', '')
@@ -442,7 +467,7 @@ def mscard_edit(id=None):
     return render_template('admin/mscard_edit.html', form=form, mscard=mscard)
 
 
-@admin.route('/mscard/block')
+@admin.route('/mscard/block', methods=['GET'])
 def mscard_block():
     # 会员卡停用
     msid = request.args.get('msid', '')
@@ -505,10 +530,6 @@ def msdetail_edit(id=None):
 @admin.route('/item/get', methods=['GET', 'POST'])
 def item_get():
     # 获取产品分页清单
-    # items = Item.query.order_by(Item.id.asc()).all()
-    # data = []
-    # for item in items:
-    #     data.append(item.to_json())
     if request.method == 'POST':
         params = request.form.to_dict()
         page = int(params['curPage']) if (params.has_key('curPage')) else 1
@@ -545,3 +566,27 @@ def item_get():
             "data": data,
         }
     return dumps(res)
+
+@admin.route('/customer/list', methods=['GET'])
+def customer_list():
+    # 客户列表
+    key = request.args.get('key', '')
+    page = request.args.get('page', 1, type=int)
+    pagination = Customer.query
+    # 如果查询了增加查询条件
+    if key:
+        # 姓名/手机/邮箱/车牌号查询
+        pagination = pagination.filter(
+            Customer.name.ilike('%' + key + '%') or
+            Customer.phone.ilike('%' + key + '%') or
+            Customer.email.ilike('%' + key + '%') or
+            Customer.pnumber.ilike('%' + key + '%')
+        )
+    pagination = pagination.join(User).filter(
+        User.id == Customer.user_id
+    ).order_by(
+        Customer.addtime.desc()
+    ).paginate(page=page,
+               per_page=current_app.config['POSTS_PER_PAGE'],
+               error_out=False)
+    return render_template('admin/customer_list.html', pagination=pagination, key=key)
