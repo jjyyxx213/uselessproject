@@ -1,10 +1,11 @@
 # -*- coding:utf-8 -*-
 from . import home
-from flask import render_template, session, redirect, request, url_for, flash
+from flask import render_template, session, redirect, request, url_for, flash, current_app
 from forms import LoginForm, PwdForm
-from app.models import User, Userlog, Oplog
+from app.models import User, Userlog, Oplog, Item
 from app import db
 from werkzeug.security import generate_password_hash
+from sqlalchemy import or_
 
 
 @home.route('/', methods=['GET'])
@@ -69,3 +70,24 @@ def pwd():
         return redirect(url_for('home.login'))
     return render_template('home/pwd.html', form=form)
 
+@home.route('/item/list/<int:type>', methods=['GET'])
+def item_list(type=0):
+    # 商品/服务列表
+    key = request.args.get('key', '')
+    page = request.args.get('page', 1, type=int)
+    # type 0: item; 1: service
+    pagination = Item.query.filter_by(type=type)
+    # 如果查询了增加查询条件
+    if key:
+        # 名称查询
+        pagination = pagination.filter(
+            or_(Item.name.ilike('%' + key + '%'),
+                Item.standard.ilike('%' + key + '%'),
+                Item.remarks.ilike('%' + key + '%'))
+        )
+    pagination = pagination.order_by(
+        Item.addtime.desc()
+    ).paginate(page=page,
+               per_page=current_app.config['POSTS_PER_PAGE'],
+               error_out=False)
+    return render_template('home/item_list.html', type=type, pagination=pagination, key=key)
