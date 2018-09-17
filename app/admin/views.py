@@ -8,6 +8,7 @@ from app import db
 import os, stat, uuid
 from datetime import datetime
 from json import dumps
+from sqlalchemy import or_
 
 
 @admin.route("/", methods=["GET"])
@@ -553,10 +554,10 @@ def customer_list():
     if key:
         # 姓名/手机/邮箱/车牌号查询
         pagination = pagination.filter(
-            Customer.name.ilike('%' + key + '%') or
-            Customer.phone.ilike('%' + key + '%') or
-            Customer.email.ilike('%' + key + '%') or
-            Customer.pnumber.ilike('%' + key + '%')
+            or_(Customer.name.ilike('%' + key + '%'),
+            Customer.phone.ilike('%' + key + '%'),
+            Customer.email.ilike('%' + key + '%'),
+            Customer.pnumber.ilike('%' + key + '%'))
         )
     pagination = pagination.join(User).filter(
         User.id == Customer.user_id
@@ -656,4 +657,4 @@ def category_del(type=0, id=None):
     db.session.add(oplog)
     db.session.commit()
     flash(u'分类删除成功', 'ok')
-    return redirect(url_for('admin.auth_list'))
+    return redirect(url_for('admin.category_list', type=type))
