@@ -254,6 +254,26 @@ class Vipdetail(db.Model):
     def __repr__(self):
         return '<Vipdetail %r>' % self.name
 
+# 商品/服务类别
+class Category(db.Model):
+    __tablename__ = 'tb_category'
+    # 编号
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    # 名称
+    name = db.Column(db.String(200), nullable=False)
+    # 类别(0:商品;1:服务项目)
+    type = db.Column(db.SmallInteger, default=0)
+    # 备注
+    remarks = db.Column(db.Text)
+    # 添加时间
+    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    # 服务/项目主表外键
+    items = db.relationship('Item', backref='category')
+
+    def __repr__(self):
+        return '<Category %r>' % self.name
+
+
 # 服务/项目主表 todo
 class Item(db.Model):
     __tablename__ = 'tb_item'
@@ -261,6 +281,8 @@ class Item(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     # 名称
     name = db.Column(db.String(200), nullable=False)
+    # 类别
+    cate_id = db.Column(db.Integer, db.ForeignKey('tb_category.id'))
     # 销售价
     salesprice = db.Column(db.Float, default=0)
     # 成本价

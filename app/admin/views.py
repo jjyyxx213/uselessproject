@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
 from . import admin
 from flask import render_template, url_for, redirect, flash, session, request, current_app, abort
-from forms import UserForm, AuthForm, RoleForm, MscardForm, MsdetailForm, MsdetailListForm, PwdForm
-from app.models import User, Auth, Role, Oplog, Userlog, Mscard, Msdetail, Item, Customer
+from forms import UserForm, AuthForm, RoleForm, MscardForm, MsdetailForm, MsdetailListForm, PwdForm, CategoryForm
+from app.models import User, Auth, Role, Oplog, Userlog, Mscard, Msdetail, Item, Customer, Category
 from werkzeug.security import generate_password_hash
 from app import db
 import os, stat, uuid
@@ -21,7 +21,7 @@ def login():
 
 
 # 20180913 liuqq 修改密码
-@admin.route('/user/pwd_edit',methods=['GET', 'POST'])
+@admin.route('/user/pwd_edit', methods=['GET', 'POST'])
 def pwd_edit():
     form = PwdForm()
     if form.validate_on_submit():
@@ -39,9 +39,16 @@ def pwd_edit():
         new_pwd = generate_password_hash(form.new_pwd.data)
         user.pwd = new_pwd
         db.session.add(user)
+        # 20180917 jiangyu 增加修改密码日志
+        oplog = Oplog(
+            user_id=session['user_id'],
+            ip=request.remote_addr,
+            reason=u'修改密码:%s' % user.name
+        )
+        db.session.add(oplog)
         db.session.commit()
         flash(u'密码修改成功', 'ok')
-        return redirect(url_for('home.index'))
+        return redirect(url_for('home.login'))
     return render_template('admin/pwd_edit.html', form=form)
 
 
@@ -567,6 +574,7 @@ def item_get():
         }
     return dumps(res)
 
+
 @admin.route('/customer/list', methods=['GET'])
 def customer_list():
     # 客户列表
@@ -590,3 +598,76 @@ def customer_list():
                per_page=current_app.config['POSTS_PER_PAGE'],
                error_out=False)
     return render_template('admin/customer_list.html', pagination=pagination, key=key)
+
+
+@admin.route('/category/list/<int:type>', methods=['GET'])
+def category_list(type=0):
+    # 商品/服务分类列表
+    key = request.args.get('key', '')
+    page = request.args.get('page', 1, type=int)
+    # type 0: item; 1: service
+    pagination = Category.query.filter_by(type=type)
+    # 如果查询了增加查询条件
+    if key:
+        # 名称查询
+        pagination = pagination.filter(
+            Category.name.ilike('%' + key + '%')
+        )
+    pagination = pagination.order_by(
+        Category.addtime.desc()
+    ).paginate(page=page,
+               per_page=current_app.config['POSTS_PER_PAGE'],
+               error_out=False)
+    return render_template('admin/category_list.html', type=type, pagination=pagination, key=key)
+
+@admin.route('/category/add/<int:type>', methods=['GET', 'POST'])
+def category_add(type=0):
+    # 商品/服务分类添加
+    form = CategoryForm()
+    if form.validate_on_submit():
+        if Category.query.filter_by(name=form.name.data, type=type).first():
+            flash(u'您输入的分类已存在', 'err')
+            return redirect(url_for('admin.category_add', type=type))
+        category = Category(
+            name=form.name.data,
+            remarks=form.remarks.data,
+            type=type
+        )
+        oplog = Oplog(
+            user_id=session['user_id'],
+            ip=request.remote_addr,
+            reason=u'添加商品/服务项目分类:%s' % form.name.data
+        )
+        objects = [category, oplog]
+        db.session.add_all(objects)
+        db.session.commit()
+        flash(u'分类添加成功', 'ok')
+        return redirect(url_for('admin.category_add', type=type))
+    return render_template('admin/category_add.html', form=form, type=type)
+
+@admin.route('/category/edit/<int:type>/<int:id>', methods=['GET', 'POST'])
+def category_edit(type=0, id=None):
+    # 商品/服务分类修改
+    form = CategoryForm()
+    form.submit.label.text = u'修改'
+    category = Category.query.filter_by(id=id).first_or_404()
+    if request.method == 'GET':
+        form.name.data = category.name
+        form.remarks.data = category.remarks
+    if form.validate_on_submit():
+        if category.name != form.name.data and Category.query.filter_by(name=form.name.data, type=type).first():
+            flash(u'您输入的分类已存在', 'err')
+            return redirect(url_for('admin.category_edit', type=type, id=category.id))
+        category.name = form.name.data
+        category.remarks = form.remarks.data
+        db.session.add(category)
+        oplog = Oplog(
+            user_id=session['user_id'],
+            ip=request.remote_addr,
+            reason=u'修改商品/服务项目:%s' % form.name.data
+        )
+        db.session.add(oplog)
+        db.session.commit()
+        flash(u'分类修改成功', 'ok')
+        return redirect(url_for('admin.category_list', type=type))
+    return render_template('admin/category_edit.html', form=form, category=category, type=type)

@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% import 'ui/admin_page.html' as macros %}
+{% block page_content %}
+    <section class="content-header">
+        <h1> 门店管理系统</h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> 设置</a></li>
+            <li class="active">
+                {% if type == 0 %}
+                商品分类
+                {% else %}
+                服务项目分类
+                {% endif %}
+            </li>
+        </ol>
+    </section>
+    <section class="content" id="showcontent">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="box-header">
+                        <h3 class="box-title">
+                        {% if type == 0 %}
+                         商品分类列表
+                        {% else %}
+                         服务项目分类列表
+                        {% endif %}
+                        </h3>
+                        <div class="box-tools">
+                            <div class="pull-left border-right">
+                                <a href="{{ url_for('admin.category_add', type=type) }}" class="btn btn-primary btn-sm" role="button">
+                                    添加</a>&nbsp;&nbsp;&nbsp;
+                            </div>
+                            <div class="input-group input-group-sm" style="width: 150px;">
+                                <input type="text" name="table_search" class="form-control pull-right"
+                                       placeholder="请输入关键字..." id="search_key" value="{{ key }}">
+
+                                <div class="input-group-btn">
+                                    <button type="submit" class="btn btn-default" id="do_search">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-hover">
+                            <tbody>
+                            <tr>
+                                <th> 编号</th>
+                                <th> 名称</th>
+                                <th> 类别</th>
+                                <th> 备注</th>
+                                <th> 添加时间</th>
+                                <th> 操作事项</th>
+                            </tr>
+                            {% for v in pagination.items %}
+                                <tr>
+                                    <td>{{ v.id }}</td>
+                                    <td>{{ v.name }}</td>
+                                    {% if v.type == 0 %}
+                                    <td> 商品</td>
+                                    {% else %}
+                                    <td> 服务项目</td>
+                                    {% endif %}
+                                    <td>{{ v.remarks }}</td>
+                                    <td>{{ v.addtime }}</td>
+                                    <td>
+                                        <a href="{{ url_for('admin.category_edit', type=type, id=v.id) }}" name="btn-unfrozen"
+                                           class="label label-success">修改</a>
+                                        <a href="#" name="btn-frozen"
+                                           class="label label-danger">删除</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="box-footer clearfix">
+                        <ul class="pagination pagination-sm no-margin pull-right">
+                            {{ macros.pagination_widget(pagination, 'admin.category_list', type=type, key=key) }}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block js %}
+    <script>
+        $(document).ready(function () {
+            $("#g-option").addClass("active");
+            type = {{ type }};
+            if (type == 0) {//商品
+                $("#g-option-category-item").addClass("active");
+            }else{//服务项目
+                $("#g-option-category-service").addClass("active");
+            }
+            // 搜索按钮
+            $("#do_search").click(function () {
+                var key = $("#search_key").val();
+                location.href = "{{ url_for('admin.category_list', type=type) }}?key=" + key;
+            })
+            $("#search_key").bind("keyup", function (event) {
+                if (event.keyCode == "13") {
+                    //回车执行查询
+                    var key = $("#search_key").val();
+                    location.href = "{{ url_for('admin.category_list',  type=type) }}?key=" + key;
+                }
+            })
+        })
+    </script>
+{% endblock %}

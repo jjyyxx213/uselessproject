@@ -372,3 +372,30 @@ class PwdForm(FlaskForm):
             'class': 'btn btn-primary'
         }
     )
+
+class CategoryForm(FlaskForm):
+    name = StringField(
+        label=u'分类名称',
+        validators=[
+            DataRequired(message=u'请输入分类名称')
+        ],
+        description=u'分类名称',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入分类名称',
+        }
+    )
+    remarks = TextAreaField(
+        label=u'备注',
+        description=u'备注',
+        render_kw={
+            'class': 'form-control',
+            'rows': 10
+        }
+    )
+    submit = SubmitField(
+        label=u'添加',
+        render_kw={
+            'class': 'btn btn-primary'
+        }
+    )
