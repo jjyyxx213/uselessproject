@@ -33,7 +33,7 @@
                             <div class="row" style="margin-bottom: 5px">
                                 <div class="col-md-3 padding-defined">
                                     <label for="input_url" style="color: red">*</label>
-                                    <label> 产品/服务</label>
+                                    <label> 商品/服务</label>
                                 </div>
                                 <div class="col-md-2 padding-defined">
                                     <label> 原售价</label>
@@ -70,7 +70,7 @@
                                         <select class="form-control select2 item-choice"
                                                 id="inputrows-{{ loop.index0 }}-item"
                                                 name="inputrows-{{ loop.index0 }}-item"
-                                                data-placeholder="请选择产品或服务">
+                                                data-placeholder="请选择商品或服务">
                                         </select>
                                         {% for err in v.item_id.errors %}
                                                 <div class="col-md-12">
@@ -168,7 +168,7 @@
                         '                                       <input id="inputrows-' + id_ins + '-name" name="inputrows-' + id_ins + '-name" type="hidden">' +
                         '                                       <select class="form-control select2 item-choice" id="inputrows-' + id_ins + '-item"' +
                         '                                               name="inputrows-' + id_ins + '-item"' +
-                        '                                               data-placeholder="请选择产品或服务">' +
+                        '                                               data-placeholder="请选择商品或服务">' +
                         '                                       </select>' +
                         '                                    </div>\n' +
                         '                                    <div class="col-md-2 padding-defined">\n' +
@@ -231,7 +231,7 @@
                 }
                 return false;
             });
-            //这里要处理产品和服务下拉
+            //这里要处理商品和服务下拉
             var options = {
                 url: "{{ url_for('admin.item_get') }}",      // 数据接口url
                 pageSize: 10, // 每次加载的数据条数[屏蔽，目前从后台获取]

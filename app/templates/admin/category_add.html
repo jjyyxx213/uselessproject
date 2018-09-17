@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block page_content %}
+    <section class="content-header">
+        <h1> 门店管理系统</h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> 设置</a></li>
+                {% if type == 0 %}
+                <li><a href="{{ url_for('admin.category_list', type=0) }}"> 商品分类</a></li>
+                {% else %}
+                <li><a href="{{ url_for('admin.category_list', type=1) }}"> 服务项目分类</a></li>
+                {% endif %}
+            <li class="active"> 添加分类</li>
+        </ol>
+    </section>
+    <section class="content" id="showcontent">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">
+                        {% if type == 0 %}
+                         添加商品分类
+                        {% else %}
+                         添加服务项目分类
+                        {% endif %}
+                        </h3>
+                    </div>
+                    <form role="form" method="post">
+                        <!--启动CSRF-->
+                        {{ form.hidden_tag() }}
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label for="input_name" style="color: red">*</label>
+                                {% if type == 0 %}
+                                 商品分类
+                                {% else %}
+                                 服务项目分类
+                                {% endif %}
+                                {{ form.name }}
+                                {% for err in form.name.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="form-group">
+                                {{ form.remarks.label }}
+                                {{ form.remarks }}
+                                {% for err in form.remarks.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="box-footer">
+                            {{ form.submit }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block js %}
+    <script>
+        $(document).ready(function () {
+            $("#g-option").addClass("active");
+            type = {{ type }};
+            if (type == 0) {//商品
+                $("#g-option-category-item").addClass("active");
+            }else{//服务项目
+                $("#g-option-category-service").addClass("active");
+            }
+        })
+    </script>
+{% endblock %}

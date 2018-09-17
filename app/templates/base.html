@@ -16,7 +16,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='dist/css/AdminLTE.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='dist/css/skins/skin-blue-light.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='plugins/iCheck/square/blue.css') }}">
-
     <!--[if lt IE 9]>
     <script src="{{ url_for('static', filename='dist/js/html5shiv.js') }}"></script>
     <script src="{{ url_for('static', filename='dist/js/respond.js') }}"></script>
@@ -28,7 +27,7 @@
 </head>
 
 <body class="hold-transition skin-blue-light sidebar-mini">
-<div class="wrapper">
+<div class="wrapper" style="overflow-y: hidden">
 
     <!-- Main Header -->
     <header class="main-header">
@@ -181,7 +180,7 @@
                             <!-- Menu Footer-->
                             <li class="user-footer">
                                 <div class="pull-left">
-                                    <a href="{{ url_for('admin.pwd_edit') }}" class="btn btn-default btn-flat"> 修改密码</a>
+                                    <a href="{{ url_for('home.pwd') }}" class="btn btn-default btn-flat"> 修改密码</a>
                                 </div>
                                 <div class="pull-right">
                                     <a href="{{ url_for('home.logout') }}" class="btn btn-default btn-flat"> 退出系统</a>
@@ -200,17 +199,17 @@
         <section class="sidebar">
 
             <!-- Sidebar user panel (optional) -->
-            <div class="user-panel">
-                <div class="pull-left image">
-                    <img src="{{ url_for('static', filename='dist/img/user2-160x160.jpg') }}" class="img-circle"
-                         alt="User Image">
-                </div>
-                <div class="pull-left info">
-                    <p> 刘哥</p>
-                    <!-- Status -->
-                    <a href="#"><i class="fa fa-circle text-success"></i> 在线</a>
-                </div>
-            </div>
+{#            <div class="user-panel">#}
+{#                <div class="pull-left image">#}
+{#                    <img src="{{ url_for('static', filename='dist/img/user2-160x160.jpg') }}" class="img-circle"#}
+{#                         alt="User Image">#}
+{#                </div>#}
+{#                <div class="pull-left info">#}
+{#                    <p> 刘哥</p>#}
+{#                    <!-- Status -->#}
+{#                    <a href="#"><i class="fa fa-circle text-success"></i> 在线</a>#}
+{#                </div>#}
+{#            </div>#}
 
             <!-- search form (Optional) -->
             <!--
@@ -291,7 +290,7 @@
 <script src="{{ url_for('static', filename='bower_components/select2/dist/js/select2.full.min.js') }}"></script>
 <script src="{{ url_for('static', filename='bower_components/select2/dist/js/i18n/zh-CN.js') }}"></script>
 <script src="{{ url_for('static', filename='plugins/iCheck/icheck.min.js') }}"></script>
-<script src="{{ url_for('static', filename='dist/js/my_javascript.js') }}"></script>
+<script src="{{ url_for('static', filename='dist/js/ajaxSelect2.js') }}"></script>
 {% block js %}{% endblock %}
 <!-- Page script -->
 
