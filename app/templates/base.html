@@ -27,7 +27,7 @@
 </head>
 
 <body class="hold-transition skin-blue-light sidebar-mini">
-<div class="wrapper">
+<div class="wrapper" style="overflow-y: hidden">
 
     <!-- Main Header -->
     <header class="main-header">
@@ -180,7 +180,7 @@
                             <!-- Menu Footer-->
                             <li class="user-footer">
                                 <div class="pull-left">
-                                    <a href="{{ url_for('admin.pwd_edit') }}" class="btn btn-default btn-flat"> 修改密码</a>
+                                    <a href="{{ url_for('home.pwd') }}" class="btn btn-default btn-flat"> 修改密码</a>
                                 </div>
                                 <div class="pull-right">
                                     <a href="{{ url_for('home.logout') }}" class="btn btn-default btn-flat"> 退出系统</a>

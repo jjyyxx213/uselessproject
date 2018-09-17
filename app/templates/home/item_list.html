@@ -21,14 +21,14 @@
                     <div class="box-header">
                         <h3 class="box-title">
                         {% if type == 0 %}
-                         商品分类列表
+                         商品列表
                         {% else %}
-                         服务项目分类列表
+                         服务项目列表
                         {% endif %}
                         </h3>
                         <div class="box-tools">
                             <div class="pull-left border-right">
-                                <a href="{{ url_for('admin.category_add', type=type) }}" class="btn btn-primary btn-sm" role="button">
+                                <a href="#" class="btn btn-primary btn-sm" role="button">
                                     添加</a>&nbsp;&nbsp;&nbsp;
                             </div>
                             <div class="input-group input-group-sm" style="width: 150px;">
@@ -49,26 +49,30 @@
                             <tr>
                                 <th> 编号</th>
                                 <th> 名称</th>
-                                <th> 类别</th>
+                                <th> 销售价</th>
+                                <th> 单位</th>
+                                <th> 规格</th>
                                 <th> 备注</th>
-                                <th> 添加时间</th>
+                                <th> 状态</th>
                                 <th> 操作事项</th>
                             </tr>
                             {% for v in pagination.items %}
                                 <tr>
                                     <td>{{ v.id }}</td>
                                     <td>{{ v.name }}</td>
-                                    {% if v.type == 0 %}
-                                    <td> 商品</td>
+                                    <td>{{ v.salesprice }}</td>
+                                    <td>{{ v.unit }}</td>
+                                    <td>{{ v.standard }}</td>
+                                    {% if v.valid == 1 %}
+                                    <td> 有效</td>
                                     {% else %}
-                                    <td> 服务项目</td>
+                                    <td> 无效</td>
                                     {% endif %}
                                     <td>{{ v.remarks }}</td>
-                                    <td>{{ v.addtime }}</td>
                                     <td>
-                                        <a href="{{ url_for('admin.category_edit', type=type, id=v.id) }}"
+                                        <a href="#"
                                            class="label label-success">修改</a>
-                                        <a href="{{ url_for('admin.category_del', type=type, id=v.id) }}"
+                                        <a href="#"
                                            class="label label-danger">删除</a>
                                     </td>
                                 </tr>
@@ -78,7 +82,7 @@
                     </div>
                     <div class="box-footer clearfix">
                         <ul class="pagination pagination-sm no-margin pull-right">
-                            {{ macros.pagination_widget(pagination, 'admin.category_list', type=type, key=key) }}
+                            {{ macros.pagination_widget(pagination, 'home.item_list', type=type, key=key) }}
                         </ul>
                     </div>
                 </div>
@@ -90,23 +94,23 @@
 {% block js %}
     <script>
         $(document).ready(function () {
-            $("#g-option").addClass("active");
+            $("#g-is").addClass("active");
             type = {{ type }};
             if (type == 0) {//商品
-                $("#g-option-category-item").addClass("active");
+                $("#g-is-item").addClass("active");
             }else{//服务项目
-                $("#g-option-category-service").addClass("active");
+                $("#g-is-service").addClass("active");
             }
             // 搜索按钮
             $("#do_search").click(function () {
                 var key = $("#search_key").val();
-                location.href = "{{ url_for('admin.category_list', type=type) }}?key=" + key;
+                location.href = "{{ url_for('home.item_list', type=type) }}?key=" + key;
             })
             $("#search_key").bind("keyup", function (event) {
                 if (event.keyCode == "13") {
                     //回车执行查询
                     var key = $("#search_key").val();
-                    location.href = "{{ url_for('admin.category_list',  type=type) }}?key=" + key;
+                    location.href = "{{ url_for('home.item_list',  type=type) }}?key=" + key;
                 }
             })
         })

@@ -329,50 +329,6 @@ class MsdetailForm(FlaskForm):
         }
     )
 
-
-# 20180913 liuqq 修改密码表单
-class PwdForm(FlaskForm):
-    old_pwd = StringField(
-        label=u'旧密码',
-        validators=[
-            DataRequired(message=u'请输入旧密码')
-        ],
-        description=u'旧密码',
-        render_kw={
-            'class': 'form-control',
-            'placeholder': u'请输入旧密码',
-        }
-    )
-    new_pwd = StringField(
-        label=u'新密码',
-        validators=[
-            DataRequired(message=u'请输入新密码')
-        ],
-        description=u'新密码',
-        render_kw={
-            'class': 'form-control',
-            'placeholder': u'请输入新密码',
-        }
-    )
-    re_pwd = StringField(
-        label=u'确认新密码',
-        validators=[
-            DataRequired(message=u'请再次输入新密码')
-        ],
-        description=u'确认密码',
-        render_kw={
-            'class': 'form-control',
-            'placeholder': u'请再次输入新密码',
-        }
-    )
-
-    submit = SubmitField(
-        label=u'修改',
-        render_kw={
-            'class': 'btn btn-primary'
-        }
-    )
-
 class CategoryForm(FlaskForm):
     name = StringField(
         label=u'分类名称',

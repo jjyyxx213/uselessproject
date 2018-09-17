@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 from . import admin
 from flask import render_template, url_for, redirect, flash, session, request, current_app, abort
-from forms import UserForm, AuthForm, RoleForm, MscardForm, MsdetailForm, MsdetailListForm, PwdForm, CategoryForm
+from forms import UserForm, AuthForm, RoleForm, MscardForm, MsdetailForm, MsdetailListForm, CategoryForm
 from app.models import User, Auth, Role, Oplog, Userlog, Mscard, Msdetail, Item, Customer, Category
 from werkzeug.security import generate_password_hash
 from app import db
@@ -18,38 +18,6 @@ def index():
 @admin.route("/login", methods=["GET", "POST"])
 def login():
     return redirect(url_for('home.login'))
-
-
-# 20180913 liuqq 修改密码
-@admin.route('/user/pwd_edit', methods=['GET', 'POST'])
-def pwd_edit():
-    form = PwdForm()
-    if form.validate_on_submit():
-        # 验证密码
-        user = User.query.filter_by(id=session.get('user_id')).first()
-        if user.verify_password(form.old_pwd.data) != 1:
-            flash(u'旧密码输入错误', 'err')
-            return redirect(url_for('admin.pwd_edit'))
-        if form.new_pwd.data != form.re_pwd.data:
-            flash(u'您两次输入的密码不一致!', 'err')
-            return redirect(url_for('admin.pwd_edit'))
-        if form.new_pwd.data == form.old_pwd.data:
-            flash(u'新密码与旧密码一致！', 'err')
-            return redirect(url_for('admin.pwd_edit'))
-        new_pwd = generate_password_hash(form.new_pwd.data)
-        user.pwd = new_pwd
-        db.session.add(user)
-        # 20180917 jiangyu 增加修改密码日志
-        oplog = Oplog(
-            user_id=session['user_id'],
-            ip=request.remote_addr,
-            reason=u'修改密码:%s' % user.name
-        )
-        db.session.add(oplog)
-        db.session.commit()
-        flash(u'密码修改成功', 'ok')
-        return redirect(url_for('home.login'))
-    return render_template('admin/pwd_edit.html', form=form)
 
 
 @admin.route('/auth/add', methods=['GET', 'POST'])
@@ -671,3 +639,21 @@ def category_edit(type=0, id=None):
         flash(u'分类修改成功', 'ok')
         return redirect(url_for('admin.category_list', type=type))
     return render_template('admin/category_edit.html', form=form, category=category, type=type)
+
+@admin.route('/category/del/<int:type>/<int:id>', methods=['GET', 'POST'])
+def category_del(type=0, id=None):
+    # 商品/服务分类删除
+    if Item.query.filter_by(cate_id=id).first():
+        flash(u'您选择的分类已使用，不能删除', 'err')
+        return redirect(url_for('admin.category_list', type=type))
+    category = Category.query.filter_by(id=id).first_or_404()
+    db.session.delete(category)
+    oplog = Oplog(
+        user_id=session['user_id'],
+        ip=request.remote_addr,
+        reason=u'删除商品/服务分类:%s' % category.name
+    )
+    db.session.add(oplog)
+    db.session.commit()
+    flash(u'分类删除成功', 'ok')
+    return redirect(url_for('admin.auth_list'))
