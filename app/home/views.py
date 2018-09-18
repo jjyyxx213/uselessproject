@@ -177,14 +177,14 @@ def customer_add():
         db.session.add_all(objects)
         db.session.commit()
         flash(u'客户添加成功', 'ok')
-        return redirect(url_for('home.customer_list'))
+        return redirect(url_for('home.customer_add'))
     return render_template('home/customer_add.html', form=form)
 
 
 # 20180918 liuqq 修改客户信息
 @home.route('/customer/cus_edit/<int:id>', methods=['GET', 'POST'])
 def customer_edit(id=None):
-    # 权限修改
+    # 权限客户
     form = CustomerForm()
     form.submit.label.text = u'修改'
     obj_customer = Customer.query.filter_by(id=id).first_or_404()
