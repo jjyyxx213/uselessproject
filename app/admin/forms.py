@@ -3,7 +3,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, FileField, TextAreaField, SelectField, \
     SelectMultipleField, RadioField, FieldList, FormField, HiddenField
 from wtforms.validators import DataRequired, EqualTo, Regexp, Length
-from app.models import User, Auth, Role, Item
+from app.models import User, Auth, Role, Kvp, Category
 
 
 class AuthForm(FlaskForm):
@@ -355,3 +355,119 @@ class CategoryForm(FlaskForm):
             'class': 'btn btn-primary'
         }
     )
+
+class ItemForm(FlaskForm):
+    name = StringField(
+        label=u'名称',
+        validators=[
+            DataRequired(message=u'请输入名称')
+        ],
+        description=u'名称',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入名称',
+        }
+    )
+    # 类别
+    cate_id = SelectField(
+        label=u'类别',
+        coerce=int,
+        # 要区分商品和服务项目类别,选项从客户端初始化
+        validators=[
+            DataRequired(message=u'请选择类别')
+        ],
+        choices=[],
+        render_kw={
+            "class": "form-control select2",
+            "data-placeholder": u"请选择类别",
+        }
+    )
+    # 销售价
+    salesprice = StringField(
+        label=u'销售价',
+        validators=[
+            DataRequired(message=u'请输入优惠价'),
+            Regexp('[\d+\.\d]', message=u'请输入数字'),
+        ],
+        description=u'销售价',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入优惠价',
+        }
+    )
+    # 成本价
+    costprice = StringField(
+        label=u'成本价',
+        validators=[
+            DataRequired(message=u'请输入成本价'),
+            Regexp('[\d+\.\d]', message=u'请输入数字'),
+        ],
+        description=u'成本价',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入成本价',
+        }
+    )
+    # 提成
+    rewardprice = StringField(
+        label=u'提成',
+        validators=[
+            DataRequired(message=u'请输入提成'),
+            Regexp('[\d+\.\d]', message=u'请输入数字'),
+        ],
+        description=u'成本价',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入提成',
+        }
+    )
+    # 规格
+    standard = StringField(
+        label=u'规格',
+        description=u'规格',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入规格',
+        }
+    )
+    # 备注
+    remarks = TextAreaField(
+        label=u'备注',
+        description=u'备注',
+        render_kw={
+            'class': 'form-control',
+            'rows': 10
+        }
+    )
+    submit = SubmitField(
+        label=u'添加',
+        render_kw={
+            'class': 'btn btn-primary'
+        }
+    )
+    # 单位
+    unit = SelectField(
+        label=u'单位',
+        validators=[
+            DataRequired(message=u'请选择单位')
+        ],
+        coerce=int,
+        choices=[],
+        render_kw={
+            "class": "form-control select2",
+            "data-placeholder": u"请选择计量单位",
+        }
+    )
+    # 状态
+    valid = RadioField(
+        label=u'状态',
+        description=u'状态',
+        coerce=int,
+        choices=[(1, u'有效'), (0, u'停用')],
+        default=1,
+    )
+    # 如果需要从数据库取值，一定要重写__init__方法，因为db对象不是全局的
+    def __init__(self, type, *args, **kwargs):
+        super(ItemForm, self).__init__(*args, **kwargs)
+        self.unit.choices = [(v.key, v.value) for v in Kvp.query.filter_by(type='unit').order_by(Kvp.value).all()]
+        self.cate_id.choices = [(v.id, v.name) for v in Category.query.filter_by(type=type).order_by(Category.name).all()]

@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% block css %}
+    <style>
+        .padding-defined {
+            padding-left: 10px;
+            padding-right: 0px;
+        }
+    </style>
+{% endblock %}
+{% block page_content %}
+    <section class="content-header">
+        <h1> 门店管理系统</h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> 设置</a></li>
+                {% if type == 0 %}
+                <li><a href="{{ url_for('admin.item_list', type=0) }}"> 商品列表</a></li>
+                {% else %}
+                <li><a href="{{ url_for('admin.item_list', type=1) }}"> 服务项目列表</a></li>
+                {% endif %}
+            <li class="active">
+                {% if type == 0 %}
+                 修改商品
+                {% else %}
+                 修改服务项目
+                {% endif %}
+            </li>
+        </ol>
+    </section>
+    <section class="content" id="showcontent">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">
+                        {% if type == 0 %}
+                         修改商品
+                        {% else %}
+                         修改服务项目
+                        {% endif %}
+                        </h3>
+                    </div>
+                    <form role="form" method="post">
+                        <!--启动CSRF-->
+                        {{ form.hidden_tag() }}
+                        <div class="box-body">
+                            <div class="row" style="margin-bottom: 5px">
+                                <div class="col-md-3 padding-defined">
+                                    <label style="color: red">*</label>
+                                    <label>
+                                        {% if type == 0 %}
+                                         商品名称
+                                        {% else %}
+                                         服务项目名称
+                                        {% endif %}
+                                    </label>
+                                </div>
+                                <div class="col-md-2 padding-defined">
+                                    {{ form.cate_id.label }}
+                                </div>
+                                <div class="col-md-1 padding-defined">
+                                    {{ form.unit.label }}
+                                </div>
+                                <div class="col-md-2 padding-defined">
+                                    {{ form.standard.label }}
+                                </div>
+                                <div class="col-md-1 padding-defined">
+                                    <label for="input_valid" style="color: red">*</label>
+                                    {{ form.valid.label }}
+                                </div>
+                            </div>
+                            <div class="row" style="margin-bottom: 5px">
+                                <div class="col-md-3 padding-defined">
+                                    {{ form.name }}
+                                    {% for err in form.name.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-2 padding-defined">
+                                    {{ form.cate_id }}
+                                    {% for err in form.cate_id.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-1 padding-defined">
+                                    {{ form.unit }}
+                                    {% for err in form.unit.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-2 padding-defined">
+                                    {{ form.standard }}
+                                    {% for err in form.standard.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-2 padding-defined">
+                                    {% for valid in form.valid %}
+                                    {{ valid }}
+                                    {% if valid.data == 1 %}
+                                        <label for="input_valid">有效</label>
+                                    {% else %}
+                                        <label for="input_valid">失效</label>
+                                    {% endif %}
+                                    {% endfor %}
+                                    {% for err in form.valid.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="row" style="margin-bottom: 5px">
+                                <div class="col-md-3 padding-defined">
+                                    <label style="color: red">*</label>
+                                    {{ form.salesprice.label }}
+                                </div>
+                                <div class="col-md-3 padding-defined">
+                                    <label style="color: red">*</label>
+                                    {{ form.costprice.label }}
+                                </div>
+                                <div class="col-md-3 padding-defined">
+                                    <label style="color: red">*</label>
+                                    {{ form.rewardprice.label }}
+                                </div>
+                            </div>
+                            <div class="row" style="margin-bottom: 5px">
+                                <div class="col-md-3 padding-defined">
+                                    {{ form.salesprice }}
+                                    {% for err in form.salesprice.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-3 padding-defined">
+                                    {{ form.costprice }}
+                                    {% for err in form.costprice.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-3 padding-defined">
+                                    {{ form.rewardprice }}
+                                    {% for err in form.rewardprice.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="row" style="margin-bottom: 5px">
+                                <div class="col-md-9 padding-defined">
+                                    {{ form.remarks.label }}
+                                </div>
+                            </div>
+                                <div class="row" style="margin-bottom: 5px">
+                                <div class="col-md-9 padding-defined">
+                                    {{ form.remarks }}
+                                    {% for err in form.remarks.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box-footer">
+                            {{ form.submit }}
+                            <a href="{{ url_for('admin.item_list', type=type) }}" class="btn btn-default pull-right"
+                               role="button"> 返回</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block js %}
+    <script>
+        $(document).ready(function () {
+            $("#g-option").addClass("active");
+            type = {{ type }};
+            if (type == 0) {//商品
+                $("#g-option-item").addClass("active");
+            }else{// 服务项目
+                $("#g-option-service").addClass("active");
+            }
+            // 下拉框设置
+            $('.select2').select2(
+                {
+                language: "zh-CN",
+                allowClear: true,
+                }
+            )
+            //$('#cate_id').val('').trigger('change');
+            //$('#unit').val('').trigger('change');
+            // 单选框设置
+            $('input[type="checkbox"], input[type="radio"]').iCheck({
+                checkboxClass: 'icheckbox_square-blue',
+                radioClass: 'iradio_square-blue'
+            })
+        })
+    </script>
+{% endblock %}

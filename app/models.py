@@ -3,6 +3,20 @@ from datetime import datetime
 from app import db
 from werkzeug.security import check_password_hash
 
+# 字典
+class Kvp(db.Model):
+    __tablename__ = 'tb_kvp'
+    # 编号
+    type = db.Column(db.String(100), nullable=False)
+    key = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    value = db.Column(db.String(200), nullable=False)
+    # 添加时间
+    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    def __repr__(self):
+        return "<Kvp %r:%r>" % self.key, self.value
+
+
+# 用户
 class User(db.Model):
     __tablename__ = "tb_user"
     # 编号

@@ -72,7 +72,7 @@ def pwd():
 
 @home.route('/item/list/<int:type>', methods=['GET'])
 def item_list(type=0):
-    # 商品/服务列表
+    # 商品/服务列表查询
     key = request.args.get('key', '')
     page = request.args.get('page', 1, type=int)
     # type 0: item; 1: service
