@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
 from . import home
 from flask import render_template, session, redirect, request, url_for, flash, current_app
-from forms import LoginForm, PwdForm
-from app.models import User, Userlog, Oplog, Item, Supplier
+from forms import LoginForm, PwdForm, CustomerForm
+from app.models import User, Userlog, Oplog, Item, Supplier, Customer
 from app import db
 from werkzeug.security import generate_password_hash
 from sqlalchemy import or_
@@ -115,3 +115,111 @@ def supplier_list():
                per_page=current_app.config['POSTS_PER_PAGE'],
                error_out=False)
     return render_template('home/supplier_list.html', type=type, pagination=pagination, key=key)
+
+
+@home.route('/customer/list', methods=['GET'])
+def customer_list():
+    # 客户列表
+    key = request.args.get('key', '')
+    page = request.args.get('page', 1, type=int)
+    pagination = Customer.query
+    # 如果查询了增加查询条件
+    if key:
+        # 姓名/手机/邮箱/车牌号查询
+        pagination = pagination.filter(
+            or_(Customer.name.ilike('%' + key + '%'),
+            Customer.phone.ilike('%' + key + '%'),
+            Customer.email.ilike('%' + key + '%'),
+            Customer.pnumber.ilike('%' + key + '%'))
+        )
+    pagination = pagination.join(User).filter(
+        User.id == Customer.user_id
+    ).order_by(
+        Customer.addtime.desc()
+    ).paginate(page=page,
+               per_page=current_app.config['POSTS_PER_PAGE'],
+               error_out=False)
+    return render_template('home/customer_list.html', pagination=pagination, key=key)
+
+
+# 20180916 liuqq 新增客户
+@home.route('/customer/cus_add', methods=['GET', 'POST'])
+def customer_add():
+    form = CustomerForm()
+    if form.validate_on_submit():
+        if Customer.query.filter_by(pnumber=form.pnumber.data).first():
+            flash(u'您输入的车牌号已存在', 'err')
+            return redirect(url_for('home.customer_add'))
+        if Customer.query.filter_by(phone=form.phone.data).first():
+            flash(u'您输入的手机号已存在', 'err')
+            return redirect(url_for('home.customer_add'))
+
+        province = request.form.get('province')
+
+        obj_customer = Customer(
+            name=form.name.data,
+            name_wechat=form.name_wechat.data,
+            sex=int(form.sex.data),
+            phone=form.phone.data,
+            pnumber=province + form.pnumber.data,
+            vin=form.vin.data,
+            brand=form.brand.data,
+            email=form.email.data,
+            id_card=form.id_card.data,
+            user_id=form.user_id.data
+        )
+        obj_oplog = Oplog(
+            user_id=session['user_id'],
+            ip=request.remote_addr,
+            reason=u'添加客户:%s' % form.name.data
+        )
+        objects = [obj_customer, obj_oplog]
+        db.session.add_all(objects)
+        db.session.commit()
+        flash(u'客户添加成功', 'ok')
+        return redirect(url_for('home.customer_list'))
+    return render_template('home/customer_add.html', form=form)
+
+
+# 20180918 liuqq 修改客户信息
+@home.route('/customer/cus_edit/<int:id>', methods=['GET', 'POST'])
+def customer_edit(id=None):
+    # 权限修改
+    form = CustomerForm()
+    form.submit.label.text = u'修改'
+    obj_customer = Customer.query.filter_by(id=id).first_or_404()
+    if request.method == 'GET':
+        # get时进行赋值。应对SelectField无法模板中赋初值
+        form.sex.data = int(obj_customer.sex)
+    if form.validate_on_submit():
+        if obj_customer.pnumber != form.pnumber.data and Customer.query.filter_by(pnumber=form.pnumber.data).first():
+            flash(u'您输入的车牌号已存在', 'err')
+            return redirect(url_for('home.customer_edit', id=obj_customer.id))
+        if obj_customer.phone != form.phone.data and Customer.query.filter_by(phone=form.phone.data).first():
+            flash(u'您输入的手机号已存在', 'err')
+            return redirect(url_for('home.customer_edit', id=obj_customer.id))
+
+        province = request.form.get('province')
+
+        obj_customer.name = form.name.data,
+        obj_customer.name_wechat = form.name_wechat.data,
+        obj_customer.sex = int(form.sex.data),
+        obj_customer.phone = form.phone.data,
+        obj_customer.pnumber = province + form.pnumber.data,
+        obj_customer.vin = form.vin.data,
+        obj_customer.brand = form.brand.data,
+        obj_customer.email = form.email.data,
+        obj_customer.id_card = form.id_card.data,
+        obj_customer.user_id = form.user_id.data
+
+        db.session.add(obj_customer)
+        obj_oplog = Oplog(
+            user_id=session['user_id'],
+            ip=request.remote_addr,
+            reason=u'修改客户信息:%s' % form.name.data
+        )
+        db.session.add(obj_oplog)
+        db.session.commit()
+        flash(u'客户信息修改成功', 'ok')
+        return redirect(url_for('home.customer_list'))
+    return render_template('home/customer_edit.html', form=form, customer=obj_customer)

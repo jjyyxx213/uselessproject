@@ -17,7 +17,7 @@
                         <h3 class="box-title"> 客户列表</h3>
                         <div class="box-tools">
                             <div class="pull-left border-right">
-                                <a href="#" class="btn btn-primary btn-sm" role="button">
+                                <a href="{{ url_for('home.customer_add') }}" class="btn btn-primary btn-sm" role="button">
                                     添加</a>&nbsp;&nbsp;&nbsp;
                             </div>
                             <div class="input-group input-group-sm" style="width: 280px;">
@@ -55,7 +55,11 @@
                                 <tr>
                                     <td>{{ v.id }}</td>
                                     <td>{{ v.name }}</td>
-                                    <td>{{ v.sex }}</td>
+                                    {% if v.sex == '1' %}
+                                        <td id="{{ v.sex }}">男</td>
+                                    {% else %}
+                                        <td id="{{ v.sex }}">女</td>
+                                    {% endif %}
                                     <td>{{ v.phone }}</td>
                                     <td>{{ v.freq }}</td>
                                     <td>{{ v.summary }}</td>
@@ -67,7 +71,7 @@
                                     <td>{{ v.vip_id }}</td>
                                     <td>{{ v.addtime }}</td>
                                     <td>
-                                        <a href="#" name="btn-unfrozen"
+                                        <a href="{{ url_for('home.customer_edit', id=v.id) }}" name="btn-unfrozen"
                                            class="label label-success">修改</a>
                                         <a href="#" name="btn-frozen"
                                            class="label label-danger">会员卡</a>
@@ -79,7 +83,7 @@
                     </div>
                     <div class="box-footer clearfix">
                         <ul class="pagination pagination-sm no-margin pull-right">
-                            {{ macros.pagination_widget(pagination, 'admin.customer_list', key=key) }}
+                            {{ macros.pagination_widget(pagination, 'home.customer_list', key=key) }}
                         </ul>
                     </div>
                 </div>
@@ -96,13 +100,13 @@
             // 搜索按钮
             $("#do_search").click(function () {
                 var key = $("#search_key").val();
-                location.href = "{{ url_for('admin.customer_list') }}?key=" + key;
+                location.href = "{{ url_for('home.customer_list') }}?key=" + key;
             })
             $("#search_key").bind("keyup", function (event) {
                 if (event.keyCode == "13") {
                     //回车执行查询
                     var key = $("#search_key").val()
-                    location.href = "{{ url_for("admin.customer_list") }}?key=" + key
+                    location.href = "{{ url_for("home.customer_list") }}?key=" + key
                 }
             })
         })
