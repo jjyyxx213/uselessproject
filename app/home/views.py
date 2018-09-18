@@ -2,7 +2,7 @@
 from . import home
 from flask import render_template, session, redirect, request, url_for, flash, current_app
 from forms import LoginForm, PwdForm
-from app.models import User, Userlog, Oplog, Item
+from app.models import User, Userlog, Oplog, Item, Supplier
 from app import db
 from werkzeug.security import generate_password_hash
 from sqlalchemy import or_
@@ -72,14 +72,14 @@ def pwd():
 
 @home.route('/item/list/<int:type>', methods=['GET'])
 def item_list(type=0):
-    # 商品/服务列表
+    # 商品/服务列表查询
     key = request.args.get('key', '')
     page = request.args.get('page', 1, type=int)
     # type 0: item; 1: service
     pagination = Item.query.filter_by(type=type)
     # 如果查询了增加查询条件
     if key:
-        # 名称查询
+        # 名称/规格/备注
         pagination = pagination.filter(
             or_(Item.name.ilike('%' + key + '%'),
                 Item.standard.ilike('%' + key + '%'),
@@ -91,3 +91,27 @@ def item_list(type=0):
                per_page=current_app.config['POSTS_PER_PAGE'],
                error_out=False)
     return render_template('home/item_list.html', type=type, pagination=pagination, key=key)
+
+@home.route('/supplier/list', methods=['GET'])
+def supplier_list():
+    # 供应商列表查询
+    key = request.args.get('key', '')
+    page = request.args.get('page', 1, type=int)
+    pagination = Supplier.query
+    # 条件查询
+    if key:
+        # 名称/联系人/手机/电话/QQ/备注
+        pagination = pagination.filter(
+            or_(Supplier.name.ilike('%' + key + '%'),
+                Supplier.contact.ilike('%' + key + '%'),
+                Supplier.phone.ilike('%' + key + '%'),
+                Supplier.tel.ilike('%' + key + '%'),
+                Supplier.qq.ilike('%' + key + '%'),
+                Supplier.remarks.ilike('%' + key + '%'))
+        )
+    pagination = pagination.order_by(
+        Supplier.addtime.desc()
+    ).paginate(page=page,
+               per_page=current_app.config['POSTS_PER_PAGE'],
+               error_out=False)
+    return render_template('home/supplier_list.html', type=type, pagination=pagination, key=key)

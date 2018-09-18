@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 from . import admin
 from flask import render_template, url_for, redirect, flash, session, request, current_app, abort
-from forms import UserForm, AuthForm, RoleForm, MscardForm, MsdetailForm, MsdetailListForm, CategoryForm
+from forms import UserForm, AuthForm, RoleForm, MscardForm, MsdetailForm, MsdetailListForm, CategoryForm, ItemForm
 from app.models import User, Auth, Role, Oplog, Userlog, Mscard, Msdetail, Item, Customer, Category
 from werkzeug.security import generate_password_hash
 from app import db
@@ -633,13 +633,13 @@ def category_edit(type=0, id=None):
         oplog = Oplog(
             user_id=session['user_id'],
             ip=request.remote_addr,
-            reason=u'修改商品/服务项目:%s' % form.name.data
+            reason=u'修改商品/服务项目分类:%s' % form.name.data
         )
         db.session.add(oplog)
         db.session.commit()
         flash(u'分类修改成功', 'ok')
         return redirect(url_for('admin.category_list', type=type))
-    return render_template('admin/category_edit.html', form=form, category=category, type=type)
+    return render_template('admin/category_edit.html', form=form, type=type)
 
 @admin.route('/category/del/<int:type>/<int:id>', methods=['GET', 'POST'])
 def category_del(type=0, id=None):
@@ -652,9 +652,124 @@ def category_del(type=0, id=None):
     oplog = Oplog(
         user_id=session['user_id'],
         ip=request.remote_addr,
-        reason=u'删除商品/服务分类:%s' % category.name
+        reason=u'删除商品/服务项目分类:%s' % category.name
     )
     db.session.add(oplog)
     db.session.commit()
     flash(u'分类删除成功', 'ok')
     return redirect(url_for('admin.category_list', type=type))
+
+@admin.route('/item/list/<int:type>', methods=['GET'])
+def item_list(type=0):
+    # 商品/服务列表高级权限
+    key = request.args.get('key', '')
+    page = request.args.get('page', 1, type=int)
+    # type 0: item; 1: service
+    pagination = Item.query.filter_by(type=type)
+    # 如果查询了增加查询条件
+    if key:
+        # 名称查询
+        pagination = pagination.filter(
+            or_(Item.name.ilike('%' + key + '%'),
+                Item.standard.ilike('%' + key + '%'),
+                Item.remarks.ilike('%' + key + '%'))
+        )
+    pagination = pagination.order_by(
+        Item.addtime.desc()
+    ).paginate(page=page,
+               per_page=current_app.config['POSTS_PER_PAGE'],
+               error_out=False)
+    return render_template('admin/item_list.html', type=type, pagination=pagination, key=key)
+
+@admin.route('/item/add/<int:type>', methods=['GET', 'POST'])
+def item_add(type=0):
+    # 商品/服务添加
+    form = ItemForm(type=type)
+    if form.validate_on_submit():
+        if Item.query.filter_by(name=form.name.data, type=type).first():
+            flash(u'您输入的名称已存在', 'err')
+            return redirect(url_for('admin.item_add', type=type))
+        item = Item(
+            name=form.name.data,
+            cate_id=form.cate_id.data,
+            type=type,
+            salesprice=float(form.salesprice.data),
+            rewardprice=float(form.rewardprice.data),
+            costprice=float(form.costprice.data),
+            unit=form.unit.data,
+            standard=form.standard.data,
+            valid=form.valid.data,
+            remarks=form.remarks.data,
+        )
+        oplog = Oplog(
+            user_id=session['user_id'],
+            ip=request.remote_addr,
+            reason=u'添加商品/服务项目:%s' % form.name.data
+        )
+        objects = [item, oplog]
+        db.session.add_all(objects)
+        db.session.commit()
+        flash(u'添加成功', 'ok')
+        return redirect(url_for('admin.item_add', type=type))
+    return render_template('admin/item_add.html', form=form, type=type)
+
+@admin.route('/item/edit/<int:type>/<int:id>', methods=['GET', 'POST'])
+def item_edit(type=0, id=None):
+    # 商品/服务修改
+    form = ItemForm(type=type)
+    form.submit.label.text = u'修改'
+    item = Item.query.filter_by(id=id).first_or_404()
+    if request.method == 'GET':
+        form.name.data = item.name
+        form.cate_id.data = item.cate_id
+        form.salesprice.data = item.salesprice
+        form.rewardprice.data = item.rewardprice
+        form.costprice.data = item.costprice
+        form.unit.data = item.unit
+        form.standard.data = item.standard
+        form.valid.data = item.valid
+        form.remarks.data = item.remarks
+    if form.validate_on_submit():
+        if item.name != form.name.data and Item.query.filter_by(name=form.name.data, type=type).first():
+            flash(u'您输入的分类已存在', 'err')
+            return redirect(url_for('admin.item_edit', type=type, id=item.id))
+        item.name = form.name.data
+        item.cate_id = form.cate_id.data
+        item.salesprice = form.salesprice.data
+        item.rewardprice = form.rewardprice.data
+        item.costprice = form.costprice.data
+        item.unit = form.unit.data
+        item.standard = form.standard.data
+        item.valid = form.valid.data
+        item.remarks = form.remarks.data
+        db.session.add(item)
+        oplog = Oplog(
+            user_id=session['user_id'],
+            ip=request.remote_addr,
+            reason=u'修改商品/服务项目:%s' % form.name.data
+        )
+        db.session.add(oplog)
+        db.session.commit()
+        flash(u'分类修改成功', 'ok')
+        return redirect(url_for('admin.item_list', type=type))
+    return render_template('admin/item_edit.html', form=form, type=type)
+
+@admin.route('/item/block', methods=['POST'])
+def item_block():
+    # 商品/服务项目停用
+    if request.method == 'POST':
+        params = request.form.to_dict()
+        id = int(params['itemid']) if (params.has_key('itemid')) else None
+        type = int(params['type']) if (params.has_key('type')) else 0
+    item = Item.query.filter_by(id=id, type=type).first_or_404()
+    item.valid = 0
+    db.session.add(item)
+    oplog = Oplog(
+        user_id=session['user_id'],
+        ip=request.remote_addr,
+        reason=u'停用商品/服务项目:%s' % item.name
+    )
+    db.session.add(oplog)
+    db.session.commit()
+    data = {"valid": 0}
+    return dumps(data)

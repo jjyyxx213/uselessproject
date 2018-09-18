@@ -3,6 +3,20 @@ from datetime import datetime
 from app import db
 from werkzeug.security import check_password_hash
 
+# 字典
+class Kvp(db.Model):
+    __tablename__ = 'tb_kvp'
+    # 编号
+    type = db.Column(db.String(100), nullable=False)
+    key = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    value = db.Column(db.String(200), nullable=False)
+    # 添加时间
+    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    def __repr__(self):
+        return "<Kvp %r:%r>" % self.key, self.value
+
+
+# 用户
 class User(db.Model):
     __tablename__ = "tb_user"
     # 编号
@@ -260,7 +274,7 @@ class Category(db.Model):
     # 编号
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     # 名称
-    name = db.Column(db.String(200), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
     # 类别(0:商品;1:服务项目)
     type = db.Column(db.SmallInteger, default=0)
     # 备注
@@ -280,7 +294,7 @@ class Item(db.Model):
     # 编号
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     # 名称
-    name = db.Column(db.String(200), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
     # 类别id
     cate_id = db.Column(db.Integer, db.ForeignKey('tb_category.id'))
     # 类别(类别字段冗余，避免关联查询 type 0: item; 1: service)
@@ -316,6 +330,32 @@ class Item(db.Model):
             del dict['_sa_instance_state']
         return dict
 
+# 供应商表
+class Supplier(db.Model):
+    __tablename__ = 'tb_supplier'
+    # 编号
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    # 名称
+    name = db.Column(db.String(100), nullable=False)
+    # 联络人
+    contact = db.Column(db.String(50), nullable=False)
+    # 手机
+    phone = db.Column(db.String(11), nullable=False)
+    # 联系电话
+    tel = db.Column(db.String(11), nullable=False)
+    # QQ
+    qq = db.Column(db.String(11), nullable=False)
+    # 地址
+    address = db.Column(db.String(200))
+    # 状态 (1有效；0无效)
+    valid = db.Column(db.SmallInteger, default=1)
+    # 备注
+    remarks = db.Column(db.Text)
+    # 添加时间
+    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
+    def __repr__(self):
+        return '<Supplier %r>' % self.name
 
 # 销售订单主表 todo
 class Order(db.Model):
@@ -323,7 +363,7 @@ class Order(db.Model):
     # 编号
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     # 名称
-    name = db.Column(db.String(200), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
 
     # 客户消费流水外键
     billings = db.relationship('Billing', backref='order')

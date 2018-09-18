@@ -58,7 +58,7 @@
                                     {% if v.valid == 1 %}
                                         <td id="{{ v.id }}">有效</td>
                                     {% else %}
-                                        <td id="{{ v.id }}">失效</td>
+                                        <td id="{{ v.id }}" style="color: red">失效</td>
                                     {% endif %}
                                     <td>{{ v.addtime }}</td>
                                     <td><a href="{{ url_for('admin.msdetail_edit', id=v.id) }}"
@@ -148,6 +148,7 @@
                         if (result.valid == 0) {
                             // 停用成功
                             $("#" + msid).text("失效")
+                            $("#" + msid).css("color","red");
                         }
                     },
                     error: function (jqXHR, textStatus, errorThrown) {

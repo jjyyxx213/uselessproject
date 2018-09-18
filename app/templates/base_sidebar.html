@@ -58,13 +58,13 @@
         </a>
         <ul class="treeview-menu">
             <li id="g-is-item">
-                <a href="{{ url_for('home.item_list', type=0) }}"><i class="fa fa-circle-o"></i> 商品列表</a>
+                <a href="{{ url_for('home.item_list', type=0) }}"><i class="fa fa-circle-o"></i> 商品查询</a>
             </li>
             <li id="g-is-service">
-                <a href="{{ url_for('home.item_list', type=1) }}"><i class="fa fa-circle-o"></i> 服务项目列表</a>
+                <a href="{{ url_for('home.item_list', type=1) }}"><i class="fa fa-circle-o"></i> 服务项目查询</a>
             </li>
             <li id="g-is-supplier">
-                <a href="#"><i class="fa fa-circle-o"></i> 供应商列表</a>
+                <a href="{{ url_for('home.supplier_list') }}"><i class="fa fa-circle-o"></i> 供应商查询</a>
             </li>
         </ul>
     </li>
@@ -79,6 +79,12 @@
                 <a href="{{ url_for('admin.mscard_list') }}">
                     <i class="fa fa-circle-o"></i> 会员卡
                 </a>
+            </li>
+            <li id="g-option-item">
+                <a href="{{ url_for('admin.item_list', type=0) }}"><i class="fa fa-circle-o"></i> 商品</a>
+            </li>
+            <li id="g-option-service">
+                <a href="{{ url_for('admin.item_list', type=1) }}"><i class="fa fa-circle-o"></i> 服务项目</a>
             </li>
             <li id="g-option-category-item">
                 <a href="{{ url_for('admin.category_list', type=0) }}">

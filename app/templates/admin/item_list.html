@@ -4,12 +4,12 @@
     <section class="content-header">
         <h1> 门店管理系统</h1>
         <ol class="breadcrumb">
-            <li><a href="#"><i class="fa fa-dashboard"></i> 商品服务管理</a></li>
+            <li><a href="#"><i class="fa fa-dashboard"></i> 设置</a></li>
             <li class="active">
                 {% if type == 0 %}
-                商品查询
+                商品列表
                 {% else %}
-                服务项目查询
+                服务项目列表
                 {% endif %}
             </li>
         </ol>
@@ -27,6 +27,11 @@
                         {% endif %}
                         </h3>
                         <div class="box-tools">
+                            <div class="pull-left border-right">
+                                <a href="{{ url_for('admin.item_add', type=type) }}" class="btn btn-primary btn-sm" role="button">
+                                    添加
+                                </a>&nbsp;&nbsp;&nbsp;
+                            </div>
                             <div class="input-group input-group-sm" style="width: 250px;">
                                 <input type="text" name="table_search" class="form-control pull-right"
                                        placeholder="请输入关键字...  (名称/规格/备注)" id="search_key" value="{{ key }}">
@@ -46,24 +51,35 @@
                                 <th> 编号</th>
                                 <th> 名称</th>
                                 <th> 销售价</th>
+                                <th> 成本价</th>
+                                <th> 提成</th>
                                 <th> 单位</th>
                                 <th> 规格</th>
                                 <th> 状态</th>
                                 <th> 备注</th>
+                                <th> 操作事项</th>
                             </tr>
                             {% for v in pagination.items %}
                                 <tr>
                                     <td>{{ v.id }}</td>
                                     <td>{{ v.name }}</td>
                                     <td>{{ v.salesprice }}元</td>
+                                    <td>{{ v.costprice }}元</td>
+                                    <td>{{ v.rewardprice }}元</td>
                                     <td>{{ v.unit }}</td>
                                     <td>{{ v.standard }}</td>
                                     {% if v.valid == 1 %}
-                                    <td> 有效</td>
+                                    <td id="{{ v.id }}"> 有效</td>
                                     {% else %}
-                                    <td style="color: red"> 无效</td>
+                                    <td id="{{ v.id }}" style="color: red"> 无效</td>
                                     {% endif %}
                                     <td>{{ v.remarks }}</td>
+                                    <td>
+                                        <a href="{{ url_for('admin.item_edit', type=type, id=v.id) }}"
+                                           class="label label-success">修改</a>
+                                        <a name="btn-block"
+                                           class="label label-danger">停用</a>
+                                    </td>
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -71,7 +87,7 @@
                     </div>
                     <div class="box-footer clearfix">
                         <ul class="pagination pagination-sm no-margin pull-right">
-                            {{ macros.pagination_widget(pagination, 'home.item_list', type=type, key=key) }}
+                            {{ macros.pagination_widget(pagination, 'admin.item_list', type=type, key=key) }}
                         </ul>
                     </div>
                 </div>
@@ -83,24 +99,56 @@
 {% block js %}
     <script>
         $(document).ready(function () {
-            $("#g-is").addClass("active");
+            $("#g-option").addClass("active");
             type = {{ type }};
             if (type == 0) {//商品
-                $("#g-is-item").addClass("active");
+                $("#g-option-item").addClass("active");
             }else{//服务项目
-                $("#g-is-service").addClass("active");
+                $("#g-option-service").addClass("active");
             }
             // 搜索按钮
             $("#do_search").click(function () {
                 var key = $("#search_key").val();
-                location.href = "{{ url_for('home.item_list', type=type) }}?key=" + key;
+                location.href = "{{ url_for('admin.item_list', type=type) }}?key=" + key;
             })
             $("#search_key").bind("keyup", function (event) {
                 if (event.keyCode == "13") {
                     //回车执行查询
                     var key = $("#search_key").val();
-                    location.href = "{{ url_for('home.item_list',  type=type) }}?key=" + key;
+                    location.href = "{{ url_for('admin.item_list',  type=type) }}?key=" + key;
                 }
+            })
+            // 商品停用(使用post)
+            $("a[name='btn-block']").on("click", function () {
+                //获取父元素第一个兄弟的text，就是id
+                var itemid = $(this).parent().siblings().first().text()
+                var type = {{ type }}
+                //var x = $(this).parent().siblings().eq(0).text()//eq(0)也可以
+                //获取状态，如果是失效直接返回不再提交
+                if ($("#" + itemid).text() == "失效") {
+                    return
+                }
+                $.ajax({
+                    url: "{{ url_for('admin.item_block') }}",
+                    type: "post",
+                    data: {
+                        'itemid': itemid,
+                        'type': type,
+                    },
+                    dataType: "json",
+                    success: function (result) {
+                        if (result.valid == 0) {
+                            // 停用成功
+                            $("#" + itemid).text("失效")
+                            $("#" + itemid).css("color","red");
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        if (errorThrown != 'abort') {
+                            alert('失败了，您操作的太频繁');
+                        }
+                    }
+                })
             })
         })
     </script>
