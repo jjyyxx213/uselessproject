@@ -185,7 +185,12 @@
         $(document).ready(function () {
             $("#g-customer").addClass("active")
             $("#g-customer-list").addClass("active")
-            $('.select2').select2()
+            $('.select2').select2(
+                {
+                language: "zh-CN",
+                allowClear: true,
+                }
+            )
             //只要遇到radio,checkbox 直接转换为icheck
             $('input[type="checkbox"], input[type="radio"]').iCheck({
                 checkboxClass: 'icheckbox_square-blue',
