@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% block page_content %}
+    <section class="content-header">
+        <h1> 门店管理系统</h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> 客户管理</a></li>
+            <li class="active"> 修改客户信息</li>
+        </ol>
+    </section>
+    <section class="content" id="showcontent">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"> 修改客户信息</h3>
+                    </div>
+                    <form role="form" method="post">
+                        <!--启动CSRF-->
+                        {{ form.hidden_tag() }}
+                        <div class="box-body">
+                            <div class="col-xs-6 col-sm-6">
+                                <div class="form-group">
+                                    <label for="input_name" style="color: red">*</label>
+                                    {{ form.name.label }}
+                                    {{ form.name(value=customer.name) }}
+                                    {% for err in form.name.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="input_name" style="color: red">*</label>
+                                    {{ form.pnumber.label }}
+                                    <div class="input-group">
+                                        <div class="input-group-btn">
+                                            <select name="province" id="my_jc_select1" class="btn btn-default dropdown-toggle" style="height: 34px;background-color: white">
+                                                <option selected="selected" value="鄂">{{ customer.pnumber[0:1] }}</option>
+                                                <option value="浙">浙</option>
+                                                <option value="京">京</option>
+                                                <option value="沪">沪</option>
+                                                <option value="川">川</option>
+                                                <option value="津">津</option>
+                                                <option value="渝">渝</option>
+                                                <option value="粤">粤</option>
+                                                <option value="赣">赣</option>
+                                                <option value="冀">冀</option>
+                                                <option value="蒙">蒙</option>
+                                                <option value="鲁">鲁</option>
+                                                <option value="苏">苏</option>
+                                                <option value="辽">辽</option>
+                                                <option value="吉">吉</option>
+                                                <option value="皖">皖</option>
+                                                <option value="湘">湘</option>
+                                                <option value="黑">黑</option>
+                                                <option value="琼">琼</option>
+                                                <option value="贵">贵</option>
+                                                <option value="桂">桂</option>
+                                                <option value="云">云</option>
+                                                <option value="藏">藏</option>
+                                                <option value="陕">陕</option>
+                                                <option value="甘">甘</option>
+                                                <option value="宁">宁</option>
+                                                <option value="青">青</option>
+                                                <option value="豫">豫</option>
+                                                <option value="闽">闽</option>
+                                                <option value="新">新</option>
+                                                <option value="晋">晋</option>
+                                            </select>
+                                        </div>
+                                        {{ form.pnumber(value=customer.pnumber[1:]) }}
+                                    </div>
+                                    {% for err in form.pnumber.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
+
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="input_name" style="color: red">*</label>
+                                    {{ form.brand.label }}
+                                    {{ form.brand(value=customer.brand) }}
+                                    {% for err in form.brand.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="form-group">
+                                    {{ form.name_wechat.label }}
+                                    {{ form.name_wechat(value=customer.name_wechat) }}
+                                    {% for err in form.name_wechat.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="form-group">
+                                    {{ form.vin.label }}
+                                    {{ form.vin(value=customer.vin) }}
+                                    {% for err in form.vin.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="col-xs-6 col-sm-6">
+
+                                <div class="form-group">
+                                    <label for="input_name" style="color: red">*</label>
+                                    {{ form.user_id.label }}
+                                    {{ form.user_id(value=customer.user_id) }}
+                                    {% for err in form.user_id.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="form-group">
+                                    <label for="input_name" style="color: red">*</label>
+                                    {{ form.phone.label }}
+                                    {{ form.phone(value=customer.phone) }}
+                                    {% for err in form.phone.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="form-group">
+                                    <label for="input_name" style="color: red">*</label>
+                                    {{ form.email.label }}
+                                    {{ form.email(value=customer.email) }}
+                                    {% for err in form.email.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="form-group">
+                                    {{ form.id_card.label }}
+                                    {{ form.id_card(value=customer.id_card) }}
+                                    {% for err in form.id_card.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="form-group">
+                                    <div>
+                                        <label for="input_name" style="color: red">*</label>
+                                        <label for="input_name">性别 </label>
+                                    </div>
+                                    {% for sex in form.sex %}
+                                        {{ sex }}
+                                        {% if sex.data == 1 %}
+                                            <label for="input_sex">男</label>
+                                        {% else %}
+                                            <label for="input_sex">女</label>
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% for err in form.sex.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box-footer">
+                            {{ form.submit }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block js %}
+    <script>
+        $(document).ready(function () {
+            $("#g-customer").addClass("active")
+            $("#g-customer-list").addClass("active")
+            $('.select2').select2()
+            //只要遇到radio,checkbox 直接转换为icheck
+            $('input[type="checkbox"], input[type="radio"]').iCheck({
+                checkboxClass: 'icheckbox_square-blue',
+                radioClass: 'iradio_square-blue'
+            })
+        })
+    </script>
+{% endblock %}

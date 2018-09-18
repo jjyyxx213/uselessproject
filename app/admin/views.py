@@ -544,31 +544,6 @@ def item_get():
     return dumps(res)
 
 
-@admin.route('/customer/list', methods=['GET'])
-def customer_list():
-    # 客户列表
-    key = request.args.get('key', '')
-    page = request.args.get('page', 1, type=int)
-    pagination = Customer.query
-    # 如果查询了增加查询条件
-    if key:
-        # 姓名/手机/邮箱/车牌号查询
-        pagination = pagination.filter(
-            or_(Customer.name.ilike('%' + key + '%'),
-            Customer.phone.ilike('%' + key + '%'),
-            Customer.email.ilike('%' + key + '%'),
-            Customer.pnumber.ilike('%' + key + '%'))
-        )
-    pagination = pagination.join(User).filter(
-        User.id == Customer.user_id
-    ).order_by(
-        Customer.addtime.desc()
-    ).paginate(page=page,
-               per_page=current_app.config['POSTS_PER_PAGE'],
-               error_out=False)
-    return render_template('admin/customer_list.html', pagination=pagination, key=key)
-
-
 @admin.route('/category/list/<int:type>', methods=['GET'])
 def category_list(type=0):
     # 商品/服务分类列表
