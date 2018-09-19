@@ -226,15 +226,15 @@ class MscardForm(FlaskForm):
         }
     )
     scorerule = StringField(
-        label=u'积分生成规则',
+        label=u'积分规则',
         validators=[
-            DataRequired(message=u'请输入积分生成规则'),
+            DataRequired(message=u'请输入积分规则'),
             Regexp('[\d+\.\d]', message=u'请输入数字'),
         ],
-        description=u'积分生成规则',
+        description=u'积分规则',
         render_kw={
             'class': 'form-control',
-            'placeholder': u'请输入积分生成规则',
+            'placeholder': u'请输入积分规则',
         }
     )
     scorelimit = StringField(

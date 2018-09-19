@@ -126,7 +126,7 @@ class Mscard(db.Model):
     payment = db.Column(db.Float, default=0)
     # 有效期区间 数字类型(月)
     interval = db.Column(db.Float, default=1)
-    # 积分生成规则(积分=消费金额*积分生成规则)
+    # 积分规则(积分=消费金额*积分规则)
     scorerule = db.Column(db.Float, default=1)
     # 积分限制提醒(到达额度后，提醒会员升级)
     scorelimit = db.Column(db.Float, default=9999)
@@ -232,7 +232,7 @@ class Vip(db.Model):
     balance = db.Column(db.Float, default=0)
     # 积分余额
     score = db.Column(db.Float, default=0)
-    # 积分生成规则(积分=消费金额*积分生成规则)
+    # 积分规则(积分=消费金额*积分规则)
     scorerule = db.Column(db.Float, default=1)
     # 积分限制提醒(到达额度后，提醒会员升级)
     scorelimit = db.Column(db.Float, default=9999)
