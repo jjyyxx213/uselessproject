@@ -686,9 +686,10 @@ def item_add(type=0):
     # 商品/服务添加
     form = ItemForm(type=type)
     if form.validate_on_submit():
-        if Item.query.filter_by(name=form.name.data, type=type).first():
-            flash(u'您输入的名称已存在', 'err')
-            return redirect(url_for('admin.item_add', type=type))
+        # 不对名称做校验了
+        #if Item.query.filter_by(name=form.name.data, type=type).first():
+        #    flash(u'您输入的名称已存在', 'err')
+        #    return redirect(url_for('admin.item_add', type=type))
         item = Item(
             name=form.name.data,
             cate_id=form.cate_id.data,
@@ -730,9 +731,10 @@ def item_edit(type=0, id=None):
         form.valid.data = item.valid
         form.remarks.data = item.remarks
     if form.validate_on_submit():
-        if item.name != form.name.data and Item.query.filter_by(name=form.name.data, type=type).first():
-            flash(u'您输入的分类已存在', 'err')
-            return redirect(url_for('admin.item_edit', type=type, id=item.id))
+        # 不对名称做校验了
+        #if item.name != form.name.data and Item.query.filter_by(name=form.name.data, type=type).first():
+        #    flash(u'您输入的商品已存在', 'err')
+        #    return redirect(url_for('admin.item_edit', type=type, id=item.id))
         item.name = form.name.data
         item.cate_id = form.cate_id.data
         item.salesprice = form.salesprice.data
