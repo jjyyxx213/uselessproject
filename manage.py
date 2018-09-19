@@ -26,7 +26,7 @@ def dbinit():
     objects.append(Auth(id=1, name=u'超级管理员权限', url='/'))
     objects.append(Role(id=1, name=u'超级管理员', auths='1'))
     objects.append(User(id=1, name='admin', pwd=password, phone='18888888888', uuid=uuid.uuid4().hex))
-    # key-value pairs init
+    # unit
     objects.append(Kvp(type='unit', value=u'套'))
     objects.append(Kvp(type='unit', value=u'张'))
     objects.append(Kvp(type='unit', value=u'辆'))
@@ -50,6 +50,11 @@ def dbinit():
     objects.append(Kvp(type='unit', value=u'袋'))
     objects.append(Kvp(type='unit', value=u'件'))
     objects.append(Kvp(type='unit', value=u'箱'))
+    # store
+    objects.append(Kvp(type='store', value=u'库房1'))
+    objects.append(Kvp(type='store', value=u'库房2'))
+    objects.append(Kvp(type='store', value=u'库房3'))
+
     db.session.add_all(objects)
     db.session.commit()
 

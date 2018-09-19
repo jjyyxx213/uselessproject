@@ -226,15 +226,15 @@ class MscardForm(FlaskForm):
         }
     )
     scorerule = StringField(
-        label=u'积分生成规则',
+        label=u'积分规则',
         validators=[
-            DataRequired(message=u'请输入积分生成规则'),
+            DataRequired(message=u'请输入积分规则'),
             Regexp('[\d+\.\d]', message=u'请输入数字'),
         ],
-        description=u'积分生成规则',
+        description=u'积分规则',
         render_kw={
             'class': 'form-control',
-            'placeholder': u'请输入积分生成规则',
+            'placeholder': u'请输入积分规则',
         }
     )
     scorelimit = StringField(
@@ -471,3 +471,80 @@ class ItemForm(FlaskForm):
         super(ItemForm, self).__init__(*args, **kwargs)
         self.unit.choices = [(v.key, v.value) for v in Kvp.query.filter_by(type='unit').order_by(Kvp.value).all()]
         self.cate_id.choices = [(v.id, v.name) for v in Category.query.filter_by(type=type).order_by(Category.name).all()]
+
+class SupplierForm(FlaskForm):
+    name = StringField(
+        label=u'分类名称',
+        validators=[
+            DataRequired(message=u'请输入分类名称')
+        ],
+        description=u'分类名称',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入分类名称',
+        }
+    )
+    contact = StringField(
+        label=u'联络人',
+        validators=[
+            DataRequired(message=u'请输入联络人')
+        ],
+        description=u'联络人',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入联络人',
+        }
+    )
+    phone = StringField(
+        label=u'手机号',
+        description=u'手机号',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入手机号',
+        }
+    )
+    tel = StringField(
+        label=u'联系电话',
+        description=u'联系电话',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入联系电话',
+        }
+    )
+    qq = StringField(
+        label=u'QQ',
+        description=u'QQ',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入QQ',
+        }
+    )
+    address = StringField(
+        label=u'地址',
+        description=u'地址',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入地址',
+        }
+    )
+    valid = RadioField(
+        label=u'状态',
+        description=u'状态',
+        coerce=int,
+        choices=[(1, u'有效'), (0, u'停用')],
+        default=1,
+    )
+    remarks = TextAreaField(
+        label=u'备注',
+        description=u'备注',
+        render_kw={
+            'class': 'form-control',
+            'rows': 10
+        }
+    )
+    submit = SubmitField(
+        label=u'添加',
+        render_kw={
+            'class': 'btn btn-primary'
+        }
+    )

@@ -56,7 +56,7 @@
                                 <label for="input_scorerule" style="color: red">*</label>
                                 {{ form.scorerule.label }}
                                 <label for="input_scorerule" class="badge bg-green" data-toggle="tooltip"
-                                       title="积分=消费金额*积分生成规则">?</label>
+                                       title="积分=消费金额*积分规则">?</label>
                                 {{ form.scorerule }}
                                 {% for err in form.scorerule.errors %}
                                     <div class="col-md-12">
@@ -108,12 +108,12 @@
 {% block js %}
     <script>
         $(document).ready(function () {
-            $("#g-option").addClass("active")
-            $("#g-option-mscard").addClass("active")
+            $("#g-option").addClass("active");
+            $("#g-option-mscard").addClass("active");
             // 弹出提示初始化
             $(function () {
                 $('[data-toggle="tooltip"]').tooltip()
-            })
+            });
             //只要遇到radio,checkbox 直接转换为icheck
             $('input[type="checkbox"], input[type="radio"]').iCheck({
                 checkboxClass: 'icheckbox_square-blue',

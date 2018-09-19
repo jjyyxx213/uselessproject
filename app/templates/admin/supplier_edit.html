@@ -12,17 +12,9 @@
         <h1> 门店管理系统</h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> 设置</a></li>
-                {% if type == 0 %}
-                <li><a href="{{ url_for('admin.item_list', type=0) }}"> 商品列表</a></li>
-                {% else %}
-                <li><a href="{{ url_for('admin.item_list', type=1) }}"> 服务项目列表</a></li>
-                {% endif %}
+                <li><a href="{{ url_for('admin.supplier_list') }}"> 供应商列表</a></li>
             <li class="active">
-                {% if type == 0 %}
-                 修改商品
-                {% else %}
-                 修改服务项目
-                {% endif %}
+                修改供应商
             </li>
         </ol>
     </section>
@@ -32,11 +24,7 @@
                 <div class="box box-primary">
                     <div class="box-header with-border">
                         <h3 class="box-title">
-                        {% if type == 0 %}
-                         修改商品
-                        {% else %}
-                         修改服务项目
-                        {% endif %}
+                        修改供应商
                         </h3>
                     </div>
                     <form role="form" method="post">
@@ -46,24 +34,14 @@
                             <div class="row" style="margin-bottom: 5px">
                                 <div class="col-md-3 padding-defined">
                                     <label style="color: red">*</label>
-                                    <label>
-                                        {% if type == 0 %}
-                                         商品名称
-                                        {% else %}
-                                         服务项目名称
-                                        {% endif %}
-                                    <label class="badge bg-green" data-toggle="tooltip"
-                                       title="所有已发生的单据名称会同步变更">?</label>
-                                    </label>
+                                    {{ form.name.label }}
                                 </div>
-                                <div class="col-md-2 padding-defined">
-                                    {{ form.cate_id.label }}
+                                <div class="col-md-3 padding-defined">
+                                    <label style="color: red">*</label>
+                                    {{ form.contact.label }}
                                 </div>
-                                <div class="col-md-1 padding-defined">
-                                    {{ form.unit.label }}
-                                </div>
-                                <div class="col-md-2 padding-defined">
-                                    {{ form.standard.label }}
+                                <div class="col-md-3 padding-defined">
+                                    {{ form.phone.label }}
                                 </div>
                                 <div class="col-md-1 padding-defined">
                                     <label for="input_valid" style="color: red">*</label>
@@ -79,25 +57,17 @@
                                     </div>
                                     {% endfor %}
                                 </div>
-                                <div class="col-md-2 padding-defined">
-                                    {{ form.cate_id }}
-                                    {% for err in form.cate_id.errors %}
+                                <div class="col-md-3 padding-defined">
+                                    {{ form.contact }}
+                                    {% for err in form.contact.errors %}
                                     <div class="col-md-12">
                                         <p style="color: red">{{ err }}</p>
                                     </div>
                                     {% endfor %}
                                 </div>
-                                <div class="col-md-1 padding-defined">
-                                    {{ form.unit }}
-                                    {% for err in form.unit.errors %}
-                                    <div class="col-md-12">
-                                        <p style="color: red">{{ err }}</p>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                                <div class="col-md-2 padding-defined">
-                                    {{ form.standard }}
-                                    {% for err in form.standard.errors %}
+                                <div class="col-md-3 padding-defined">
+                                    {{ form.phone }}
+                                    {% for err in form.phone.errors %}
                                     <div class="col-md-12">
                                         <p style="color: red">{{ err }}</p>
                                     </div>
@@ -121,38 +91,35 @@
                             </div>
                             <div class="row" style="margin-bottom: 5px">
                                 <div class="col-md-3 padding-defined">
-                                    <label style="color: red">*</label>
-                                    {{ form.salesprice.label }}
+                                    {{ form.tel.label }}
                                 </div>
                                 <div class="col-md-3 padding-defined">
-                                    <label style="color: red">*</label>
-                                    {{ form.costprice.label }}
+                                    {{ form.qq.label }}
                                 </div>
-                                <div class="col-md-3 padding-defined">
-                                    <label style="color: red">*</label>
-                                    {{ form.rewardprice.label }}
+                                <div class="col-md-4 padding-defined">
+                                    {{ form.address.label }}
                                 </div>
                             </div>
                             <div class="row" style="margin-bottom: 5px">
                                 <div class="col-md-3 padding-defined">
-                                    {{ form.salesprice }}
-                                    {% for err in form.salesprice.errors %}
+                                    {{ form.tel }}
+                                    {% for err in form.tel.errors %}
                                     <div class="col-md-12">
                                         <p style="color: red">{{ err }}</p>
                                     </div>
                                     {% endfor %}
                                 </div>
                                 <div class="col-md-3 padding-defined">
-                                    {{ form.costprice }}
-                                    {% for err in form.costprice.errors %}
+                                    {{ form.qq }}
+                                    {% for err in form.qq.errors %}
                                     <div class="col-md-12">
                                         <p style="color: red">{{ err }}</p>
                                     </div>
                                     {% endfor %}
                                 </div>
-                                <div class="col-md-3 padding-defined">
-                                    {{ form.rewardprice }}
-                                    {% for err in form.rewardprice.errors %}
+                                <div class="col-md-4 padding-defined">
+                                    {{ form.address }}
+                                    {% for err in form.address.errors %}
                                     <div class="col-md-12">
                                         <p style="color: red">{{ err }}</p>
                                     </div>
@@ -160,12 +127,12 @@
                                 </div>
                             </div>
                             <div class="row" style="margin-bottom: 5px">
-                                <div class="col-md-9 padding-defined">
+                                <div class="col-md-10 padding-defined">
                                     {{ form.remarks.label }}
                                 </div>
                             </div>
                                 <div class="row" style="margin-bottom: 5px">
-                                <div class="col-md-9 padding-defined">
+                                <div class="col-md-10 padding-defined">
                                     {{ form.remarks }}
                                     {% for err in form.remarks.errors %}
                                     <div class="col-md-12">
@@ -177,7 +144,7 @@
                         </div>
                         <div class="box-footer">
                             {{ form.submit }}
-                            <a href="{{ url_for('admin.item_list', type=type) }}" class="btn btn-default pull-right"
+                            <a href="{{ url_for('admin.supplier_list') }}" class="btn btn-default pull-right"
                                role="button"> 返回</a>
                         </div>
                     </form>
@@ -191,16 +158,7 @@
     <script>
         $(document).ready(function () {
             $("#g-option").addClass("active");
-            type = {{ type }};
-            if (type == 0) {//商品
-                $("#g-option-item").addClass("active");
-            }else{// 服务项目
-                $("#g-option-service").addClass("active");
-            }
-            // 弹出提示初始化
-            $(function () {
-                $('[data-toggle="tooltip"]').tooltip()
-            });
+            $("#g-option-supplier").addClass("active");
             // 下拉框设置
             $('.select2').select2(
                 {
@@ -208,8 +166,6 @@
                 allowClear: true,
                 }
             )
-            //$('#cate_id').val('').trigger('change');
-            //$('#unit').val('').trigger('change');
             // 单选框设置
             $('input[type="checkbox"], input[type="radio"]').iCheck({
                 checkboxClass: 'icheckbox_square-blue',
