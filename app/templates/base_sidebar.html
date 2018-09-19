@@ -59,7 +59,7 @@
         </ul>
     </li>
     <li class="treeview" id="g-option">
-        <a href="#"><i class="fa fa-cog"></i> <span> 设置</span>
+        <a href="#"><i class="fa fa-cog"></i> <span> 基础设置</span>
             <span class="pull-right-container">
                             <i class="fa fa-angle-left pull-right"></i>
                         </span>
@@ -75,6 +75,9 @@
             </li>
             <li id="g-option-service">
                 <a href="{{ url_for('admin.item_list', type=1) }}"><i class="fa fa-circle-o"></i> 服务项目</a>
+            </li>
+            <li id="g-option-supplier">
+                <a href="{{ url_for('admin.supplier_list') }}"><i class="fa fa-circle-o"></i> 供应商</a>
             </li>
             <li id="g-option-category-item">
                 <a href="{{ url_for('admin.category_list', type=0) }}">

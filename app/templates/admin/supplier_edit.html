@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% block css %}
+    <style>
+        .padding-defined {
+            padding-left: 10px;
+            padding-right: 0px;
+        }
+    </style>
+{% endblock %}
+{% block page_content %}
+    <section class="content-header">
+        <h1> 门店管理系统</h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> 设置</a></li>
+                <li><a href="{{ url_for('admin.supplier_list') }}"> 供应商列表</a></li>
+            <li class="active">
+                修改供应商
+            </li>
+        </ol>
+    </section>
+    <section class="content" id="showcontent">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">
+                        修改供应商
+                        </h3>
+                    </div>
+                    <form role="form" method="post">
+                        <!--启动CSRF-->
+                        {{ form.hidden_tag() }}
+                        <div class="box-body">
+                            <div class="row" style="margin-bottom: 5px">
+                                <div class="col-md-3 padding-defined">
+                                    <label style="color: red">*</label>
+                                    {{ form.name.label }}
+                                </div>
+                                <div class="col-md-3 padding-defined">
+                                    <label style="color: red">*</label>
+                                    {{ form.contact.label }}
+                                </div>
+                                <div class="col-md-3 padding-defined">
+                                    {{ form.phone.label }}
+                                </div>
+                                <div class="col-md-1 padding-defined">
+                                    <label for="input_valid" style="color: red">*</label>
+                                    {{ form.valid.label }}
+                                </div>
+                            </div>
+                            <div class="row" style="margin-bottom: 5px">
+                                <div class="col-md-3 padding-defined">
+                                    {{ form.name }}
+                                    {% for err in form.name.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-3 padding-defined">
+                                    {{ form.contact }}
+                                    {% for err in form.contact.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-3 padding-defined">
+                                    {{ form.phone }}
+                                    {% for err in form.phone.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-2 padding-defined">
+                                    {% for valid in form.valid %}
+                                    {{ valid }}
+                                    {% if valid.data == 1 %}
+                                        <label for="input_valid">有效</label>
+                                    {% else %}
+                                        <label for="input_valid">失效</label>
+                                    {% endif %}
+                                    {% endfor %}
+                                    {% for err in form.valid.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="row" style="margin-bottom: 5px">
+                                <div class="col-md-3 padding-defined">
+                                    {{ form.tel.label }}
+                                </div>
+                                <div class="col-md-3 padding-defined">
+                                    {{ form.qq.label }}
+                                </div>
+                                <div class="col-md-4 padding-defined">
+                                    {{ form.address.label }}
+                                </div>
+                            </div>
+                            <div class="row" style="margin-bottom: 5px">
+                                <div class="col-md-3 padding-defined">
+                                    {{ form.tel }}
+                                    {% for err in form.tel.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-3 padding-defined">
+                                    {{ form.qq }}
+                                    {% for err in form.qq.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-4 padding-defined">
+                                    {{ form.address }}
+                                    {% for err in form.address.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="row" style="margin-bottom: 5px">
+                                <div class="col-md-10 padding-defined">
+                                    {{ form.remarks.label }}
+                                </div>
+                            </div>
+                                <div class="row" style="margin-bottom: 5px">
+                                <div class="col-md-10 padding-defined">
+                                    {{ form.remarks }}
+                                    {% for err in form.remarks.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box-footer">
+                            {{ form.submit }}
+                            <a href="{{ url_for('admin.supplier_list') }}" class="btn btn-default pull-right"
+                               role="button"> 返回</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block js %}
+    <script>
+        $(document).ready(function () {
+            $("#g-option").addClass("active");
+            $("#g-option-supplier").addClass("active");
+            // 下拉框设置
+            $('.select2').select2(
+                {
+                language: "zh-CN",
+                allowClear: true,
+                }
+            )
+            // 单选框设置
+            $('input[type="checkbox"], input[type="radio"]').iCheck({
+                checkboxClass: 'icheckbox_square-blue',
+                radioClass: 'iradio_square-blue'
+            })
+        })
+    </script>
+{% endblock %}

@@ -340,11 +340,11 @@ class Supplier(db.Model):
     # 联络人
     contact = db.Column(db.String(50), nullable=False)
     # 手机
-    phone = db.Column(db.String(11), nullable=False)
+    phone = db.Column(db.String(11))
     # 联系电话
-    tel = db.Column(db.String(11), nullable=False)
+    tel = db.Column(db.String(11))
     # QQ
-    qq = db.Column(db.String(11), nullable=False)
+    qq = db.Column(db.String(11))
     # 地址
     address = db.Column(db.String(200))
     # 状态 (1有效；0无效)

@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
 from . import admin
 from flask import render_template, url_for, redirect, flash, session, request, current_app, abort
-from forms import UserForm, AuthForm, RoleForm, MscardForm, MsdetailForm, MsdetailListForm, CategoryForm, ItemForm
-from app.models import User, Auth, Role, Oplog, Userlog, Mscard, Msdetail, Item, Customer, Category
+from forms import UserForm, AuthForm, RoleForm, MscardForm, MsdetailForm, MsdetailListForm, CategoryForm, ItemForm, SupplierForm
+from app.models import User, Auth, Role, Oplog, Userlog, Mscard, Msdetail, Item, Customer, Category, Supplier
 from werkzeug.security import generate_password_hash
 from app import db
 import os, stat, uuid
@@ -750,7 +750,7 @@ def item_edit(type=0, id=None):
         )
         db.session.add(oplog)
         db.session.commit()
-        flash(u'分类修改成功', 'ok')
+        flash(u'修改成功', 'ok')
         return redirect(url_for('admin.item_list', type=type))
     return render_template('admin/item_edit.html', form=form, type=type)
 
@@ -768,6 +768,118 @@ def item_block():
         user_id=session['user_id'],
         ip=request.remote_addr,
         reason=u'停用商品/服务项目:%s' % item.name
+    )
+    db.session.add(oplog)
+    db.session.commit()
+    data = {"valid": 0}
+    return dumps(data)
+
+@admin.route('/supplier/list', methods=['GET'])
+def supplier_list():
+    # 供应商列表
+    key = request.args.get('key', '')
+    page = request.args.get('page', 1, type=int)
+    pagination = Supplier.query
+    # 条件查询
+    if key:
+        # 名称/联系人/手机/电话/QQ/备注
+        pagination = pagination.filter(
+            or_(Supplier.name.ilike('%' + key + '%'),
+                Supplier.contact.ilike('%' + key + '%'),
+                Supplier.phone.ilike('%' + key + '%'),
+                Supplier.tel.ilike('%' + key + '%'),
+                Supplier.qq.ilike('%' + key + '%'),
+                Supplier.remarks.ilike('%' + key + '%'))
+        )
+    pagination = pagination.order_by(
+        Supplier.addtime.desc()
+    ).paginate(page=page,
+               per_page=current_app.config['POSTS_PER_PAGE'],
+               error_out=False)
+    return render_template('admin/supplier_list.html', type=type, pagination=pagination, key=key)
+
+@admin.route('/supplier/add', methods=['GET', 'POST'])
+def supplier_add():
+    # 供应商添加
+    form = SupplierForm()
+    if form.validate_on_submit():
+        if Supplier.query.filter_by(name=form.name.data).first():
+            flash(u'您输入的名称已存在', 'err')
+            return redirect(url_for('admin.supplier_add'))
+        supplier = Supplier(
+            name=form.name.data,
+            contact=form.contact.data,
+            phone=form.phone.data,
+            tel=form.tel.data,
+            qq=form.qq.data,
+            address=form.address.data,
+            valid=form.valid.data,
+            remarks=form.remarks.data,
+        )
+        oplog = Oplog(
+            user_id=session['user_id'],
+            ip=request.remote_addr,
+            reason=u'添加供应商:%s' % form.name.data
+        )
+        objects = [supplier, oplog]
+        db.session.add_all(objects)
+        db.session.commit()
+        flash(u'添加成功', 'ok')
+        return redirect(url_for('admin.supplier_add'))
+    return render_template('admin/supplier_add.html', form=form)
+
+@admin.route('/supplier/edit/<int:id>', methods=['GET', 'POST'])
+def supplier_edit(id=None):
+    # 供应商修改
+    form = SupplierForm()
+    form.submit.label.text = u'修改'
+    supplier = Supplier.query.filter_by(id=id).first_or_404()
+    if request.method == 'GET':
+        form.name.data = supplier.name
+        form.contact.data = supplier.contact
+        form.phone.data = supplier.phone
+        form.tel.data = supplier.tel
+        form.qq.data = supplier.qq
+        form.address.data = supplier.address
+        form.valid.data = supplier.valid
+        form.remarks.data = supplier.remarks
+    if form.validate_on_submit():
+        if supplier.name != form.name.data and Supplier.query.filter_by(name=form.name.data).first():
+            flash(u'您输入的供应商已存在', 'err')
+            return redirect(url_for('admin.supplier_edit', id=supplier.id))
+        supplier.name = form.name.data
+        supplier.contact = form.contact.data
+        supplier.phone = form.phone.data
+        supplier.tel = form.tel.data
+        supplier.qq = form.qq.data
+        supplier.address = form.address.data
+        supplier.valid = form.valid.data
+        supplier.remarks = form.remarks.data
+        db.session.add(supplier)
+        oplog = Oplog(
+            user_id=session['user_id'],
+            ip=request.remote_addr,
+            reason=u'修改供应商:%s' % form.name.data
+        )
+        db.session.add(oplog)
+        db.session.commit()
+        flash(u'供应商修改成功', 'ok')
+        return redirect(url_for('admin.supplier_list'))
+    return render_template('admin/supplier_edit.html', form=form)
+
+@admin.route('/supplier/block', methods=['POST'])
+def supplier_block():
+    # 供应商停用
+    if request.method == 'POST':
+        params = request.form.to_dict()
+        id = int(params['supid']) if (params.has_key('supid')) else None
+    supplier = Supplier.query.filter_by(id=id).first_or_404()
+    supplier.valid = 0
+    db.session.add(supplier)
+    oplog = Oplog(
+        user_id=session['user_id'],
+        ip=request.remote_addr,
+        reason=u'停用供应商:%s' % supplier.name
     )
     db.session.add(oplog)
     db.session.commit()
