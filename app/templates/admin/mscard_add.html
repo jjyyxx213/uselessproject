@@ -108,12 +108,12 @@
 {% block js %}
     <script>
         $(document).ready(function () {
-            $("#g-option").addClass("active")
-            $("#g-option-mscard").addClass("active")
+            $("#g-option").addClass("active");
+            $("#g-option-mscard").addClass("active");
             // 弹出提示初始化
             $(function () {
                 $('[data-toggle="tooltip"]').tooltip()
-            })
+            });
             //只要遇到radio,checkbox 直接转换为icheck
             $('input[type="checkbox"], input[type="radio"]').iCheck({
                 checkboxClass: 'icheckbox_square-blue',

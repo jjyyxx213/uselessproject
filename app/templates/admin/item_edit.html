@@ -52,6 +52,8 @@
                                         {% else %}
                                          服务项目名称
                                         {% endif %}
+                                    <label class="badge bg-green" data-toggle="tooltip"
+                                       title="所有已发生的单据名称会同步变更">?</label>
                                     </label>
                                 </div>
                                 <div class="col-md-2 padding-defined">
@@ -195,6 +197,10 @@
             }else{// 服务项目
                 $("#g-option-service").addClass("active");
             }
+            // 弹出提示初始化
+            $(function () {
+                $('[data-toggle="tooltip"]').tooltip()
+            });
             // 下拉框设置
             $('.select2').select2(
                 {
