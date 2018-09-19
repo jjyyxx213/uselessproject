@@ -374,6 +374,9 @@ class Supplier(db.Model):
     # 添加时间
     addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
+    # 采购订单外键
+    porders = db.relationship('Porder', backref='supplier')
+
     def __repr__(self):
         return '<Supplier %r>' % self.name
 
@@ -408,6 +411,8 @@ class Porder(db.Model):
     type = db.Column(db.SmallInteger, default=0)
     # 操作员ID
     user_id = db.Column(db.Integer, db.ForeignKey('tb_user.id'))
+    # 供应商id
+    supplier_id = db.Column(db.Integer, db.ForeignKey('tb_supplier.id'))
     # 应收应付金额（主体为店主+为收款/-为付款）
     amount = db.Column(db.Float, default=0)
     # 优惠后应收应付金额(主体为店主+为收款/-为付款)
