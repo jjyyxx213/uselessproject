@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% import 'ui/admin_page.html' as macros %}
-
 {% block page_content %}
     <section class="content-header">
         <h1> 门店管理系统</h1>
@@ -41,7 +40,7 @@
                         </div>
                     </div>
                     <div class="box-body table-responsive no-padding">
-                        <table class="table table-hover">
+                        <table id="ex1" class="table table-hover">
                             <tbody>
                             <tr>
                                 <th> 编号</th>
@@ -98,6 +97,10 @@
                     var key = $("#search_key").val()
                     location.href = "{{ url_for("home.stock_list") }}?key=" + key
                 }
+            })
+            $('#ex1').DataTable({
+                    'ordering': true,
+                    'autoWidth': false
             })
         })
     </script>

@@ -372,7 +372,6 @@ class ItemForm(FlaskForm):
     cate_id = SelectField(
         label=u'类别',
         coerce=int,
-        # 要区分商品和服务项目类别,选项从客户端初始化
         validators=[
             DataRequired(message=u'请选择类别')
         ],

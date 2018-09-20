@@ -417,9 +417,11 @@ class Porder(db.Model):
     amount = db.Column(db.Float, default=0)
     # 优惠后应收应付金额(主体为店主+为收款/-为付款)
     discount = db.Column(db.Float, default=0)
+    # 实际收付金额(主体为店主+为收款/-为付款)
+    payment = db.Column(db.Float, default=0)
     # 欠款(主体为店主+为收款/-为付款)
     debt = db.Column(db.Float, default=0)
-    # 单据状态 0:编制 1:暂存 2:生效
+    # 单据状态 0:暂存 1:生效
     status = db.Column(db.SmallInteger, default=0)
     # 备注
     remarks = db.Column(db.String(200))

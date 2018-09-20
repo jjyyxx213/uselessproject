@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 from . import home
 from flask import render_template, session, redirect, request, url_for, flash, current_app
-from forms import LoginForm, PwdForm, CustomerForm
+from forms import LoginForm, PwdForm, CustomerForm, StockBuyForm
 from app.models import User, Userlog, Oplog, Item, Supplier, Customer, Stock, Kvp
 from app import db
 from werkzeug.security import generate_password_hash
@@ -246,3 +246,9 @@ def stock_list():
                per_page=current_app.config['POSTS_PER_PAGE'],
                error_out=False)
     return render_template('home/stock_list.html', pagination=pagination, key=key)
+
+@home.route('/stock/buy/<int:id>', methods=['GET', 'POST'])
+def stock_buy(id=None):
+    # 采购单
+    form = StockBuyForm()
+    return render_template('home/stock_buy.html', form=form)
