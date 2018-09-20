@@ -2,10 +2,10 @@
 from . import home
 from flask import render_template, session, redirect, request, url_for, flash, current_app
 from forms import LoginForm, PwdForm, CustomerForm
-from app.models import User, Userlog, Oplog, Item, Supplier, Customer
+from app.models import User, Userlog, Oplog, Item, Supplier, Customer, Stock, Kvp
 from app import db
 from werkzeug.security import generate_password_hash
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 
 
 @home.route('/', methods=['GET'])
@@ -184,7 +184,7 @@ def customer_add():
 # 20180918 liuqq 修改客户信息
 @home.route('/customer/cus_edit/<int:id>', methods=['GET', 'POST'])
 def customer_edit(id=None):
-    # 权限客户
+    # 修改客户
     form = CustomerForm()
     form.submit.label.text = u'修改'
     obj_customer = Customer.query.filter_by(id=id).first_or_404()
@@ -223,3 +223,26 @@ def customer_edit(id=None):
         flash(u'客户信息修改成功', 'ok')
         return redirect(url_for('home.customer_list'))
     return render_template('home/customer_edit.html', form=form, customer=obj_customer)
+
+
+@home.route('/stock/list', methods=['GET'])
+def stock_list():
+    # 库存列表
+    key = request.args.get('key', '')
+    page = request.args.get('page', 1, type=int)
+    pagination = db.session.query(Stock, Item, Kvp).filter(
+        and_(Item.id == Stock.item_id, Kvp.type == 'store', Kvp.key == Stock.store_id)
+    )
+    # 条件查询
+    if key:
+        # 名称/联系人/手机/电话/QQ/备注
+        pagination = pagination.filter(
+            or_(Kvp.value.ilike('%' + key + '%'),
+                Item.name.ilike('%' + key + '%'))
+        )
+    pagination = pagination.order_by(
+        Stock.addtime.desc()
+    ).paginate(page=page,
+               per_page=current_app.config['POSTS_PER_PAGE'],
+               error_out=False)
+    return render_template('home/stock_list.html', pagination=pagination, key=key)
