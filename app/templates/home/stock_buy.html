@@ -29,24 +29,22 @@
 
                         <div class="row">
                             <div class="input-group col-md-3 pull-left margin-defined">
-                                    <span class="input-group-btn">
-                                            <button class="btn btn-default" type="button"> 供应商</button>
-                                        </span>
-                                <select class="form-control select2"
-                                        id="supplier_id"
-                                        name="supplier_id"
-                                        data-placeholder="请选择供应商">
-                                </select>
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" type="button"> 供应商</button>
+                                </span>
+                                {{ form.supplier_id }}
                             </div>
                             <div class="input-group col-md-3 pull-left margin-defined">
-                                    <span class="input-group-btn">
-                                            <button class="btn btn-default" type="button"> 采购员</button>
-                                        </span>
-                                <select class="form-control select2"
-                                        id="supplier_id"
-                                        name="supplier_id"
-                                        data-placeholder="请选择采购员">
-                                </select>
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" type="button"> 采购员</button>
+                                </span>
+                                {{ form.user_id }}
+                            </div>
+                            <div class="col-md-4 input-group padding-defined pull-left margin-defined">
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" type="button"> 备注</button>
+                                </span>
+                                {{ form.remarks }}
                             </div>
                         </div>
                     </div>
@@ -154,7 +152,27 @@
                                 </div>
                             {% endfor %}
                             <div class="row" style="margin-bottom: 0px">
-                                <div class="col-md-1 col-md-offset-9 padding-defined">
+                                <div class="col-md-7 padding-defined pull-left">
+                                    <div class="input-group">
+                                        <span class="input-group-btn">
+                                                <button class="btn btn-default" type="button"> 应付金额</button>
+                                        </span>
+                                        {{ form.amount }}
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="button"> 优惠后金额</button>
+                                        </span>
+                                        {{ form.discount }}
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="button"> 本次付款</button>
+                                        </span>
+                                        {{ form.payment }}
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="button"> 本次欠款</button>
+                                        </span>
+                                        {{ form.debt }}
+                                    </div>
+                                </div>
+                                <div class="col-md-1 col-md-offset-2 padding-defined">
                                     <div class="form-group">
                                         <input id="total_costprice"
                                                name="total_costprice" class="form-control"
@@ -163,46 +181,85 @@
                                 </div>
                             </div>
                             <div class="row" style="margin-bottom: 0px">
-                                <div class="col-md-7 input-group padding-defined pull-left margin-defined">
-                                    <span class="input-group-btn">
-                                            <button class="btn btn-default" type="button"> 应收金额</button>
-                                    </span>
-                                    <input id="amount" name="amount" class="form-control"
-                                           placeholder="应收金额" type="text" value="1000" readonly>
-                                    <span class="input-group-btn">
-                                            <button class="btn btn-default" type="button"> 优惠后金额</button>
-                                    </span>
-                                    <input id="discount" name="discount" class="form-control"
-                                           placeholder="优惠后金额" type="text" value="1000">
-                                    <span class="input-group-btn">
-                                            <button class="btn btn-default" type="button"> 本次付款</button>
-                                    </span>
-                                    <input id="payment" name="payment" class="form-control"
-                                           placeholder="本次付款" type="text" value="1000">
-                                    <span class="input-group-btn">
-                                            <button class="btn btn-default" type="button"> 本次欠款</button>
-                                    </span>
-                                    <input id="debt" name="debt" class="form-control"
-                                           placeholder="本次欠款" type="text" value="1000" readonly>
-                                </div>
-                                <div class="col-md-3 input-group padding-defined pull-left margin-defined">
-                                <span class="input-group-btn">
-                                            <button class="btn btn-default" type="button"> 备注</button>
-                                    </span>
-                                    <input id="remarks" name="remarks" class="form-control"
-                                           placeholder="备注" type="text" value="为什么欠款？">
-                                </div>
+
+
                             </div>
                             <div class="box-footer">
                                 {{ form.submit }}
-
-
                                 <a class="btn btn-warning" name="temp_submit">暂存</a>
                                 <a href="{{ url_for('home.stock_list') }}" class="btn btn-default pull-right"
                                    role="button"> 返回</a>
                             </div>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 测试代码!-->
+        <div class="row" style="margin-bottom: 0px">
+            <div class="col-md-4 padding-defined">
+                <div class="input-group padding-defined">
+                    <input class="form-control" name="remarks" placeholder="请选择商品" type="text" value="">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="button" name="item_id-0"> ...</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="itemModal" tabindex="-1" role="dialog" aria-labelledby="itemModalLabel">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                        <h4 class="modal-title" id="itemModalLabel"> 商品选择</h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-hover">
+                            <tbody>
+                            <tr>
+                                <th> 编号</th>
+                                <th> 名称</th>
+                                <th> 销售价</th>
+                                <th> 单位</th>
+                                <th> 规格</th>
+                                <th> 状态</th>
+                                <th> 备注</th>
+                            </tr>
+
+                                <tr>
+                                    <td>2</td>
+                                    <td>拉开就</td>
+                                    <td>111.0元</td>
+                                    <td>8</td>
+                                    <td>1</td>
+
+                                    <td> 有效</td>
+
+                                    <td>sdfdf</td>
+                                </tr>
+
+                                <tr>
+                                    <td>1</td>
+                                    <td>假几把</td>
+                                    <td>100.0元</td>
+                                    <td>15</td>
+                                    <td>25</td>
+
+                                    <td> 有效</td>
+
+                                    <td></td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary pull-left"> 选择</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal"> 关闭</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -214,6 +271,21 @@
         $(document).ready(function () {
             $("#g-stock").addClass("active")
             $("#g-stock-buy").addClass("active")
+            // 下拉框设置
+            $('.select2').select2(
+                {
+                    language: "zh-CN",
+                    allowClear: true,
+                }
+            )
+            // 供应商
+            $('#supplier_id').val('').trigger('change');
+            // 采购员
+            $('#user_id').val('').trigger('change');
+            $("button[name='item_id-0']").on('click', function () {
+                $('#itemModal').modal();
+            })
+
         })
     </script>
 {% endblock %}

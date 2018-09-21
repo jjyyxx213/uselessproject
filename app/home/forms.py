@@ -3,7 +3,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, FileField, TextAreaField, SelectField, \
     SelectMultipleField, RadioField, FieldList, FormField, HiddenField
 from wtforms.validators import DataRequired, Regexp, Length
-from app.models import User, Kvp
+from app.models import User, Kvp, Supplier
 
 
 class LoginForm(FlaskForm):
@@ -300,16 +300,92 @@ class StockBuyForm(FlaskForm):
     inputrows = FieldList(
         FormField(StockBuyListForm), min_entries=1
     )
-    # 供应商 todo
+    # 供应商
+    supplier_id = SelectField(
+        label=u'供应商',
+        coerce=int,
+        choices=[],
+        render_kw={
+            "class": "form-control select2",
+            "data-placeholder": u"请选择供应商",
+        }
+    )
     # 操作员
+    user_id = SelectField(
+        label=u'操作员',
+        coerce=int,
+        choices=[],
+        render_kw={
+            "class": "form-control select2",
+            "data-placeholder": u"请选择员工",
+        }
+    )
     # 应付金额
-    # 优惠后应付金额
+    amount = StringField(
+        label=u'应付金额',
+        description=u'应付金额',
+        render_kw={
+            'class': 'form-control',
+            #'placeholder': u'请输入应付金额',
+            'readonly' : 'true'
+        }
+    )
+    # 优惠后金额
+    discount = StringField(
+        label=u'优惠后金额',
+        validators=[
+            DataRequired(message=u'请输入优惠后金额'),
+            Regexp('[\d+\.\d]', message=u'请输入数字'),
+        ],
+        description=u'优惠后金额',
+        render_kw={
+            'class': 'form-control',
+            #'placeholder': u'请输入优惠后金额',
+        }
+    )
     # 实际付款金额
+    payment = StringField(
+        label=u'本次付款',
+        validators=[
+            DataRequired(message=u'请输入本次付款金额'),
+            Regexp('[\d+\.\d]', message=u'请输入数字'),
+        ],
+        description=u'本次付款',
+        render_kw={
+            'class': 'form-control',
+            #'placeholder': u'请输入本次付款金额',
+        }
+    )
     # 欠款
+    debt = StringField(
+        label=u'本次欠款',
+        description=u'本次欠款',
+        render_kw={
+            'class': 'form-control',
+            #'placeholder': u'请输入本次欠款金额',
+            'readonly': 'true',
+        }
+    )
     # 备注
+    remarks = StringField(
+        label=u'备注',
+        description=u'备注',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入备注',
+        }
+    )
+    # 保存
     submit = SubmitField(
         label=u'结算',
         render_kw={
             'class': 'btn btn-primary',
         }
     )
+    # 如果需要从数据库取值，一定要重写__init__方法，因为db对象不是全局的
+    def __init__(self, *args, **kwargs):
+        super(StockBuyForm, self).__init__(*args, **kwargs)
+        self.supplier_id.choices = [(v.id, v.name) for v in
+                                    Supplier.query.filter(Supplier.valid==1).order_by(Supplier.name).all()]
+        self.user_id.choices = [(v.id, v.name) for v in
+                                    User.query.filter(User.frozen == 0).order_by(User.name).all()]
