@@ -55,7 +55,7 @@
                                     </label>
                                 </div>
                                 <div class="col-md-2 padding-defined">
-                                    {{ form.cate_id.label }}
+                                    {{ form.cate.label }}
                                 </div>
                                 <div class="col-md-1 padding-defined">
                                     {{ form.unit.label }}
@@ -78,8 +78,8 @@
                                     {% endfor %}
                                 </div>
                                 <div class="col-md-2 padding-defined">
-                                    {{ form.cate_id }}
-                                    {% for err in form.cate_id.errors %}
+                                    {{ form.cate }}
+                                    {% for err in form.cate.errors %}
                                     <div class="col-md-12">
                                         <p style="color: red">{{ err }}</p>
                                     </div>

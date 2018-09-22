@@ -235,12 +235,13 @@ class StockBuyListForm(FlaskForm):
         }
     )
     # 仓库
-    store_id = SelectField(
+    store = SelectField(
         label=u'仓库',
         validators=[
             DataRequired(message=u'请选择仓库'),
         ],
         description=u'仓库',
+        coerce=unicode,
         choices=[],
         render_kw={
             "class": "form-control select2",
@@ -294,7 +295,7 @@ class StockBuyListForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         kwargs['csrf_enabled'] = False
         FlaskForm.__init__(self, *args, **kwargs)
-        self.store_id.choices = [(v.key, v.value) for v in Kvp.query.filter_by(type='store').order_by(Kvp.value).all()]
+        self.store.choices = [(v.value, v.value) for v in Kvp.query.filter_by(type='store').order_by(Kvp.value).all()]
 
 class StockBuyForm(FlaskForm):
     inputrows = FieldList(

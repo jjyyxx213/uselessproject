@@ -54,13 +54,13 @@
                             </tr>
                             {% for v in pagination.items %}
                                 <tr>
-                                    <td>{{ v.Stock.id }}</td>
-                                    <td>{{ v.Kvp.value }}</td>
-                                    <td>{{ v.Item.name }}</td>
-                                    <td>{{ v.Item.salesprice }}</td>
-                                    <td>{{ v.Item.unit }}</td>
-                                    <td>{{ v.Item.standard }}</td>
-                                    <td>{{ v.Stock.qty }}</td>
+                                    <td>{{ v.id }}</td>
+                                    <td>{{ v.store }}</td>
+                                    <td>{{ v.item.name }}</td>
+                                    <td>{{ v.item.salesprice }}</td>
+                                    <td>{{ v.item.unit }}</td>
+                                    <td>{{ v.item.standard }}</td>
+                                    <td>{{ v.qty }}</td>
                                     <td>
                                         <a href="#" name="btn-unfrozen"
                                            class="label label-success">采购单</a>

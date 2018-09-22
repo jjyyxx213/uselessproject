@@ -66,9 +66,9 @@
                                     <td>{{ v.remarks }}</td>
                                     <td>{{ v.addtime }}</td>
                                     <td>
-                                        <a href="{{ url_for('admin.category_edit', type=type, id=v.id) }}"
+                                        <a href="{{ url_for('admin.category_edit', type=type, id=v.id, name=v.name) }}"
                                            class="label label-success">修改</a>
-                                        <a href="{{ url_for('admin.category_del', type=type, id=v.id) }}"
+                                        <a href="{{ url_for('admin.category_del', type=type, id=v.id, name=v.name) }}"
                                            class="label label-danger">删除</a>
                                     </td>
                                 </tr>

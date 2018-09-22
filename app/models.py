@@ -284,8 +284,6 @@ class Category(db.Model):
     remarks = db.Column(db.Text)
     # 添加时间
     addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    # 服务/项目主表外键
-    items = db.relationship('Item', backref='category')
 
     def __repr__(self):
         return '<Category %r>' % self.name
@@ -297,8 +295,8 @@ class Item(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     # 名称
     name = db.Column(db.String(100), nullable=False)
-    # 类别id
-    cate_id = db.Column(db.Integer, db.ForeignKey('tb_category.id'))
+    # 商品/服务类别(冗余避免关联查询)
+    cate = db.Column(db.String(100))
     # 类别(类别字段冗余，避免关联查询 type 0: item; 1: service)
     type = db.Column(db.SmallInteger, default=0)
     # 销售价
@@ -385,8 +383,8 @@ class Stock(db.Model):
     __tablename__ = 'tb_stock'
     # 编号
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    # 仓库编号
-    store_id = db.Column(db.Integer, nullable=False)
+    # 仓库名称
+    store = db.Column(db.Integer, nullable=False)
     # 商品ID
     item_id = db.Column(db.Integer, db.ForeignKey('tb_item.id'), nullable=True)
     # 采购单价（最后一次采购价）

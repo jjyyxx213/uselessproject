@@ -200,9 +200,9 @@
         <div class="row" style="margin-bottom: 0px">
             <div class="col-md-4 padding-defined">
                 <div class="input-group padding-defined">
-                    <input class="form-control" name="remarks" placeholder="请选择商品" type="text" value="">
+                    <input class="form-control" name="remarks" placeholder="请选择商品" id="item-id-0" type="text" value="">
                     <span class="input-group-btn">
-                        <button class="btn btn-default" type="button" name="item_id-0"> ...</button>
+                        <button class="btn btn-default" type="button" name="item_choice"> ...</button>
                     </span>
                 </div>
             </div>
@@ -218,41 +218,27 @@
                     </div>
                     <div class="modal-body">
                         <table class="table table-hover">
-                            <tbody>
-                            <tr>
-                                <th> 编号</th>
-                                <th> 名称</th>
-                                <th> 销售价</th>
-                                <th> 单位</th>
-                                <th> 规格</th>
-                                <th> 状态</th>
-                                <th> 备注</th>
-                            </tr>
-
+                            <thead>
                                 <tr>
-                                    <td>2</td>
-                                    <td>拉开就</td>
-                                    <td>111.0元</td>
-                                    <td>8</td>
-                                    <td>1</td>
-
-                                    <td> 有效</td>
-
-                                    <td>sdfdf</td>
+                                    <th> 编号</th>
+                                    <th> 商品名称</th>
+                                    <th> 库存数量</th>
+                                    <th> 规格</th>
+                                    <th> 成本价</th>
+                                    <th> 销售价</th>
+                                    <th> 商品类型</th>
                                 </tr>
-
+                            </thead>
+                            <tbody id="items">
                                 <tr>
-                                    <td>1</td>
-                                    <td>假几把</td>
-                                    <td>100.0元</td>
-                                    <td>15</td>
-                                    <td>25</td>
-
-                                    <td> 有效</td>
-
-                                    <td></td>
+                                    <td> 编号</td>
+                                    <td> 商品名称</td>
+                                    <td> 库存数量</td>
+                                    <td> 规格</td>
+                                    <td> 成本价</td>
+                                    <td> 销售价</td>
+                                    <td> 商品类型</td>
                                 </tr>
-
                             </tbody>
                         </table>
                     </div>
@@ -282,10 +268,61 @@
             $('#supplier_id').val('').trigger('change');
             // 采购员
             $('#user_id').val('').trigger('change');
-            $("button[name='item_id-0']").on('click', function () {
-                $('#itemModal').modal();
-            })
 
+            //测试
+            $("button[name='item_choice']").on('click', function () {
+                $('#itemModal').modal();
+            });
+
+            var pendingRequests = {};
+            $.ajaxPrefilter(function (options, originalOptions, jqXHR) {
+                var key = options.url;
+                console.log(key);
+                console.log(!pendingRequests[key]);
+                if (!pendingRequests[key]) {
+                    pendingRequests[key] = jqXHR
+                } else {
+                    //jqXHR.abort();    //放弃后触发的提交
+                    pendingRequests[key].abort()   // 放弃先触发的提交
+                }
+
+                var complete = options.complete;
+                options.complete = function (jqXHR, textStatus) {
+                    pendingRequests[key] = null;
+                    if (jQuery.isFunction(complete)) {
+                        complete.apply(this, arguments)
+                    }
+                }
+            });
+            {#Prefilters是一个预过滤器，在每个请求之前被发送和$.ajax()处理它们前处理。#}
+            {#options 是请求的选项#}
+            {#originalOptions 值作为提供给Ajax方法未经修改的选项，因此，没有ajaxSettings设置中的默认值#}
+            {#jqXHR 是请求的jqXHR对象#}
+            {#核心思想是维护一个队列，发送请求时，将请求加入队列，请求响应后，从队列中清除，这就保证了在任一时刻只能有一个同样的请求发送.#}
+            {#调用abort后jquery会执行error的方法，抛出abort的异常信息。#}
+            {#按钮每次点击都会向后端发送请求，下面的demo实现了多次点击按钮之后，只保证最后一次点击的请求能够成功。#}
+            $("button[name='item_choice']").on("click", function () {
+                //获取父元素第一个兄弟的id
+                //var msid = $(this).parent().siblings().first().attr("id");
+                //var x = $(this).parent().siblings().eq(0).text()//eq(0)也可以
+
+                $.ajax({
+                    url: "{{ url_for('home.modal_item') }}",
+                    type: "GET",
+                    data: "page=" + msid,
+                    dataType: "json",
+                    success: function (result) {
+                        $('#items').append(
+                            //something
+                        )
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        if (errorThrown != 'abort') {
+                            alert('失败了，您操作的太频繁');
+                        }
+                    }
+                })
+            })
         })
     </script>
 {% endblock %}

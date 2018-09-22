@@ -2,7 +2,7 @@
 from . import home
 from flask import render_template, session, redirect, request, url_for, flash, current_app
 from forms import LoginForm, PwdForm, CustomerForm, StockBuyForm
-from app.models import User, Userlog, Oplog, Item, Supplier, Customer, Stock, Kvp
+from app.models import User, Userlog, Oplog, Item, Supplier, Customer, Stock, Kvp, Category
 from app import db
 from werkzeug.security import generate_password_hash
 from sqlalchemy import or_, and_
@@ -230,18 +230,18 @@ def stock_list():
     # 库存列表
     key = request.args.get('key', '')
     page = request.args.get('page', 1, type=int)
-    pagination = db.session.query(Stock, Item, Kvp).filter(
-        and_(Item.id == Stock.item_id, Kvp.type == 'store', Kvp.key == Stock.store_id)
+    pagination = Stock.query.join(Item).filter(
+        Item.id == Stock.item_id
     )
     # 条件查询
     if key:
-        # 名称/联系人/手机/电话/QQ/备注
+        # 库房/零件号
         pagination = pagination.filter(
-            or_(Kvp.value.ilike('%' + key + '%'),
+            or_(Stock.store.ilike('%' + key + '%'),
                 Item.name.ilike('%' + key + '%'))
         )
     pagination = pagination.order_by(
-        Stock.addtime.desc()
+        Item.name.asc()
     ).paginate(page=page,
                per_page=current_app.config['POSTS_PER_PAGE'],
                error_out=False)
@@ -252,3 +252,12 @@ def stock_buy(id=None):
     # 采购单
     form = StockBuyForm()
     return render_template('home/stock_buy.html', form=form)
+
+# @home.route('/modal/item', methods=['GET'])
+# def modal_item():
+#     key = request.args.get('key', '')
+#     items = Item.query.outerjoin(
+#         Stock, Item.id == Stock.item_id
+#     ).join(Category).filter(
+#         Item.cate_id == Category.id
+#     ).join(tb_kvp)

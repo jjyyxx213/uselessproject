@@ -369,9 +369,9 @@ class ItemForm(FlaskForm):
         }
     )
     # 类别
-    cate_id = SelectField(
+    cate = SelectField(
         label=u'类别',
-        coerce=int,
+        coerce=unicode,
         validators=[
             DataRequired(message=u'请选择类别')
         ],
@@ -450,7 +450,7 @@ class ItemForm(FlaskForm):
         validators=[
             DataRequired(message=u'请选择单位')
         ],
-        coerce=int,
+        coerce=unicode,
         choices=[],
         render_kw={
             "class": "form-control select2",
@@ -468,8 +468,8 @@ class ItemForm(FlaskForm):
     # 如果需要从数据库取值，一定要重写__init__方法，因为db对象不是全局的
     def __init__(self, type, *args, **kwargs):
         super(ItemForm, self).__init__(*args, **kwargs)
-        self.unit.choices = [(v.key, v.value) for v in Kvp.query.filter_by(type='unit').order_by(Kvp.value).all()]
-        self.cate_id.choices = [(v.id, v.name) for v in Category.query.filter_by(type=type).order_by(Category.name).all()]
+        self.unit.choices = [(v.value, v.value) for v in Kvp.query.filter_by(type='unit').order_by(Kvp.value).all()]
+        self.cate.choices = [(v.name, v.name) for v in Category.query.filter_by(type=type).order_by(Category.name).all()]
 
 class SupplierForm(FlaskForm):
     name = StringField(
