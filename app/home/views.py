@@ -6,6 +6,7 @@ from app.models import User, Userlog, Oplog, Item, Supplier, Customer, Stock, Kv
 from app import db
 from werkzeug.security import generate_password_hash
 from sqlalchemy import or_, and_
+from json import dumps
 
 
 @home.route('/', methods=['GET'])
@@ -235,7 +236,7 @@ def stock_list():
     )
     # 条件查询
     if key:
-        # 库房/零件号
+        # 库房/名称
         pagination = pagination.filter(
             or_(Stock.store.ilike('%' + key + '%'),
                 Item.name.ilike('%' + key + '%'))
@@ -253,11 +254,51 @@ def stock_buy(id=None):
     form = StockBuyForm()
     return render_template('home/stock_buy.html', form=form)
 
-# @home.route('/modal/item', methods=['GET'])
-# def modal_item():
-#     key = request.args.get('key', '')
-#     items = Item.query.outerjoin(
-#         Stock, Item.id == Stock.item_id
-#     ).join(Category).filter(
-#         Item.cate_id == Category.id
-#     ).join(tb_kvp)
+@home.route('/modal/item', methods=['GET'])
+def modal_item():
+    key = request.args.get('key', '')
+    items = Item.query.outerjoin(
+        Stock, Item.id == Stock.item_id
+    )
+    items = items.filter(Item.valid == 1, Item.type == 0)
+    # 条件查询
+    if key:
+        # 库房/零件名称/类别/规格
+        items = items.filter(
+            or_(Stock.store.ilike('%' + key + '%'),
+                Item.name.ilike('%' + key + '%'),
+                Item.cate.ilike('%' + key + '%'),
+                Item.standard.ilike('%' + key + '%'),
+                )
+        )
+    items = items.order_by(Item.name.asc()).limit(current_app.config['POSTS_PER_PAGE']).all()
+    # 返回的数据格式为
+    # {
+    # "pages": 1,
+    # "data": [
+    #         {"id": "1",
+    #         "name": "xx"}
+    #         ]
+    # }
+    data = []
+    # todo
+    for v in items:
+        qty = 0
+        for j in v.stocks:
+            qty += j.qty
+        data.append(
+            {
+                "id": v.id,
+                "name": v.name,
+                "qty": qty,
+                "standard": v.standard,
+                "costprice": v.costprice,
+                "salesprice": v.salesprice,
+                "cate": v.cate,
+            }
+        )
+    res = {
+        "key": key,
+        "data": data,
+    }
+    return dumps(res);

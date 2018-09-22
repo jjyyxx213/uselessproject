@@ -230,15 +230,7 @@
                                 </tr>
                             </thead>
                             <tbody id="items">
-                                <tr>
-                                    <td> 编号</td>
-                                    <td> 商品名称</td>
-                                    <td> 库存数量</td>
-                                    <td> 规格</td>
-                                    <td> 成本价</td>
-                                    <td> 销售价</td>
-                                    <td> 商品类型</td>
-                                </tr>
+
                             </tbody>
                         </table>
                     </div>
@@ -309,12 +301,34 @@
                 $.ajax({
                     url: "{{ url_for('home.modal_item') }}",
                     type: "GET",
-                    data: "page=" + msid,
+                    data: "key=" + "",
                     dataType: "json",
                     success: function (result) {
-                        $('#items').append(
-                            //something
-                        )
+                        $('#items').empty();
+                        var data = result.data;
+                        var len = data.length;
+                        for (var i = 0; i < len; i++) {
+                            console.log(
+                                '<tr><td>' + data[i].id + '</td>' +
+                                    '<td>' + data[i].name + '</td>' +
+                                    '<td>' + data[i].qty + '</td>' +
+                                    '<td>' + data[i].standard + '</td>' +
+                                    '<td>' + data[i].costprice + '</td>' +
+                                    '<td>' + data[i].salesprice + '</td>' +
+                                    '<td>' + data[i].cate + '</td></tr>'
+                            );
+                            $('#items').append(
+                                    '<tr><td>' + data[i].id + '</td>' +
+                                    '<td>' + data[i].name + '</td>' +
+                                    '<td>' + data[i].qty + '</td>' +
+                                    '<td>' + data[i].standard + '</td>' +
+                                    '<td>' + data[i].costprice + '</td>' +
+                                    '<td>' + data[i].salesprice + '</td>' +
+                                    '<td>' + data[i].cate + '</td></tr>'
+                            );
+                            //var option = {"id": data[i][value], "text": data[i][name]};
+                            //cbData.push(option);
+                        }
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
                         if (errorThrown != 'abort') {
