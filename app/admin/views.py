@@ -466,7 +466,7 @@ def msdetail_edit(id=None):
     # 编辑会员卡套餐明细
     form = MsdetailForm()
     mscard = Mscard.query.filter_by(id=id).first_or_404()
-    msdetails = Msdetail.query.filter_by(mscard_id=id).order_by(Msdetail.item_id.asc()).all()
+    msdetails = Msdetail.query.filter_by(mscard_id=id).order_by(Msdetail.id.asc()).all()
     if request.method == 'GET' and msdetails:
         # 先把空行去除
         while len(form.inputrows) > 0:

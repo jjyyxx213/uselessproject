@@ -221,9 +221,17 @@ class StockBuyListForm(FlaskForm):
             DataRequired(message=u'请选择产品或服务'),
         ],
     )
-    item_name = HiddenField(
-        label=u'产品/服务',
-        description=u'产品/服务',
+    item_name = StringField(
+        label=u'商品名称',
+        validators=[
+            DataRequired(message=u'请选择商品')
+        ],
+        description=u'商品名称',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请选择商品',
+            'readonly': 'true',
+        }
     )
     # 规格
     item_standard = StringField(

@@ -207,7 +207,7 @@
                         '                                    </div>\n' +
                         '                                </div>');
                     // 动态添加行后，要处理select2下拉框初始化
-                    var options = {
+                    let options = {
                         url: "{{ url_for('admin.item_get') }}",      // 数据接口url
                         pageSize: 10, // 每次加载的数据条数[屏蔽，目前从后台获取]
                         value: "id",  // 下拉框value字段名称
@@ -232,7 +232,7 @@
                 return false;
             });
             //这里要处理商品和服务下拉
-            var options = {
+            let options = {
                 url: "{{ url_for('admin.item_get') }}",      // 数据接口url
                 pageSize: 10, // 每次加载的数据条数[屏蔽，目前从后台获取]
                 value: "id",  // 下拉框value字段名称

@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
 from . import home
 from flask import render_template, session, redirect, request, url_for, flash, current_app
-from forms import LoginForm, PwdForm, CustomerForm, StockBuyForm
-from app.models import User, Userlog, Oplog, Item, Supplier, Customer, Stock, Kvp, Category
+from forms import LoginForm, PwdForm, CustomerForm, StockBuyForm, StockBuyListForm
+from app.models import User, Userlog, Oplog, Item, Supplier, Customer, Stock, Porder, Podetail
 from app import db
 from werkzeug.security import generate_password_hash
 from sqlalchemy import or_, and_
@@ -252,7 +252,25 @@ def stock_list():
 def stock_buy(id=None):
     # 采购单
     form = StockBuyForm()
-    return render_template('home/stock_buy.html', form=form)
+    porder = Porder.query.filter_by(id=id).first()
+    if not porder:
+        porder = Porder(type=0)
+        db.session.add(porder)
+        db.session.commit()
+    podetails = Podetail.query.filter_by(porder_id=id).order_by(Podetail.id.asc()).all()
+    if request.method == 'GET':
+        # porder赋值
+        form.supplier_id.data = porder.supplier_id
+        form.user_id.data = porder.user_id
+        form.amount.data = porder.amount
+        form.discount.data = porder.discount
+        form.payment.data = porder.payment
+        form.debt.data = porder.debt
+        form.remarks.data = porder.remarks
+
+    # 计算动态input的初值
+    form_count = len(form.inputrows)
+    return render_template('home/stock_buy.html', form=form, porder=porder, form_count=form_count)
 
 @home.route('/modal/item', methods=['GET'])
 def modal_item():
@@ -281,7 +299,6 @@ def modal_item():
     #         ]
     # }
     data = []
-    # todo
     for v in items:
         qty = 0
         for j in v.stocks:

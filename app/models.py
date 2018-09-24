@@ -434,6 +434,7 @@ class Porder(db.Model):
 
 # 采购订单明细表
 class Podetail(db.Model):
+    __tablename__ = 'tb_podetail'
     # 编号
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     # 采购订单号
