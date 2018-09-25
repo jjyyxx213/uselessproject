@@ -303,7 +303,7 @@ class StockBuyListForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         kwargs['csrf_enabled'] = False
         FlaskForm.__init__(self, *args, **kwargs)
-        self.store.choices = [(v.value, v.value) for v in Kvp.query.filter_by(type='store').order_by(Kvp.value).all()]
+        #self.store.choices = [(v.value, v.value) for v in Kvp.query.filter_by(type='store').order_by(Kvp.value).all()]
 
 class StockBuyForm(FlaskForm):
     inputrows = FieldList(

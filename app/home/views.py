@@ -2,7 +2,7 @@
 from . import home
 from flask import render_template, session, redirect, request, url_for, flash, current_app
 from forms import LoginForm, PwdForm, CustomerForm, StockBuyForm, StockBuyListForm
-from app.models import User, Userlog, Oplog, Item, Supplier, Customer, Stock, Porder, Podetail
+from app.models import User, Userlog, Oplog, Item, Supplier, Customer, Stock, Porder, Podetail, Kvp
 from app import db
 from werkzeug.security import generate_password_hash
 from sqlalchemy import or_, and_
@@ -267,6 +267,27 @@ def stock_buy(id=None):
         form.payment.data = porder.payment
         form.debt.data = porder.debt
         form.remarks.data = porder.remarks
+        # 如果存在明细
+        if podetails:
+            # 先把空行去除
+            while len(form.inputrows) > 0:
+                form.inputrows.pop_entry()
+            # 对FormField赋值，要使用append_entry方法
+            for detail in podetails:
+                listform = StockBuyListForm()
+                listform.item_id = detail.item_id
+                listform.item_name = detail.item.name
+                listform.item_standard = detail.item.standard
+                listform.store = detail.nstore
+                listform.qty = detail.qty
+                if detail.stock:
+                    listform.stock_costprice = detail.stock.costprice
+                else:
+                    listform.stock_costprice = detail.costprice
+                listform.costprice = detail.costprice
+                listform.rowamount = detail.rowamount
+                form.inputrows.append_entry(listform)
+
 
     # 计算动态input的初值
     form_count = len(form.inputrows)
@@ -274,6 +295,7 @@ def stock_buy(id=None):
 
 @home.route('/modal/item', methods=['GET'])
 def modal_item():
+    # 获取商品弹出框数据
     key = request.args.get('key', '')
     items = Item.query.outerjoin(
         Stock, Item.id == Stock.item_id
@@ -301,8 +323,11 @@ def modal_item():
     data = []
     for v in items:
         qty = 0
+        stock_costprice = v.costprice
         for j in v.stocks:
             qty += j.qty
+            # 上一次的进货价不准确，暂时懒得改了
+            stock_costprice = j.costprice
         data.append(
             {
                 "id": v.id,
@@ -312,10 +337,51 @@ def modal_item():
                 "costprice": v.costprice,
                 "salesprice": v.salesprice,
                 "cate": v.cate,
+                "stock_costprice": stock_costprice,
             }
         )
     res = {
         "key": key,
         "data": data,
     }
-    return dumps(res);
+    return dumps(res)
+
+@home.route('/store/get', methods=['GET', 'POST'])
+def store_get():
+    # 获取库房分页清单
+    if request.method == 'POST':
+        params = request.form.to_dict()
+        page = int(params['curPage']) if (params.has_key('curPage')) else 1
+        key = params['selectInput'] if (params.has_key('selectInput')) else ''
+
+        pagination = Kvp.query.filter(Kvp.type == 'store')
+        # 如果查询了增加查询条件
+        if key:
+            pagination = pagination.filter(Kvp.value.ilike('%' + key + '%'))
+        pagination = pagination.order_by(
+            Kvp.value.asc()
+        ).paginate(page=page,
+                   per_page=current_app.config['POSTS_PER_PAGE'],
+                   error_out=False)
+
+        # 返回的数据格式为
+        # {
+        # "pages": 1,
+        # "data": [
+        #         {"id": "1",
+        #         "name": "xx"}
+        #         ]
+        # }
+        data = []
+        for v in pagination.items:
+            data.append(
+                {#key和值都用字符
+                    "id": v.value,
+                    "name": v.value
+                }
+            )
+        res = {
+            "pages": pagination.pages,
+            "data": data,
+        }
+    return dumps(res)

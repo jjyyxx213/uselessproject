@@ -66,7 +66,7 @@ function ajaxSelect2(selectId, options, formatResult, formatSelected) {
             return markup;
         },
         // 最少输入N个字符才开始检索，如果想在点击下拉框时加载数据，请设置为 0
-        minimumInputLength: 1
+        minimumInputLength: 0
     };
     if (flag) {
         select2Option.templateResult = formatResult;

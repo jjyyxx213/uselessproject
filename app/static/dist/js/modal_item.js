@@ -13,22 +13,12 @@ function modal_item(appendId, url) {
                         var data = result.data;
                         var len = data.length;
                         for (var i = 0; i < len; i++) {
-                            /*
-                            console.log(
-                                '<tr><td>' + data[i].id + '</td>' +
-                                    '<td>' + data[i].name + '</td>' +
-                                    '<td>' + data[i].qty + '</td>' +
-                                    '<td>' + data[i].standard + '</td>' +
-                                    '<td>' + data[i].costprice + '</td>' +
-                                    '<td>' + data[i].salesprice + '</td>' +
-                                    '<td>' + data[i].cate + '</td></tr>'
-                            );
-                            */
                             $('#items').append(
                                     '<tr><td>' + data[i].id + '</td>' +
                                     '<td>' + data[i].name + '</td>' +
                                     '<td>' + data[i].qty + '</td>' +
                                     '<td>' + data[i].standard + '</td>' +
+                                    '<td>' + data[i].stock_costprice + '</td>' +
                                     '<td>' + data[i].costprice + '</td>' +
                                     '<td>' + data[i].salesprice + '</td>' +
                                     '<td>' + data[i].cate + '</td></tr>'

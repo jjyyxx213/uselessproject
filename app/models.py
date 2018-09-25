@@ -384,7 +384,7 @@ class Stock(db.Model):
     # 编号
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     # 仓库名称
-    store = db.Column(db.Integer, nullable=False)
+    store = db.Column(db.String(40), nullable=False)
     # 商品ID
     item_id = db.Column(db.Integer, db.ForeignKey('tb_item.id'), nullable=True)
     # 采购单价（最后一次采购价）
@@ -442,11 +442,11 @@ class Podetail(db.Model):
     # 商品ID
     item_id = db.Column(db.Integer, db.ForeignKey('tb_item.id'), nullable=True)
     # 原仓库
-    ostore_id = db.Column(db.Integer, nullable=False)
+    ostore = db.Column(db.String(40))
     # 新仓库
-    nstore_id = db.Column(db.Integer, nullable=False)
+    nstore = db.Column(db.String(40))
     # 库存id(计算库存数量)
-    stock_id = db.Column(db.Integer, db.ForeignKey('tb_stock.id'), nullable=False)
+    stock_id = db.Column(db.Integer, db.ForeignKey('tb_stock.id'))
     # 数量(进货、退货数量)
     qty = db.Column(db.Float, default=0)
     # 进货/退货单价
