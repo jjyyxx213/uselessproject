@@ -24,43 +24,43 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="box box-primary">
-                    <div class="box-header with-border">
-                        <h3 class="box-title"> 采购入库</h3>
-                        <div class="pull-right">总行数：<strong id="cnt">{{ form_count }}</strong>/<strong>20</strong></div>
-                        <div class="row">
-                            <div class="input-group col-md-3 pull-left margin-defined">
-                                <span class="input-group-btn">
-                                    <button class="btn btn-default" type="button"> 供应商</button>
-                                </span>
-                                {{ form.supplier_id }}
-                            </div>
-                            {% for err in form.supplier_id.errors %}
-                                <div class="col-md-12">
-                                    <p style="color: red" class="small">{{ err }}</p>
-                                </div>
-                            {% endfor %}
-                            <div class="input-group col-md-3 pull-left margin-defined">
-                                <span class="input-group-btn">
-                                    <button class="btn btn-default" type="button"> 采购员</button>
-                                </span>
-                                {{ form.user_id }}
-                            </div>
-                            {% for err in form.user_id.errors %}
-                                <div class="col-md-12">
-                                    <p style="color: red" class="small">{{ err }}</p>
-                                </div>
-                            {% endfor %}
-                            <div class="col-md-4 input-group padding-defined pull-left margin-defined">
-                                <span class="input-group-btn">
-                                    <button class="btn btn-default" type="button"> 备注</button>
-                                </span>
-                                {{ form.remarks }}
-                            </div>
-                        </div>
-                    </div>
                     <form role="form" method="post">
                         <!--启动CSRF-->
                         {{ form.hidden_tag() }}
+                        <div class="box-header with-border">
+                            <h3 class="box-title"> 采购入库</h3>
+                            <div class="pull-right">总行数：<strong id="cnt">{{ form_count }}</strong>/<strong>20</strong></div>
+                            <div class="row">
+                                <div class="input-group col-md-3 pull-left margin-defined">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default" type="button"> 供应商</button>
+                                    </span>
+                                    {{ form.supplier_id }}
+                                </div>
+                                {% for err in form.supplier_id.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red" class="small">{{ err }}</p>
+                                    </div>
+                                {% endfor %}
+                                <div class="input-group col-md-3 pull-left margin-defined">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default" type="button"> 采购员</button>
+                                    </span>
+                                    {{ form.user_id }}
+                                </div>
+                                {% for err in form.user_id.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red" class="small">{{ err }}</p>
+                                    </div>
+                                {% endfor %}
+                                <div class="col-md-4 input-group padding-defined pull-left margin-defined">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default" type="button"> 备注</button>
+                                    </span>
+                                    {{ form.remarks }}
+                                </div>
+                            </div>
+                        </div>
                         <div class="box-body">
                             <div class="row" style="margin-bottom: 5px">
                                 <div class="col-md-3 padding-defined">

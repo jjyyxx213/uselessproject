@@ -320,7 +320,7 @@ def stock_buy_edit(id=None):
             podetail = Podetail(
                 porder_id=porder.id,
                 item_id=iter_add.item_id.data,
-                nstore=iter_add.nstore.data,
+                nstore=iter_add.store.data,
                 qty=iter_add.qty.data,
                 costprice=iter_add.costprice.data,
                 rowamount=iter_add.rowamount.data,
@@ -328,16 +328,21 @@ def stock_buy_edit(id=None):
             db.session.add(podetail)
             # 判断库存是否存在
             stock = Stock.query.filter_by(item_id=iter_add.item_id.data,
-                                          store=iter_add.nstore.data).first()
+                                          store=iter_add.store.data).first()
             if stock: #存在就更新数量
-                stock.qty += iter_add.qty.data
+                stock.qty += float(iter_add.qty.data)
+                costprice = iter_add.costprice.data
             else: #不存在库存表加一条
                 stock = Stock(
                     item_id=iter_add.item_id.data,
                     costprice=iter_add.costprice.data,
                     qty=iter_add.qty.data,
-                    store=iter_add.nstore.data,
+                    store=iter_add.store.data,
                 )
+            db.session.add(stock)
+            # 设置主表为发布
+            porder.status = 1
+            db.session.add(porder)
         db.session.commit()
         flash(u'采购单结算成功', 'ok')
         return redirect(url_for('home.stock_buy_list'))
