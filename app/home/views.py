@@ -248,13 +248,39 @@ def stock_list():
                error_out=False)
     return render_template('home/stock_list.html', pagination=pagination, key=key)
 
-@home.route('/stock/buy/<int:id>', methods=['GET', 'POST'])
-def stock_buy(id=None):
+@home.route('/stock/buy/list', methods=['GET'])
+def stock_buy_list():
+    # 采购单列表
+    key = request.args.get('key', '')
+    # 采购单状态 true 临时;false 全部
+    status = request.args.get('status', 'false')
+    page = request.args.get('page', 1, type=int)
+    pagination = Porder.query.filter_by(type=0)
+    # 条件查询
+    if key:
+        # 单号/备注
+        pagination = pagination.filter(
+            or_(Porder.id.ilike('%' + key + '%'),
+                Porder.remarks.ilike('%' + key + '%'),
+                Porder.addtime.ilike('%' + key + '%'))
+        )
+    if status == 'true':
+        pagination = pagination.filter(Porder.status == 0)
+    pagination = pagination.order_by(
+        Porder.addtime.asc()
+    ).paginate(page=page,
+               per_page=current_app.config['POSTS_PER_PAGE'],
+               error_out=False)
+    return render_template('home/stock_buy_list.html', pagination=pagination, key=key, status=status)
+
+
+@home.route('/stock/buy/edit/<int:id>', methods=['GET', 'POST'])
+def stock_buy_edit(id=None):
     # 采购单
     form = StockBuyForm()
     porder = Porder.query.filter_by(id=id).first()
     if not porder:
-        porder = Porder(type=0)
+        porder = Porder(type=0, user_id=int(session['user_id']))
         db.session.add(porder)
         db.session.commit()
     podetails = Podetail.query.filter_by(porder_id=id).order_by(Podetail.id.asc()).all()
@@ -280,18 +306,42 @@ def stock_buy(id=None):
                 listform.item_standard = detail.item.standard
                 listform.store = detail.nstore
                 listform.qty = detail.qty
-                if detail.stock:
-                    listform.stock_costprice = detail.stock.costprice
-                else:
-                    listform.stock_costprice = detail.costprice
                 listform.costprice = detail.costprice
                 listform.rowamount = detail.rowamount
                 form.inputrows.append_entry(listform)
-
-
     # 计算动态input的初值
     form_count = len(form.inputrows)
-    return render_template('home/stock_buy.html', form=form, porder=porder, form_count=form_count)
+    if form.validate_on_submit():
+        # 删除所有明细
+        for iter_del in podetails:
+            db.session.delete(iter_del)
+        for iter_add in form.inputrows:
+            # 新增明细
+            podetail = Podetail(
+                porder_id=porder.id,
+                item_id=iter_add.item_id.data,
+                nstore=iter_add.nstore.data,
+                qty=iter_add.qty.data,
+                costprice=iter_add.costprice.data,
+                rowamount=iter_add.rowamount.data,
+            )
+            db.session.add(podetail)
+            # 判断库存是否存在
+            stock = Stock.query.filter_by(item_id=iter_add.item_id.data,
+                                          store=iter_add.nstore.data).first()
+            if stock: #存在就更新数量
+                stock.qty += iter_add.qty.data
+            else: #不存在库存表加一条
+                stock = Stock(
+                    item_id=iter_add.item_id.data,
+                    costprice=iter_add.costprice.data,
+                    qty=iter_add.qty.data,
+                    store=iter_add.nstore.data,
+                )
+        db.session.commit()
+        flash(u'采购单结算成功', 'ok')
+        return redirect(url_for('home.stock_buy_list'))
+    return render_template('home/stock_buy_edit.html', form=form, porder=porder, form_count=form_count)
 
 @home.route('/modal/item', methods=['GET'])
 def modal_item():

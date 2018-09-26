@@ -32,15 +32,24 @@
                                 <span class="input-group-btn">
                                     <button class="btn btn-default" type="button"> 供应商</button>
                                 </span>
-
                                 {{ form.supplier_id }}
                             </div>
+                            {% for err in form.supplier_id.errors %}
+                                <div class="col-md-12">
+                                    <p style="color: red" class="small">{{ err }}</p>
+                                </div>
+                            {% endfor %}
                             <div class="input-group col-md-3 pull-left margin-defined">
                                 <span class="input-group-btn">
                                     <button class="btn btn-default" type="button"> 采购员</button>
                                 </span>
                                 {{ form.user_id }}
                             </div>
+                            {% for err in form.user_id.errors %}
+                                <div class="col-md-12">
+                                    <p style="color: red" class="small">{{ err }}</p>
+                                </div>
+                            {% endfor %}
                             <div class="col-md-4 input-group padding-defined pull-left margin-defined">
                                 <span class="input-group-btn">
                                     <button class="btn btn-default" type="button"> 备注</button>
@@ -54,7 +63,7 @@
                         {{ form.hidden_tag() }}
                         <div class="box-body">
                             <div class="row" style="margin-bottom: 5px">
-                                <div class="col-md-2 padding-defined">
+                                <div class="col-md-3 padding-defined">
                                     <label style="color: red">*</label>
                                     <label class="small"> 商品</label>
                                 </div>
@@ -69,9 +78,6 @@
                                     <label class="small"> 数量(卷)</label>
                                 </div>
                                 <div class="col-md-1 padding-defined">
-                                    <label class="small"> 上次进价</label>
-                                </div>
-                                <div class="col-md-1 padding-defined">
                                     <label class="small"> 单价</label>
                                 </div>
                                 <div class="col-md-1 padding-defined">
@@ -83,78 +89,106 @@
                                     </button>
                                 </div>
                             </div>
-                                <div id="inputs">
-                            {% for v in form.inputrows %}
-                                <div class="row" style="margin-bottom: 0px">
-                                    <div class="col-md-2 padding-defined">
-                                        <div class="input-group">
-                                            <input id="inputrows-{{ loop.index0 }}-item_id"
-                                                   name="inputrows-{{ loop.index0 }}-item_id" type="hidden"
-                                                   value="{{ v.data.item_id or '' }}">
-                                            <input id="inputrows-{{ loop.index0 }}-item_name" readonly
-                                                   name="inputrows-{{ loop.index0 }}-item_name" class="form-control"
-                                                   placeholder="请选择商品" type="text" value="{{ v.data.item_name or '' }}">
-                                            <span class="input-group-btn">
-                                                <button class="btn btn-default" type="button" loop_index="{{ loop.index0 }}" name="item_choice"> ...</button>
+                            <div id="inputs">
+                                {% for v in form.inputrows %}
+                                    <div class="row" style="margin-bottom: 0px">
+                                        <div class="col-md-3 padding-defined">
+                                            <div class="input-group">
+                                                <input id="inputrows-{{ loop.index0 }}-item_id"
+                                                       name="inputrows-{{ loop.index0 }}-item_id" type="hidden"
+                                                       value="{{ v.data.item_id or '' }}">
+                                                <input id="inputrows-{{ loop.index0 }}-item_name" readonly
+                                                       name="inputrows-{{ loop.index0 }}-item_name" class="form-control"
+                                                       placeholder="请选择商品" type="text"
+                                                       value="{{ v.data.item_name or '' }}">
+                                                <span class="input-group-btn">
+                                                <button class="btn btn-default" type="button"
+                                                        loop_index="{{ loop.index0 }}" name="item_choice"> ...</button>
                                             </span>
+                                            </div>
+                                            {% for err in v.item_name.errors %}
+                                                <div class="col-md-12">
+                                                    <p style="color: red" class="small">{{ err }}</p>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-md-2 padding-defined">
+                                            <div class="form-group">
+                                                <input id="inputrows-{{ loop.index0 }}-item_standard"
+                                                       name="inputrows-{{ loop.index0 }}-item_standard"
+                                                       class="form-control"
+                                                       placeholder="规格" type="text"
+                                                       value="{{ v.data.item_standard or '' }}"
+                                                       readonly>
+                                            </div>
+                                            {% for err in v.item_standard.errors %}
+                                                <div class="col-md-12">
+                                                    <p style="color: red" class="small">{{ err }}</p>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-md-2 padding-defined">
+                                            <select class="form-control select2 store-choice"
+                                                    id="inputrows-{{ loop.index0 }}-store"
+                                                    name="inputrows-{{ loop.index0 }}-store"
+                                                    data-placeholder="请选择仓库"
+                                                    v="{{ v.data.store or '' }}">
+                                            </select>
+                                            {% for err in v.store.errors %}
+                                                <div class="col-md-12">
+                                                    <p style="color: red" class="small">{{ err }}</p>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-md-1 padding-defined">
+                                            <div class="form-group">
+                                                <input id="inputrows-{{ loop.index0 }}-qty"
+                                                       name="inputrows-{{ loop.index0 }}-qty" class="form-control"
+                                                       placeholder="数量" type="text" value="{{ v.data.qty or '' }}">
+                                            </div>
+                                            {% for err in v.qty.errors %}
+                                                <div class="col-md-12">
+                                                    <p style="color: red" class="small">{{ err }}</p>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-md-1 padding-defined">
+                                            <div class="form-group">
+                                                <input id="inputrows-{{ loop.index0 }}-costprice"
+                                                       name="inputrows-{{ loop.index0 }}-costprice"
+                                                       class="form-control"
+                                                       placeholder="单价" type="text"
+                                                       value="{{ v.data.costprice or '' }}">
+                                            </div>
+                                            {% for err in v.costprice.errors %}
+                                                <div class="col-md-12">
+                                                    <p style="color: red" class="small">{{ err }}</p>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-md-1 padding-defined">
+                                            <div class="form-group">
+                                                <input id="inputrows-{{ loop.index0 }}-rowamount"
+                                                       name="inputrows-{{ loop.index0 }}-rowamount"
+                                                       class="form-control"
+                                                       placeholder="合计" type="text"
+                                                       value="{{ v.data.rowamount or '' }}">
+                                            </div>
+                                            {% for err in v.rowamount.errors %}
+                                                <div class="col-md-12">
+                                                    <p style="color: red" class="small">{{ err }}</p>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-md-1" style="padding-left: 5px">
+                                            <button type="button" class="btn btn-box-tool" data-widget="collapse"
+                                                    name="row-minus">
+                                                <i class="fa fa-minus-square fa-lg" aria-hidden="true"></i>
+                                            </button>
                                         </div>
                                     </div>
-                                    <div class="col-md-2 padding-defined">
-                                        <div class="form-group">
-                                            <input id="inputrows-{{ loop.index0 }}-item_standard"
-                                                   name="inputrows-{{ loop.index0 }}-item_standard" class="form-control"
-                                                   placeholder="规格" type="text" value="{{ v.data.item_standard or '' }}"
-                                                   readonly>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2 padding-defined">
-                                        <select class="form-control select2 store-choice"
-                                                id="inputrows-{{ loop.index0 }}-store"
-                                                name="inputrows-{{ loop.index0 }}-store"
-                                                data-placeholder="请选择仓库"
-                                                v="{{ v.data.store or '' }}">
-                                        </select>
-                                    </div>
-                                    <div class="col-md-1 padding-defined">
-                                        <div class="form-group">
-                                            <input id="inputrows-{{ loop.index0 }}-qty"
-                                                   name="inputrows-{{ loop.index0 }}-qty" class="form-control"
-                                                   placeholder="数量" type="text" value="{{ v.data.qty or '' }}">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-1 padding-defined">
-                                        <div class="form-group">
-                                            <input id="inputrows-{{ loop.index0 }}-stock_costprice"
-                                                   name="inputrows-{{ loop.index0 }}-stock_costprice"
-                                                   class="form-control"
-                                                   placeholder="上次进价" type="text" value="{{ v.data.stock_costprice or '' }}" readonly>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-1 padding-defined">
-                                        <div class="form-group">
-                                            <input id="inputrows-{{ loop.index0 }}-costprice"
-                                                   name="inputrows-{{ loop.index0 }}-costprice"
-                                                   class="form-control"
-                                                   placeholder="单价" type="text" value="{{ v.data.costprice or '' }}">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-1 padding-defined">
-                                        <div class="form-group">
-                                            <input id="inputrows-{{ loop.index0 }}-rowamount"
-                                                   name="inputrows-{{ loop.index0 }}-rowamount"
-                                                   class="form-control"
-                                                   placeholder="合计" type="text" value="{{ v.data.rowamount or '' }}">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-1" style="padding-left: 5px">
-                                        <button type="button" class="btn btn-box-tool" data-widget="collapse"
-                                                name="row-minus">
-                                            <i class="fa fa-minus-square fa-lg" aria-hidden="true"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                                </div>
+                                {% endfor %}
+                            </div>
                             <div class="row" style="margin-bottom: 0px">
                                 <div class="col-md-7 padding-defined pull-left">
                                     <div class="input-group">
@@ -218,7 +252,6 @@
                                 <th> 商品名称</th>
                                 <th> 库存数量</th>
                                 <th> 规格</th>
-                                <th> 上次进价</th>
                                 <th> 成本价</th>
                                 <th> 销售价</th>
                                 <th> 商品类型</th>
@@ -259,7 +292,7 @@
             if (supplier_id == 0) {
                 $('#supplier_id').val('').trigger('change');
             }
-            user_id = {{ porder.user_id or 0 }}
+            user_id = {{ porder.user_id or 0 }};
             if (user_id == 0) {
                 $('#user_id').val('').trigger('change');
             }
@@ -275,70 +308,62 @@
                 {
                     InputsWrapper.append('' +
                         '<div class="row" style="margin-bottom: 0px">\n' +
-                        '                                    <div class="col-md-2 padding-defined">\n' +
+                        '                                    <div class="col-md-3 padding-defined">\n' +
                         '                                        <div class="input-group">\n' +
                         '                                            <input id="inputrows-' + id_ins + '-item_id"\n' +
                         '                                                   name="inputrows-' + id_ins + '-item_id" type="hidden">\n' +
-'                                            <input id="inputrows-' + id_ins + '-item_name"\n'+
-'                                                   name="inputrows-' + id_ins + '-item_name" class="form-control" '+
-'                                                   placeholder="请选择商品" type="text" readonly>'+
-'                                            <span class="input-group-btn">\n'+
-'                                                <button class="btn btn-default" type="button" loop_index="' + id_ins + '" name="item_choice"> ...</button>\n'+
-'                                            </span>\n'+
-'                                        </div>\n'+
-'                                    </div>\n'+
-'                                    <div class="col-md-2 padding-defined">\n'+
-'                                        <div class="form-group">\n'+
-'                                            <input id="inputrows-' + id_ins + '-item_standard"\n'+
-'                                                   name="inputrows-' + id_ins + '-item_standard" class="form-control"\n'+
-'                                                   placeholder="规格" type="text" readonly>' +
-'                                        </div>\n'+
-'                                    </div>\n'+
-'                                    <div class="col-md-2 padding-defined">\n'+
-'                                        <select class="form-control select2 store-choice"\n'+
-'                                                id="inputrows-' + id_ins + '-store"\n'+
-'                                                name="inputrows-' + id_ins + '-store"\n'+
-'                                                data-placeholder="请选择仓库">\n'+
-'                                        </select>\n'+
-'                                    </div>\n'+
-'                                    <div class="col-md-1 padding-defined">\n'+
-'                                        <div class="form-group">\n'+
-'                                            <input id="inputrows-' + id_ins + '-qty"\n'+
-'                                                   name="inputrows-' + id_ins + '-qty" class="form-control"\n'+
-'                                                   placeholder="数量" type="text">\n'+
-'                                        </div>\n'+
-'                                    </div>\n'+
-'                                    <div class="col-md-1 padding-defined">\n'+
-'                                        <div class="form-group">\n'+
-'                                            <input id="inputrows-' + id_ins + '-stock_costprice"\n'+
-'                                                   name="inputrows-' + id_ins + '-stock_costprice"\n'+
-'                                                   class="form-control"\n'+
-'                                                   placeholder="上次进价" type="text" readonly>\n'+
-'                                        </div>\n'+
-'                                    </div>\n'+
-'                                    <div class="col-md-1 padding-defined">\n'+
-'                                        <div class="form-group">\n'+
-'                                            <input id="inputrows-' + id_ins + '-costprice"\n'+
-'                                                   name="inputrows-' + id_ins + '-costprice"\n'+
-'                                                   class="form-control"\n'+
-'                                                   placeholder="单价" type="text">\n'+
-'                                        </div>\n'+
-'                                    </div>\n'+
-'                                    <div class="col-md-1 padding-defined">\n'+
-'                                        <div class="form-group">\n'+
-'                                            <input id="inputrows-' + id_ins + '-rowamount"\n'+
-'                                                   name="inputrows-' + id_ins + '-rowamount"\n'+
-'                                                   class="form-control"\n'+
-'                                                   placeholder="合计" type="text">\n'+
-'                                        </div>\n'+
-'                                    </div>\n'+
-'                                    <div class="col-md-1" style="padding-left: 5px">\n'+
-'                                        <button type="button" class="btn btn-box-tool" data-widget="collapse"\n'+
-'                                                name="row-minus">\n'+
-'                                            <i class="fa fa-minus-square fa-lg" aria-hidden="true"></i>\n'+
-'                                        </button>\n'+
-'                                    </div>\n'+
-'                                </div>');
+                        '                                            <input id="inputrows-' + id_ins + '-item_name"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-item_name" class="form-control" ' +
+                        '                                                   placeholder="请选择商品" type="text" readonly>' +
+                        '                                            <span class="input-group-btn">\n' +
+                        '                                                <button class="btn btn-default" type="button" loop_index="' + id_ins + '" name="item_choice"> ...</button>\n' +
+                        '                                            </span>\n' +
+                        '                                        </div>\n' +
+                        '                                    </div>\n' +
+                        '                                    <div class="col-md-2 padding-defined">\n' +
+                        '                                        <div class="form-group">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-item_standard"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-item_standard" class="form-control"\n' +
+                        '                                                   placeholder="规格" type="text" readonly>' +
+                        '                                        </div>\n' +
+                        '                                    </div>\n' +
+                        '                                    <div class="col-md-2 padding-defined">\n' +
+                        '                                        <select class="form-control select2 store-choice"\n' +
+                        '                                                id="inputrows-' + id_ins + '-store"\n' +
+                        '                                                name="inputrows-' + id_ins + '-store"\n' +
+                        '                                                data-placeholder="请选择仓库">\n' +
+                        '                                        </select>\n' +
+                        '                                    </div>\n' +
+                        '                                    <div class="col-md-1 padding-defined">\n' +
+                        '                                        <div class="form-group">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-qty"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-qty" class="form-control"\n' +
+                        '                                                   placeholder="数量" type="text">\n' +
+                        '                                        </div>\n' +
+                        '                                    </div>\n' +
+                        '                                    <div class="col-md-1 padding-defined">\n' +
+                        '                                        <div class="form-group">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-costprice"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-costprice"\n' +
+                        '                                                   class="form-control"\n' +
+                        '                                                   placeholder="单价" type="text">\n' +
+                        '                                        </div>\n' +
+                        '                                    </div>\n' +
+                        '                                    <div class="col-md-1 padding-defined">\n' +
+                        '                                        <div class="form-group">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-rowamount"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-rowamount"\n' +
+                        '                                                   class="form-control"\n' +
+                        '                                                   placeholder="合计" type="text">\n' +
+                        '                                        </div>\n' +
+                        '                                    </div>\n' +
+                        '                                    <div class="col-md-1" style="padding-left: 5px">\n' +
+                        '                                        <button type="button" class="btn btn-box-tool" data-widget="collapse"\n' +
+                        '                                                name="row-minus">\n' +
+                        '                                            <i class="fa fa-minus-square fa-lg" aria-hidden="true"></i>\n' +
+                        '                                        </button>\n' +
+                        '                                    </div>\n' +
+                        '                                </div>');
                     // 动态添加行后，要处理select2下拉框初始化
                     let options = {
                         url: "{{ url_for('home.store_get') }}",      // 数据接口url
@@ -408,7 +433,6 @@
                 let id = $(this).find("td:first").text();
                 let name = $(this).find("td:eq(1)").text();
                 let standard = $(this).find("td:eq(3)").text();
-                let stock_costprice = $(this).find("td:eq(4)").text();
                 $("#itemModal").modal("hide");
                 // 给输入框赋值
                 let input_item_id = $("#" + 'inputrows-' + loop_index + '-item_id');
@@ -417,8 +441,6 @@
                 input_item_name.val(name);
                 let input_item_standard = $("#" + 'inputrows-' + loop_index + '-item_standard');
                 input_item_standard.val(standard);
-                let input_stock_costprice = $("#" + 'inputrows-' + loop_index + '-stock_costprice');
-                input_stock_costprice.val(stock_costprice);
             });
 
             {#Prefilters是一个预过滤器，在每个请求之前被发送和$.ajax()处理它们前处理。#}

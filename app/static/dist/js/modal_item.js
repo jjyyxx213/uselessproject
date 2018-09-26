@@ -18,7 +18,6 @@ function modal_item(appendId, url) {
                                     '<td>' + data[i].name + '</td>' +
                                     '<td>' + data[i].qty + '</td>' +
                                     '<td>' + data[i].standard + '</td>' +
-                                    '<td>' + data[i].stock_costprice + '</td>' +
                                     '<td>' + data[i].costprice + '</td>' +
                                     '<td>' + data[i].salesprice + '</td>' +
                                     '<td>' + data[i].cate + '</td></tr>'

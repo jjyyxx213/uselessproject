@@ -10,6 +10,18 @@ from datetime import datetime
 from json import dumps
 from sqlalchemy import or_
 
+# 上下文处理器获取用户信息
+@admin.app_context_processor
+def inject_admininfo():
+    try:
+        user = User.query.filter_by(id=int(session['user_id'])).first()
+    except:
+        user = None
+    context = {
+        'user': user,
+        'online_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    }
+    return context
 
 @admin.route("/", methods=["GET"])
 def index():

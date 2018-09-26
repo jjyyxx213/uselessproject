@@ -394,9 +394,6 @@ class Stock(db.Model):
     # 添加时间
     addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
-    # 采购订单明细外键
-    podetails = db.relationship('Podetail', backref='stock')
-
     def __repr__(self):
         return '<Stock %r>' % self.id
 
@@ -407,7 +404,7 @@ class Porder(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     # 单据类型 0:采购单 1:领料单 2:调拨单 3:报损单 4:退货单
     type = db.Column(db.SmallInteger, default=0)
-    # 操作员ID
+    # 采购/领料/退货/报损ID
     user_id = db.Column(db.Integer, db.ForeignKey('tb_user.id'))
     # 供应商id
     supplier_id = db.Column(db.Integer, db.ForeignKey('tb_supplier.id'))
@@ -426,9 +423,6 @@ class Porder(db.Model):
     # 添加时间
     addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
-    # 采购订单明细外键
-    podetails = db.relationship('Podetail', backref='porder')
-
     def __repr__(self):
         return '<Porder %r>' % self.id
 
@@ -445,8 +439,6 @@ class Podetail(db.Model):
     ostore = db.Column(db.String(40))
     # 新仓库
     nstore = db.Column(db.String(40))
-    # 库存id(计算库存数量)
-    stock_id = db.Column(db.Integer, db.ForeignKey('tb_stock.id'))
     # 数量(进货、退货数量)
     qty = db.Column(db.Float, default=0)
     # 进货/退货单价

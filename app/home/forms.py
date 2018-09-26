@@ -2,6 +2,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, FileField, TextAreaField, SelectField, \
     SelectMultipleField, RadioField, FieldList, FormField, HiddenField
+from app.utils.baseforms import NoValidateSelectField
 from wtforms.validators import DataRequired, Regexp, Length
 from app.models import User, Kvp, Supplier
 
@@ -243,7 +244,7 @@ class StockBuyListForm(FlaskForm):
         }
     )
     # 仓库
-    store = SelectField(
+    store = NoValidateSelectField(
         label=u'仓库',
         validators=[
             DataRequired(message=u'请选择仓库'),
@@ -266,15 +267,6 @@ class StockBuyListForm(FlaskForm):
         render_kw={
             'class': 'form-control',
             'placeholder': u'请输入数量',
-        }
-    )
-    # 上次进价
-    stock_costprice =  StringField(
-        label=u'上次进价',
-        description=u'上次进价',
-        render_kw={
-            'class': 'form-control',
-            'readonly' : 'true',
         }
     )
     # 采购单价
@@ -312,6 +304,9 @@ class StockBuyForm(FlaskForm):
     # 供应商
     supplier_id = SelectField(
         label=u'供应商',
+        validators=[
+            DataRequired(message=u'请选择供应商'),
+        ],
         coerce=int,
         choices=[],
         render_kw={
@@ -321,7 +316,10 @@ class StockBuyForm(FlaskForm):
     )
     # 操作员
     user_id = SelectField(
-        label=u'操作员',
+        label=u'采购员',
+        validators=[
+            DataRequired(message=u'请选择员工'),
+        ],
         coerce=int,
         choices=[],
         render_kw={
