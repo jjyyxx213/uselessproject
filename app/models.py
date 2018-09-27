@@ -284,8 +284,6 @@ class Category(db.Model):
     remarks = db.Column(db.Text)
     # 添加时间
     addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    # 服务/项目主表外键
-    items = db.relationship('Item', backref='category')
 
     def __repr__(self):
         return '<Category %r>' % self.name
@@ -297,8 +295,8 @@ class Item(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     # 名称
     name = db.Column(db.String(100), nullable=False)
-    # 类别id
-    cate_id = db.Column(db.Integer, db.ForeignKey('tb_category.id'))
+    # 商品/服务类别(冗余避免关联查询)
+    cate = db.Column(db.String(100))
     # 类别(类别字段冗余，避免关联查询 type 0: item; 1: service)
     type = db.Column(db.SmallInteger, default=0)
     # 销售价
@@ -385,8 +383,8 @@ class Stock(db.Model):
     __tablename__ = 'tb_stock'
     # 编号
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    # 仓库编号
-    store_id = db.Column(db.Integer, nullable=False)
+    # 仓库名称
+    store = db.Column(db.String(40), nullable=False)
     # 商品ID
     item_id = db.Column(db.Integer, db.ForeignKey('tb_item.id'), nullable=True)
     # 采购单价（最后一次采购价）
@@ -395,9 +393,6 @@ class Stock(db.Model):
     qty = db.Column(db.Float, default=0)
     # 添加时间
     addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-
-    # 采购订单明细外键
-    podetails = db.relationship('Podetail', backref='stock')
 
     def __repr__(self):
         return '<Stock %r>' % self.id
@@ -409,7 +404,7 @@ class Porder(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     # 单据类型 0:采购单 1:领料单 2:调拨单 3:报损单 4:退货单
     type = db.Column(db.SmallInteger, default=0)
-    # 操作员ID
+    # 采购/领料/退货/报损ID
     user_id = db.Column(db.Integer, db.ForeignKey('tb_user.id'))
     # 供应商id
     supplier_id = db.Column(db.Integer, db.ForeignKey('tb_supplier.id'))
@@ -417,23 +412,23 @@ class Porder(db.Model):
     amount = db.Column(db.Float, default=0)
     # 优惠后应收应付金额(主体为店主+为收款/-为付款)
     discount = db.Column(db.Float, default=0)
+    # 实际收付金额(主体为店主+为收款/-为付款)
+    payment = db.Column(db.Float, default=0)
     # 欠款(主体为店主+为收款/-为付款)
     debt = db.Column(db.Float, default=0)
-    # 单据状态 0:编制 1:暂存 2:生效
+    # 单据状态 0:暂存 1:生效
     status = db.Column(db.SmallInteger, default=0)
     # 备注
     remarks = db.Column(db.String(200))
     # 添加时间
     addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
-    # 采购订单明细外键
-    podetails = db.relationship('Podetail', backref='porder')
-
     def __repr__(self):
         return '<Porder %r>' % self.id
 
 # 采购订单明细表
 class Podetail(db.Model):
+    __tablename__ = 'tb_podetail'
     # 编号
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     # 采购订单号
@@ -441,11 +436,9 @@ class Podetail(db.Model):
     # 商品ID
     item_id = db.Column(db.Integer, db.ForeignKey('tb_item.id'), nullable=True)
     # 原仓库
-    ostore_id = db.Column(db.Integer, nullable=False)
+    ostore = db.Column(db.String(40))
     # 新仓库
-    nstore_id = db.Column(db.Integer, nullable=False)
-    # 库存id(计算库存数量)
-    stock_id = db.Column(db.Integer, db.ForeignKey('tb_stock.id'), nullable=False)
+    nstore = db.Column(db.String(40))
     # 数量(进货、退货数量)
     qty = db.Column(db.Float, default=0)
     # 进货/退货单价

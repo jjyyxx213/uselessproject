@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% import 'ui/admin_page.html' as macros %}
-
 {% block page_content %}
     <section class="content-header">
         <h1> 门店管理系统</h1>
@@ -41,7 +40,7 @@
                         </div>
                     </div>
                     <div class="box-body table-responsive no-padding">
-                        <table class="table table-hover">
+                        <table id="ex1" class="table table-striped table-hover">
                             <tbody>
                             <tr>
                                 <th> 编号</th>
@@ -55,13 +54,13 @@
                             </tr>
                             {% for v in pagination.items %}
                                 <tr>
-                                    <td>{{ v.Stock.id }}</td>
-                                    <td>{{ v.Kvp.value }}</td>
-                                    <td>{{ v.Item.name }}</td>
-                                    <td>{{ v.Item.salesprice }}</td>
-                                    <td>{{ v.Item.unit }}</td>
-                                    <td>{{ v.Item.standard }}</td>
-                                    <td>{{ v.Stock.qty }}</td>
+                                    <td>{{ v.id }}</td>
+                                    <td>{{ v.store }}</td>
+                                    <td>{{ v.item.name }}</td>
+                                    <td>{{ v.item.salesprice }}</td>
+                                    <td>{{ v.item.unit }}</td>
+                                    <td>{{ v.item.standard }}</td>
+                                    <td>{{ v.qty }}</td>
                                     <td>
                                         <a href="#" name="btn-unfrozen"
                                            class="label label-success">采购单</a>
@@ -98,6 +97,10 @@
                     var key = $("#search_key").val()
                     location.href = "{{ url_for("home.stock_list") }}?key=" + key
                 }
+            })
+            $('#ex1').DataTable({
+                    'ordering': true,
+                    'autoWidth': false
             })
         })
     </script>

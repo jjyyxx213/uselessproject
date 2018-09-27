@@ -10,6 +10,18 @@ from datetime import datetime
 from json import dumps
 from sqlalchemy import or_
 
+# 上下文处理器获取用户信息
+@admin.app_context_processor
+def inject_admininfo():
+    try:
+        user = User.query.filter_by(id=int(session['user_id'])).first()
+    except:
+        user = None
+    context = {
+        'user': user,
+        'online_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    }
+    return context
 
 @admin.route("/", methods=["GET"])
 def index():
@@ -466,7 +478,7 @@ def msdetail_edit(id=None):
     # 编辑会员卡套餐明细
     form = MsdetailForm()
     mscard = Mscard.query.filter_by(id=id).first_or_404()
-    msdetails = Msdetail.query.filter_by(mscard_id=id).order_by(Msdetail.item_id.asc()).all()
+    msdetails = Msdetail.query.filter_by(mscard_id=id).order_by(Msdetail.id.asc()).all()
     if request.method == 'GET' and msdetails:
         # 先把空行去除
         while len(form.inputrows) > 0:
@@ -614,8 +626,8 @@ def category_add(type=0):
         return redirect(url_for('admin.category_add', type=type))
     return render_template('admin/category_add.html', form=form, type=type)
 
-@admin.route('/category/edit/<int:type>/<int:id>', methods=['GET', 'POST'])
-def category_edit(type=0, id=None):
+@admin.route('/category/edit/<int:type>/<int:id>/<string:name>', methods=['GET', 'POST'])
+def category_edit(type=0, id=None, name=None):
     # 商品/服务分类修改
     form = CategoryForm()
     form.submit.label.text = u'修改'
@@ -624,9 +636,12 @@ def category_edit(type=0, id=None):
         form.name.data = category.name
         form.remarks.data = category.remarks
     if form.validate_on_submit():
-        if category.name != form.name.data and Category.query.filter_by(name=form.name.data, type=type).first():
-            flash(u'您输入的分类已存在', 'err')
-            return redirect(url_for('admin.category_edit', type=type, id=category.id))
+        if category.name != form.name.data and Item.query.filter_by(cate=name).first():
+            flash(u'您选择的分类已被商品/服务项目使用，不能修改名称', 'err')
+            return redirect(url_for('admin.category_edit', type=type, id=category.id, name=category.name))
+        if category.name != form.name.data and Category.query.filter_by(name=form.name.data).first():
+            flash(u'您输入的分类已存在，名称不能重复', 'err')
+            return redirect(url_for('admin.category_edit', type=type, id=category.id, name=category.name))
         category.name = form.name.data
         category.remarks = form.remarks.data
         db.session.add(category)
@@ -641,10 +656,10 @@ def category_edit(type=0, id=None):
         return redirect(url_for('admin.category_list', type=type))
     return render_template('admin/category_edit.html', form=form, type=type)
 
-@admin.route('/category/del/<int:type>/<int:id>', methods=['GET', 'POST'])
-def category_del(type=0, id=None):
+@admin.route('/category/del/<int:type>/<int:id>/<string:name>', methods=['GET', 'POST'])
+def category_del(type=0, id=None, name=None):
     # 商品/服务分类删除
-    if Item.query.filter_by(cate_id=id).first():
+    if Item.query.filter_by(cate=name).first():
         flash(u'您选择的分类已使用，不能删除', 'err')
         return redirect(url_for('admin.category_list', type=type))
     category = Category.query.filter_by(id=id).first_or_404()
@@ -692,7 +707,7 @@ def item_add(type=0):
         #    return redirect(url_for('admin.item_add', type=type))
         item = Item(
             name=form.name.data,
-            cate_id=form.cate_id.data,
+            cate=form.cate.data,
             type=type,
             salesprice=float(form.salesprice.data),
             rewardprice=float(form.rewardprice.data),
@@ -722,7 +737,7 @@ def item_edit(type=0, id=None):
     item = Item.query.filter_by(id=id).first_or_404()
     if request.method == 'GET':
         form.name.data = item.name
-        form.cate_id.data = item.cate_id
+        form.cate.data = item.cate
         form.salesprice.data = item.salesprice
         form.rewardprice.data = item.rewardprice
         form.costprice.data = item.costprice
@@ -736,7 +751,7 @@ def item_edit(type=0, id=None):
         #    flash(u'您输入的商品已存在', 'err')
         #    return redirect(url_for('admin.item_edit', type=type, id=item.id))
         item.name = form.name.data
-        item.cate_id = form.cate_id.data
+        item.cate = form.cate.data
         item.salesprice = form.salesprice.data
         item.rewardprice = form.rewardprice.data
         item.costprice = form.costprice.data

@@ -2,8 +2,9 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, FileField, TextAreaField, SelectField, \
     SelectMultipleField, RadioField, FieldList, FormField, HiddenField
+from app.utils.baseforms import NoValidateSelectField
 from wtforms.validators import DataRequired, Regexp, Length
-from app.models import User
+from app.models import User, Kvp, Supplier
 
 
 class LoginForm(FlaskForm):
@@ -212,3 +213,186 @@ class CustomerForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(CustomerForm, self).__init__(*args, **kwargs)
         self.user_id.choices = [(v.id, v.name) for v in User.query.order_by(User.name).all()]
+
+class StockBuyListForm(FlaskForm):
+    item_id = HiddenField(
+        label=u'产品/服务ID',
+        description=u'产品/服务ID',
+        validators=[
+            DataRequired(message=u'请选择产品或服务'),
+        ],
+    )
+    item_name = StringField(
+        label=u'商品名称',
+        validators=[
+            DataRequired(message=u'请选择商品')
+        ],
+        description=u'商品名称',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请选择商品',
+            'readonly': 'true',
+        }
+    )
+    # 规格
+    item_standard = StringField(
+        label=u'规格',
+        description=u'规格',
+        render_kw={
+            'class': 'form-control',
+            'readonly' : 'true',
+        }
+    )
+    # 仓库
+    store = NoValidateSelectField(
+        label=u'仓库',
+        validators=[
+            DataRequired(message=u'请选择仓库'),
+        ],
+        description=u'仓库',
+        coerce=unicode,
+        choices=[],
+        render_kw={
+            "class": "form-control select2",
+            "data-placeholder": u"请选择仓库",
+        }
+    )
+    # 数量
+    qty = StringField(
+        label=u'数量',
+        validators=[
+            Regexp('[\d+]', message=u'请输入数量'),
+        ],
+        description=u'数量',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入数量',
+        }
+    )
+    # 采购单价
+    costprice = StringField(
+        label=u'单价',
+        validators=[
+            DataRequired(message=u'请输入单价'),
+            Regexp('[\d+\.\d]', message=u'请输入数字'),
+        ],
+        description=u'单价',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入单价',
+        }
+    )
+    # 采购金额（合计）
+    rowamount = StringField(
+        label=u'采购金额',
+        description=u'采购金额',
+        render_kw={
+            'class': 'form-control',
+            'readonly' : 'true',
+        }
+    )
+    #FieldList里的对象也是FormField，不知道怎么给CSRF_TOKEN赋值，关掉验证
+    def __init__(self, *args, **kwargs):
+        kwargs['csrf_enabled'] = False
+        FlaskForm.__init__(self, *args, **kwargs)
+        #self.store.choices = [(v.value, v.value) for v in Kvp.query.filter_by(type='store').order_by(Kvp.value).all()]
+
+class StockBuyForm(FlaskForm):
+    inputrows = FieldList(
+        FormField(StockBuyListForm), min_entries=1
+    )
+    # 供应商
+    supplier_id = SelectField(
+        label=u'供应商',
+        validators=[
+            DataRequired(message=u'请选择供应商'),
+        ],
+        coerce=int,
+        choices=[],
+        render_kw={
+            "class": "form-control select2",
+            "data-placeholder": u"请选择供应商",
+        }
+    )
+    # 操作员
+    user_id = SelectField(
+        label=u'采购员',
+        validators=[
+            DataRequired(message=u'请选择员工'),
+        ],
+        coerce=int,
+        choices=[],
+        render_kw={
+            "class": "form-control select2",
+            "data-placeholder": u"请选择员工",
+        }
+    )
+    # 应付金额
+    amount = StringField(
+        label=u'应付金额',
+        description=u'应付金额',
+        render_kw={
+            'class': 'form-control',
+            #'placeholder': u'请输入应付金额',
+            'readonly' : 'true'
+        }
+    )
+    # 优惠后金额
+    discount = StringField(
+        label=u'优惠后金额',
+        validators=[
+            DataRequired(message=u'请输入优惠后金额'),
+            Regexp('[\d+\.\d]', message=u'请输入数字'),
+        ],
+        description=u'优惠后金额',
+        render_kw={
+            'class': 'form-control',
+            #'placeholder': u'请输入优惠后金额',
+        }
+    )
+    # 实际付款金额
+    payment = StringField(
+        label=u'本次付款',
+        validators=[
+            DataRequired(message=u'请输入本次付款金额'),
+            Regexp('[\d+\.\d]', message=u'请输入数字'),
+        ],
+        description=u'本次付款',
+        render_kw={
+            'class': 'form-control',
+            #'placeholder': u'请输入本次付款金额',
+        }
+    )
+    # 欠款
+    debt = StringField(
+        label=u'本次欠款',
+        description=u'本次欠款',
+        render_kw={
+            'class': 'form-control',
+            #'placeholder': u'请输入本次欠款金额',
+            'readonly': 'true',
+        }
+    )
+    # 备注
+    remarks = StringField(
+        label=u'备注',
+        description=u'备注',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入备注',
+        }
+    )
+    # 保存
+    submit = SubmitField(
+        label=u'结算',
+        render_kw={
+            'class': 'btn btn-primary',
+        }
+    )
+    # 如果需要从数据库取值，一定要重写__init__方法，因为db对象不是全局的
+    def __init__(self, *args, **kwargs):
+        super(StockBuyForm, self).__init__(*args, **kwargs)
+        self.supplier_id.choices = [(v.id, v.name) for v in
+                                    Supplier.query.filter(Supplier.valid==1).order_by(Supplier.name).all()]
+        self.user_id.choices = [(v.id, v.name) for v in
+                                    User.query.filter(User.frozen == 0).order_by(User.name).all()]

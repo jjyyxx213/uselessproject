@@ -76,7 +76,7 @@
                                                 <div class="col-md-12">
                                                     <p style="color: red" class="small">{{ err }}</p>
                                                 </div>
-                                            {% endfor %}
+                                        {% endfor %}
                                     </div>
                                     <div class="col-md-2 padding-defined">
                                         <div class="form-group">
@@ -207,7 +207,7 @@
                         '                                    </div>\n' +
                         '                                </div>');
                     // 动态添加行后，要处理select2下拉框初始化
-                    var options = {
+                    let options = {
                         url: "{{ url_for('admin.item_get') }}",      // 数据接口url
                         pageSize: 10, // 每次加载的数据条数[屏蔽，目前从后台获取]
                         value: "id",  // 下拉框value字段名称
@@ -232,7 +232,7 @@
                 return false;
             });
             //这里要处理商品和服务下拉
-            var options = {
+            let options = {
                 url: "{{ url_for('admin.item_get') }}",      // 数据接口url
                 pageSize: 10, // 每次加载的数据条数[屏蔽，目前从后台获取]
                 value: "id",  // 下拉框value字段名称
@@ -245,7 +245,7 @@
                 ajaxSelect2(id, options);
                 setSelect2Value(id);
             });
-            // 点击保存是，如果有校验信息。要为item_id/item_name赋值。否则setSelect2Value获取不到值，下拉框为空
+            // 点击保存时，如果有校验信息。要为item_id/item_name赋值。否则setSelect2Value获取不到值，下拉框为空
             $("#inputs").on("change", ".item-choice", function () {
                 // 获取下拉选中的值和文本
                 let select_val = $(this).val();
@@ -260,8 +260,8 @@
         // select2为已有的数据设置初值
         function setSelect2Value(select_id) {
             let select = $("#" + select_id);
-            item_id = select.siblings().eq(0).val();
-            item_name = select.siblings().eq(1).val();
+            let item_id = select.siblings().eq(0).val();
+            let item_name = select.siblings().eq(1).val();
             select.append(new Option(item_name, item_id, false, true));
         }
     </script>
