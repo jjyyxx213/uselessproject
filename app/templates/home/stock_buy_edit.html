@@ -37,27 +37,33 @@
                                     </span>
                                     {{ form.supplier_id }}
                                 </div>
-                                {% for err in form.supplier_id.errors %}
-                                    <div class="col-md-12">
-                                        <p style="color: red" class="small">{{ err }}</p>
-                                    </div>
-                                {% endfor %}
                                 <div class="input-group col-md-3 pull-left margin-defined">
                                     <span class="input-group-btn">
                                         <button class="btn btn-default" type="button"> 采购员</button>
                                     </span>
                                     {{ form.user_id }}
                                 </div>
-                                {% for err in form.user_id.errors %}
-                                    <div class="col-md-12">
-                                        <p style="color: red" class="small">{{ err }}</p>
-                                    </div>
-                                {% endfor %}
                                 <div class="col-md-4 input-group padding-defined pull-left margin-defined">
                                     <span class="input-group-btn">
                                         <button class="btn btn-default" type="button"> 备注</button>
                                     </span>
                                     {{ form.remarks }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="input-group col-md-3 pull-left margin-defined">
+                                {% for err in form.supplier_id.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red" class="small">{{ err }}</p>
+                                    </div>
+                                {% endfor %}
+                                </div>
+                                <div class="input-group col-md-3 pull-left margin-defined">
+                                {% for err in form.user_id.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red" class="small">{{ err }}</p>
+                                    </div>
+                                {% endfor %}
                                 </div>
                             </div>
                         </div>
@@ -143,7 +149,7 @@
                                         <div class="col-md-1 padding-defined">
                                             <div class="form-group">
                                                 <input id="inputrows-{{ loop.index0 }}-qty"
-                                                       name="inputrows-{{ loop.index0 }}-qty" class="form-control"
+                                                       name="inputrows-{{ loop.index0 }}-qty" class="form-control qty"
                                                        placeholder="数量" type="text" value="{{ v.data.qty or '' }}">
                                             </div>
                                             {% for err in v.qty.errors %}
@@ -156,7 +162,7 @@
                                             <div class="form-group">
                                                 <input id="inputrows-{{ loop.index0 }}-costprice"
                                                        name="inputrows-{{ loop.index0 }}-costprice"
-                                                       class="form-control"
+                                                       class="form-control costprice"
                                                        placeholder="单价" type="text"
                                                        value="{{ v.data.costprice or '' }}">
                                             </div>
@@ -170,7 +176,7 @@
                                             <div class="form-group">
                                                 <input id="inputrows-{{ loop.index0 }}-rowamount"
                                                        name="inputrows-{{ loop.index0 }}-rowamount"
-                                                       class="form-control"
+                                                       class="form-control rowamount" readonly
                                                        placeholder="合计" type="text"
                                                        value="{{ v.data.rowamount or '' }}">
                                             </div>
@@ -210,22 +216,22 @@
                                         {{ form.debt }}
                                     </div>
                                 </div>
-                                <div class="col-md-1 col-md-offset-2 padding-defined">
-                                    <div class="form-group">
-                                        <input id="total_costprice"
-                                               name="total_costprice" class="form-control"
-                                               placeholder="合计" type="text" value="1000" readonly>
-                                    </div>
+                                <div class="col-md-5 padding-defined pull-left">
+                                        {% for err in form.discount.errors %}
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        {% endfor %}
+                                        {% for err in form.payment.errors %}
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        {% endfor %}
+                                        {% for err in form.debt.errors %}
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        {% endfor %}
                                 </div>
-                            </div>
-                            <div class="row" style="margin-bottom: 0px">
-
-
                             </div>
                             <div class="box-footer">
                                 {{ form.submit }}
                                 <a class="btn btn-warning" name="temp_submit">暂存</a>
-                                <a href="{{ url_for('home.stock_list') }}" class="btn btn-default pull-right"
+                                <a href="{{ url_for('home.stock_buy_list') }}" class="btn btn-default pull-right"
                                    role="button"> 返回</a>
                             </div>
                         </div>
@@ -337,7 +343,7 @@
                         '                                    <div class="col-md-1 padding-defined">\n' +
                         '                                        <div class="form-group">\n' +
                         '                                            <input id="inputrows-' + id_ins + '-qty"\n' +
-                        '                                                   name="inputrows-' + id_ins + '-qty" class="form-control"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-qty" class="form-control qty"\n' +
                         '                                                   placeholder="数量" type="text">\n' +
                         '                                        </div>\n' +
                         '                                    </div>\n' +
@@ -345,7 +351,7 @@
                         '                                        <div class="form-group">\n' +
                         '                                            <input id="inputrows-' + id_ins + '-costprice"\n' +
                         '                                                   name="inputrows-' + id_ins + '-costprice"\n' +
-                        '                                                   class="form-control"\n' +
+                        '                                                   class="form-control costprice"\n' +
                         '                                                   placeholder="单价" type="text">\n' +
                         '                                        </div>\n' +
                         '                                    </div>\n' +
@@ -353,7 +359,7 @@
                         '                                        <div class="form-group">\n' +
                         '                                            <input id="inputrows-' + id_ins + '-rowamount"\n' +
                         '                                                   name="inputrows-' + id_ins + '-rowamount"\n' +
-                        '                                                   class="form-control"\n' +
+                        '                                                   class="form-control rowamount" readonly\n' +
                         '                                                   placeholder="合计" type="text">\n' +
                         '                                        </div>\n' +
                         '                                    </div>\n' +
@@ -372,13 +378,7 @@
                         name: "name", // 下拉框显示字段名称
                         selected: []  // 默认选中项，格式：[{id:1,text:"选项1"},{id:2,text:"选项2"}]
                     };
-                    console.log("inputrows-" + id_ins + "-store");
                     ajaxSelect2("inputrows-" + id_ins + "-store", options);
-                    id_ins++; //这个要放到select2监听后面，否则id错误
-                    row_ins++;
-                    $("#cnt").text(row_ins)//显示总行数
-
-
                     id_ins++; //这个要放到select2监听后面，否则id错误
                     row_ins++;
                     $("#cnt").text(row_ins)//显示总行数
@@ -411,7 +411,7 @@
 
             //定义loop_index,获取所选行数据
             let loop_index;
-            $("button[name='item_choice']").on("click", function () {
+            $("#inputs").on("click", "button[name='item_choice']", function () {
                 appendId = $('#items');
                 url = "{{ url_for('home.modal_item') }}";
                 modal_item(appendId, url);
@@ -420,6 +420,49 @@
                 // 获取loop_index
                 loop_index = $(this).attr('loop_index');
             });
+            //数量监听事件
+            $("#inputs").on("change", ".qty", function () {
+                let input_qty = $(this); //数量输入框
+                let id = input_qty.attr('id'); //数量的id
+                let index = id.substr(id.indexOf('-') + 1, 1); //获取index
+                let input_costprice = $("#" + 'inputrows-' + index + '-costprice'); //单价输入框
+                let input_rowamount = $("#" + 'inputrows-' + index + '-rowamount'); //单行合计输入框
+                //数量/单价有值就进行计算
+                if (input_qty.val() != "" && input_costprice.val() != "") {
+                    //设置单行合计
+                    input_rowamount.val(calcRowAmount(index));
+                    //设置合计
+                    $("#amount").val(calcAmount(row_ins));
+                };
+            });
+            //单价监听事件
+            $("#inputs").on("change", ".costprice", function () {
+                let input_costprice = $(this); //单价输入框
+                let id = input_costprice.attr('id'); //单价的id
+                let index = id.substr(id.indexOf('-') + 1, 1); //获取index
+                let input_qty = $("#" + 'inputrows-' + index + '-qty'); //数量输入框
+                let input_rowamount = $("#" + 'inputrows-' + index + '-rowamount'); //单行合计输入框
+                //数量/单价有值就进行计算
+                if (input_qty.val() != "" && input_costprice.val() != "") {
+                    //设置单行合计
+                    input_rowamount.val(calcRowAmount(index));
+                    //设置合计
+                    $("#amount").val(calcAmount(row_ins));
+                };
+            });
+            //优惠后金额监听事件
+            $("#discount").on("change", function () {
+                if ($("#discount").val() != "" && $("#payment").val() != "") {
+                    $("#debt").val(calcDebt());
+                }
+            });
+            //本次付款监听事件
+            $("#payment").on("change", function () {
+                if ($("#discount").val() != "" && $("#payment").val() != "") {
+                    $("#debt").val(calcDebt());
+                }
+            });
+
             //modal_item高亮事件
             $("#items").on("mouseenter", "tr", function () {
                 $(this).addClass("danger");
@@ -477,6 +520,32 @@
             let select = $("#" + select_id);
             let store = select.attr('v') == 'None' ? '' : select.attr('v');
             select.append(new Option(store, store, false, true));
+        }
+
+        // 计算每行合计
+        function calcRowAmount(index) {
+            let rowamount = 0;
+            // 单价
+            let costprice = $("#inputrows-" + index + "-costprice").val();
+            // 数量
+            let qty = $("#inputrows-" + index + "-qty").val();
+            rowamount = parseFloat(costprice) * parseFloat(qty);
+            return rowamount;
+        }
+        // 计算应付金额
+        function calcAmount(count) {
+            let amount = 0;
+            let rowamount = 0;
+            for (let i = 0; i < count; i++) {
+                rowamount = $("#inputrows-" + i + "-rowamount").val();
+                amount += parseFloat(rowamount);
+            }
+            return amount;
+        }
+        // 计算欠款
+        function calcDebt() {
+                //本次欠款
+                return parseFloat($("#discount").val()) - parseFloat($("#payment").val());
         }
     </script>
 {% endblock %}

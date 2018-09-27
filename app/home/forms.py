@@ -261,7 +261,7 @@ class StockBuyListForm(FlaskForm):
     qty = StringField(
         label=u'数量',
         validators=[
-            Regexp('[\d+]', message=u'请输入数量'),
+            Regexp('^(([0-9]+[\.]?[0-9]+)|[1-9])$', message=u'请输入正数'),
         ],
         description=u'数量',
         render_kw={
@@ -274,7 +274,7 @@ class StockBuyListForm(FlaskForm):
         label=u'单价',
         validators=[
             DataRequired(message=u'请输入单价'),
-            Regexp('[\d+\.\d]', message=u'请输入数字'),
+            Regexp('^[+]{0,1}(\d+)$|^[+]{0,1}(\d+\.\d+)$', message=u'请输入数字'),
         ],
         description=u'单价',
         render_kw={
@@ -325,6 +325,7 @@ class StockBuyForm(FlaskForm):
         render_kw={
             "class": "form-control select2",
             "data-placeholder": u"请选择员工",
+            #"disabled": "true",
         }
     )
     # 应付金额
@@ -367,6 +368,9 @@ class StockBuyForm(FlaskForm):
     debt = StringField(
         label=u'本次欠款',
         description=u'本次欠款',
+        validators=[
+            Regexp('^[+]{0,1}(\d+)$|^[+]{0,1}(\d+\.\d+)$', message=u'欠款不能为负数'),
+        ],
         render_kw={
             'class': 'form-control',
             #'placeholder': u'请输入本次欠款金额',
