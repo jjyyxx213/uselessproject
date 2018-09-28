@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 from . import home
 from flask import render_template, session, redirect, request, url_for, flash, current_app
-from forms import LoginForm, PwdForm, CustomerForm, StockBuyForm, StockBuyListForm
+from forms import LoginForm, PwdForm, CustomerForm, StockBuyForm, StockBuyListForm, StockBuyDebtForm
 from app.models import User, Userlog, Oplog, Item, Supplier, Customer, Stock, Porder, Podetail, Kvp
 from app import db
 from werkzeug.security import generate_password_hash
@@ -254,6 +254,8 @@ def stock_buy_list():
     key = request.args.get('key', '')
     # 采购单状态 true 临时;false 全部
     status = request.args.get('status', 'false')
+    # 是否欠款 true 欠;false 否
+    debt = request.args.get('debt', 'false')
     page = request.args.get('page', 1, type=int)
     pagination = Porder.query.filter_by(type=0)
     # 条件查询
@@ -266,12 +268,53 @@ def stock_buy_list():
         )
     if status == 'true':
         pagination = pagination.filter(Porder.status == 0)
+    if debt == 'true':
+        pagination = pagination.filter(Porder.debt > 0)
     pagination = pagination.order_by(
         Porder.addtime.desc()
     ).paginate(page=page,
                per_page=current_app.config['POSTS_PER_PAGE'],
                error_out=False)
-    return render_template('home/stock_buy_list.html', pagination=pagination, key=key, status=status)
+    return render_template('home/stock_buy_list.html', pagination=pagination, key=key, status=status, debt=debt)
+
+@home.route('/stock/buy/view/<int:id>', methods=['GET'])
+def stock_buy_view(id=None):
+    # 明细查看
+    porder = Porder.query.filter_by(id=id).first_or_404()
+    podetails = Podetail.query.filter_by(porder_id=id).order_by(Podetail.id.asc()).all()
+    return render_template('home/stock_buy_view.html', porder=porder, podetails=podetails)
+
+@home.route('/stock/buy/debt/<int:id>', methods=['GET', 'POST'])
+def stock_buy_debt(id=None):
+    # 结款
+    form = StockBuyDebtForm()
+    porder = Porder.query.filter_by(id=id).first_or_404()
+    # 如果表单不属于用户，不是发布状态 退出
+    if porder.user_id != int(session['user_id']) or porder.status == 0 or porder.type != 0:
+        return redirect(url_for('home.stock_buy_list'))
+    if request.method == 'GET':
+        form.amount.data = porder.amount
+        form.discount.data = porder.discount
+        form.payment.data = porder.payment
+        form.debt.data = porder.debt
+        form.remarks.data = porder.remarks
+    if form.validate_on_submit():
+        porder.amount = form.amount.data
+        porder.discount = form.discount.data
+        porder.payment = form.payment.data
+        porder.debt = form.debt.data
+        porder.remarks = form.remarks.data
+        db.session.add(porder)
+        oplog = Oplog(
+            user_id=session['user_id'],
+            ip=request.remote_addr,
+            reason=u'修改结款,订单号:%s' % porder.id
+        )
+        db.session.add(oplog)
+        db.session.commit()
+        flash(u'结款修改成功', 'ok')
+        return redirect(url_for('home.stock_buy_list'))
+    return render_template('home/stock_buy_debt.html', form=form, porder=porder)
 
 
 @home.route('/stock/buy/edit/<int:id>', methods=['GET', 'POST'])
@@ -279,6 +322,11 @@ def stock_buy_edit(id=None):
     # 采购单
     form = StockBuyForm()
     porder = Porder.query.filter_by(id=id).first()
+    # 表单不存在代表新增不做校验
+    if porder:
+        # 如果表单不属于用户，不是编辑状态 退出
+        if porder.user_id != int(session['user_id']) or porder.status == 1 or porder.type != 0:
+            return redirect(url_for('home.stock_buy_list'))
     podetails = Podetail.query.filter_by(porder_id=id).order_by(Podetail.id.asc()).all()
     if request.method == 'GET':
         # porder赋值
@@ -403,6 +451,26 @@ def stock_buy_edit(id=None):
             flash(u'采购单暂存成功', 'ok')
         return redirect(url_for('home.stock_buy_list'))
     return render_template('home/stock_buy_edit.html', form=form, porder=porder, form_count=form_count)
+
+@home.route('/stock/buy/del/<int:id>', methods=['GET'])
+def stock_buy_del(id=None):
+    # 采购单删除
+    porder = Porder.query.filter_by(id=id).first_or_404()
+    podetails = Podetail.query.filter_by(porder_id=id).all()
+    if porder.type != 0 or porder.user_id != int(session['user_id']) or porder.status == 1:
+        return redirect(url_for('home.stock_buy_list'))
+    db.session.delete(porder)
+    for iter_del in podetails:
+        db.session.delete(iter_del)
+    oplog = Oplog(
+        user_id=session['user_id'],
+        ip=request.remote_addr,
+        reason=u'删除采购单:%s' % porder.id
+    )
+    db.session.add(oplog)
+    db.session.commit()
+    flash(u'采购单删除成功', 'ok')
+    return redirect(url_for('home.stock_buy_list'))
 
 @home.route('/modal/item', methods=['GET'])
 def modal_item():

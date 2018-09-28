@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% block css %}
+    <style>
+        .padding-defined {
+            padding-left: 10px;
+            padding-right: 0px;
+        }
+
+        .margin-defined {
+            margin-top: 10px;
+            margin-left: 10px;
+        }
+    </style>
+{% endblock %}
+{% block page_content %}
+    <section class="content-header">
+        <h1> 门店管理系统</h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> 库存管理</a></li>
+            <li><a href="{{ url_for('home.stock_buy_list') }}"> 采购单列表</a></li>
+            <li class="active"> 结款修改</li>
+        </ol>
+    </section>
+    <section class="content" id="showcontent">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <form role="form" method="post">
+                        <!--启动CSRF-->
+                        {{ form.hidden_tag() }}
+                        <div class="box-header with-border">
+                            <h3 class="box-title"> 采购单 - {{ porder.id }}</h3>
+                        </div>
+                        <div class="box-body">
+                            <div class="row">
+                                <div class="col-md-7 padding-defined pull-left">
+                                    <div class="input-group">
+                                        <span class="input-group-btn">
+                                                <button class="btn btn-default" type="button"> 应付金额</button>
+                                        </span>
+                                        {{ form.amount }}
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="button"> 优惠后金额</button>
+                                        </span>
+                                        {{ form.discount }}
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="button"> 本次付款</button>
+                                        </span>
+                                        {{ form.payment }}
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="button"> 本次欠款</button>
+                                        </span>
+                                        {{ form.debt }}
+                                    </div>
+                                </div>
+                                <div class="col-md-5 padding-defined pull-left">
+                                        {% for err in form.discount.errors %}
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        {% endfor %}
+                                        {% for err in form.payment.errors %}
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        {% endfor %}
+                                        {% for err in form.debt.errors %}
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        {% endfor %}
+                                </div>
+                            </div>
+                            <div class="row" style="margin-top: 10px">
+                                <div class="col-md-7 padding-defined pull-left">
+                                    <div class="input-group">
+                                        <span class="input-group-btn">
+                                                <button class="btn btn-default" type="button"> 备注</button>
+                                        </span>
+                                        {{ form.remarks }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="box-footer">
+                                {{ form.submit }}
+                                <a href="{{ url_for('home.stock_buy_list') }}" class="btn btn-default pull-right"
+                                   role="button"> 返回</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block js %}
+    <script>
+        $(document).ready(function () {
+            $("#g-stock").addClass("active");
+            $("#g-stock-buy").addClass("active");
+            // 弹出提示初始化
+            $(function () {
+                $('[data-toggle="tooltip"]').tooltip()
+            });
+
+            //优惠后金额监听事件
+            $("#discount").on("change", function () {
+                if ($("#discount").val() != "" && $("#payment").val() != "") {
+                    $("#debt").val(calcDebt());
+                }
+            });
+            //本次付款监听事件
+            $("#payment").on("change", function () {
+                if ($("#discount").val() != "" && $("#payment").val() != "") {
+                    $("#debt").val(calcDebt());
+                }
+            });
+        });
+
+        // 计算欠款
+        function calcDebt() {
+                //本次欠款
+                return parseFloat($("#discount").val()) - parseFloat($("#payment").val());
+        }
+    </script>
+{% endblock %}

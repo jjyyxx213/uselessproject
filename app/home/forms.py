@@ -396,3 +396,70 @@ class StockBuyForm(FlaskForm):
         super(StockBuyForm, self).__init__(*args, **kwargs)
         self.supplier_id.choices = [(v.id, v.name) for v in
                                     Supplier.query.filter(Supplier.valid==1).order_by(Supplier.name).all()]
+
+class StockBuyDebtForm(FlaskForm):
+    # 应付金额
+    amount = StringField(
+        label=u'应付金额',
+        description=u'应付金额',
+        render_kw={
+            'class': 'form-control',
+            #'placeholder': u'请输入应付金额',
+            'readonly' : 'true'
+        }
+    )
+    # 优惠后金额
+    discount = StringField(
+        label=u'优惠后金额',
+        validators=[
+            DataRequired(message=u'请输入优惠后金额'),
+            Regexp('[\d+\.\d]', message=u'请输入数字'),
+        ],
+        description=u'优惠后金额',
+        render_kw={
+            'class': 'form-control',
+            #'placeholder': u'请输入优惠后金额',
+        }
+    )
+    # 实际付款金额
+    payment = StringField(
+        label=u'本次付款',
+        validators=[
+            DataRequired(message=u'请输入本次付款金额'),
+            Regexp('[\d+\.\d]', message=u'请输入数字'),
+        ],
+        description=u'本次付款',
+        render_kw={
+            'class': 'form-control',
+            #'placeholder': u'请输入本次付款金额',
+        }
+    )
+    # 欠款
+    debt = StringField(
+        label=u'本次欠款',
+        description=u'本次欠款',
+        validators=[
+            Regexp('^[+]{0,1}(\d+)$|^[+]{0,1}(\d+\.\d+)$', message=u'欠款不能为负数'),
+        ],
+        render_kw={
+            'class': 'form-control',
+            #'placeholder': u'请输入本次欠款金额',
+            'readonly': 'true',
+        }
+    )
+    # 备注
+    remarks = StringField(
+        label=u'备注',
+        description=u'备注',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入备注',
+        }
+    )
+    # 保存
+    submit = SubmitField(
+        label=u'确定',
+        render_kw={
+            'class': 'btn btn-primary',
+        }
+    )
