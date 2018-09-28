@@ -279,17 +279,6 @@ def stock_buy_edit(id=None):
     # 采购单
     form = StockBuyForm()
     porder = Porder.query.filter_by(id=id).first()
-    '''
-    if not porder:
-        porder = Porder(
-            type=0,
-            user_id=int(session['user_id']),
-            status=0,
-            remarks='',
-            )
-        db.session.add(porder)
-        db.session.commit()
-    '''
     podetails = Podetail.query.filter_by(porder_id=id).order_by(Podetail.id.asc()).all()
     if request.method == 'GET':
         # porder赋值
@@ -382,6 +371,12 @@ def stock_buy_edit(id=None):
                 # 设置主表为发布
                 porder.status = 1
                 db.session.add(porder)
+            oplog = Oplog(
+                user_id=session['user_id'],
+                ip=request.remote_addr,
+                reason=u'结算采购单:%s' % porder.id
+            )
+            db.session.add(oplog)
             db.session.commit()
             flash(u'采购单结算成功', 'ok')
         else:#暂存
@@ -399,6 +394,11 @@ def stock_buy_edit(id=None):
                     rowamount=iter_add.rowamount.data,
                 )
                 db.session.add(podetail)
+            oplog = Oplog(
+                user_id=session['user_id'],
+                ip=request.remote_addr,
+                reason=u'暂存采购单:%s' % porder.id
+            )
             db.session.commit()
             flash(u'采购单暂存成功', 'ok')
         return redirect(url_for('home.stock_buy_list'))
