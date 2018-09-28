@@ -2,6 +2,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, FileField, TextAreaField, SelectField, \
     SelectMultipleField, RadioField, FieldList, FormField, HiddenField
+from flask import session
 from app.utils.baseforms import NoValidateSelectField
 from wtforms.validators import DataRequired, Regexp, Length
 from app.models import User, Kvp, Supplier
@@ -315,17 +316,11 @@ class StockBuyForm(FlaskForm):
         }
     )
     # 操作员
-    user_id = SelectField(
+    user_name = StringField(
         label=u'采购员',
-        validators=[
-            DataRequired(message=u'请选择员工'),
-        ],
-        coerce=int,
-        choices=[],
         render_kw={
-            "class": "form-control select2",
-            "data-placeholder": u"请选择员工",
-            #"disabled": "true",
+            "class": "form-control",
+            "readonly": "true",
         }
     )
     # 应付金额
@@ -386,9 +381,12 @@ class StockBuyForm(FlaskForm):
             'placeholder': u'请输入备注',
         }
     )
+    type_switch = HiddenField(
+        label=u'开关',
+    )
     # 保存
     submit = SubmitField(
-        label=u'结算',
+        label=u'确定',
         render_kw={
             'class': 'btn btn-primary',
         }
@@ -398,5 +396,3 @@ class StockBuyForm(FlaskForm):
         super(StockBuyForm, self).__init__(*args, **kwargs)
         self.supplier_id.choices = [(v.id, v.name) for v in
                                     Supplier.query.filter(Supplier.valid==1).order_by(Supplier.name).all()]
-        self.user_id.choices = [(v.id, v.name) for v in
-                                    User.query.filter(User.frozen == 0).order_by(User.name).all()]

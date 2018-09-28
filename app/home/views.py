@@ -267,7 +267,7 @@ def stock_buy_list():
     if status == 'true':
         pagination = pagination.filter(Porder.status == 0)
     pagination = pagination.order_by(
-        Porder.addtime.asc()
+        Porder.addtime.desc()
     ).paginate(page=page,
                per_page=current_app.config['POSTS_PER_PAGE'],
                error_out=False)
@@ -279,20 +279,30 @@ def stock_buy_edit(id=None):
     # 采购单
     form = StockBuyForm()
     porder = Porder.query.filter_by(id=id).first()
+    '''
     if not porder:
-        porder = Porder(type=0, user_id=int(session['user_id']))
+        porder = Porder(
+            type=0,
+            user_id=int(session['user_id']),
+            status=0,
+            remarks='',
+            )
         db.session.add(porder)
         db.session.commit()
+    '''
     podetails = Podetail.query.filter_by(porder_id=id).order_by(Podetail.id.asc()).all()
     if request.method == 'GET':
         # porder赋值
-        form.supplier_id.data = porder.supplier_id
-        form.user_id.data = porder.user_id
-        form.amount.data = porder.amount
-        form.discount.data = porder.discount
-        form.payment.data = porder.payment
-        form.debt.data = porder.debt
-        form.remarks.data = porder.remarks
+        if porder:
+            form.supplier_id.data = porder.supplier_id
+            form.user_name.data = porder.user.name
+            form.amount.data = porder.amount
+            form.discount.data = porder.discount
+            form.payment.data = porder.payment
+            form.debt.data = porder.debt
+            form.remarks.data = porder.remarks
+        else:
+            form.user_name.data = session['user']
         # 如果存在明细
         if podetails:
             # 先把空行去除
@@ -312,39 +322,85 @@ def stock_buy_edit(id=None):
     # 计算动态input的初值
     form_count = len(form.inputrows)
     if form.validate_on_submit():
-        # 删除所有明细
-        for iter_del in podetails:
-            db.session.delete(iter_del)
-        for iter_add in form.inputrows:
-            # 新增明细
-            podetail = Podetail(
-                porder_id=porder.id,
-                item_id=iter_add.item_id.data,
-                nstore=iter_add.store.data,
-                qty=iter_add.qty.data,
-                costprice=iter_add.costprice.data,
-                rowamount=iter_add.rowamount.data,
+        # type_switch:1结算;0暂存
+        switch = int(form.type_switch.data)
+        # 提交类别 1：生效；0：暂存
+        status = 1 if switch == 1 else 0
+        # 添加主表
+        if not porder:  # 没有新增一个
+            porder = Porder(
+                type=0,
+                user_id=int(session['user_id']),
+                supplier_id=form.supplier_id.data,
+                amount=form.amount.data,
+                discount=form.discount.data,
+                payment=form.payment.data,
+                debt=form.debt.data,
+                status=status,
+                remarks=form.remarks.data,
             )
-            db.session.add(podetail)
-            # 判断库存是否存在
-            stock = Stock.query.filter_by(item_id=iter_add.item_id.data,
-                                          store=iter_add.store.data).first()
-            if stock: #存在就更新数量
-                stock.qty += float(iter_add.qty.data)
-                costprice = iter_add.costprice.data
-            else: #不存在库存表加一条
-                stock = Stock(
+        else:  # 有更新值
+            porder.user_id = int(session['user_id'])
+            porder.supplier_id = form.supplier_id.data
+            porder.amount = form.amount.data
+            porder.discount = form.discount.data
+            porder.payment = form.payment.data
+            porder.debt = form.debt.data
+            porder.status = status
+            porder.remarks = form.remarks.data
+        db.session.add(porder)
+        db.session.commit()  # 这里实现的不太好，提交一下后面要获取值
+        if switch == 1:#结算
+            # 删除所有明细
+            for iter_del in podetails:
+                db.session.delete(iter_del)
+            for iter_add in form.inputrows:
+                # 新增明细
+                podetail = Podetail(
+                    porder_id=porder.id,
                     item_id=iter_add.item_id.data,
-                    costprice=iter_add.costprice.data,
+                    nstore=iter_add.store.data,
                     qty=iter_add.qty.data,
-                    store=iter_add.store.data,
+                    costprice=iter_add.costprice.data,
+                    rowamount=iter_add.rowamount.data,
                 )
-            db.session.add(stock)
-            # 设置主表为发布
-            porder.status = 1
-            db.session.add(porder)
-        db.session.commit()
-        flash(u'采购单结算成功', 'ok')
+                db.session.add(podetail)
+                # 判断库存是否存在
+                stock = Stock.query.filter_by(item_id=iter_add.item_id.data,
+                                              store=iter_add.store.data).first()
+                if stock: #存在就更新数量
+                    stock.qty += float(iter_add.qty.data)
+                    costprice = iter_add.costprice.data
+                else: #不存在库存表加一条
+                    stock = Stock(
+                        item_id=iter_add.item_id.data,
+                        costprice=iter_add.costprice.data,
+                        qty=iter_add.qty.data,
+                        store=iter_add.store.data,
+                    )
+                db.session.add(stock)
+                # 设置主表为发布
+                porder.status = 1
+                db.session.add(porder)
+            db.session.commit()
+            flash(u'采购单结算成功', 'ok')
+        else:#暂存
+            # 删除所有明细
+            for iter_del in podetails:
+                db.session.delete(iter_del)
+            for iter_add in form.inputrows:
+                # 新增明细
+                podetail = Podetail(
+                    porder_id=porder.id,
+                    item_id=iter_add.item_id.data,
+                    nstore=iter_add.store.data,
+                    qty=iter_add.qty.data,
+                    costprice=iter_add.costprice.data,
+                    rowamount=iter_add.rowamount.data,
+                )
+                db.session.add(podetail)
+            db.session.commit()
+            flash(u'采购单暂存成功', 'ok')
         return redirect(url_for('home.stock_buy_list'))
     return render_template('home/stock_buy_edit.html', form=form, porder=porder, form_count=form_count)
 

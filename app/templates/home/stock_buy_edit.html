@@ -41,7 +41,7 @@
                                     <span class="input-group-btn">
                                         <button class="btn btn-default" type="button"> 采购员</button>
                                     </span>
-                                    {{ form.user_id }}
+                                    {{ form.user_name }}
                                 </div>
                                 <div class="col-md-4 input-group padding-defined pull-left margin-defined">
                                     <span class="input-group-btn">
@@ -59,7 +59,7 @@
                                 {% endfor %}
                                 </div>
                                 <div class="input-group col-md-3 pull-left margin-defined">
-                                {% for err in form.user_id.errors %}
+                                {% for err in form.user_name.errors %}
                                     <div class="col-md-12">
                                         <p style="color: red" class="small">{{ err }}</p>
                                     </div>
@@ -230,7 +230,8 @@
                             </div>
                             <div class="box-footer">
                                 {{ form.submit }}
-                                <a class="btn btn-warning" name="temp_submit">暂存</a>
+                                {{ form.type_switch }}
+                                <input name="switch" id="switch" type="checkbox" data-size="small">
                                 <a href="{{ url_for('home.stock_buy_list') }}" class="btn btn-default pull-right"
                                    role="button"> 返回</a>
                             </div>
@@ -286,6 +287,27 @@
             $(function () {
                 $('[data-toggle="tooltip"]').tooltip()
             });
+            // switch
+            $('#switch').bootstrapSwitch(
+                {
+                    onText: "结算",
+                    offText: "暂存",
+                    onColor: "success",
+                    offColor: "warning",
+                    size: "small",
+                    onSwitchChange: function (event, state) {
+                        if (state==true){
+                            $("#type_switch").val('1');
+                        } else {
+                            $("#type_switch").val('0');
+                        }
+                    }
+                }
+            );
+            // 默认为保存
+            $('#switch').bootstrapSwitch('state',true);
+
+
             // 下拉框设置
             $('.select2').select2(
                 {
@@ -293,14 +315,11 @@
                     allowClear: true,
                 }
             );
+
             // 供应商/采购员初始化空处理
             supplier_id = {{ porder.supplier_id or 0 }};
             if (supplier_id == 0) {
                 $('#supplier_id').val('').trigger('change');
-            }
-            user_id = {{ porder.user_id or 0 }};
-            if (user_id == 0) {
-                $('#user_id').val('').trigger('change');
             }
             // 动态加载inputrows
             let MaxInputs = 20; //maximum input boxes allowed
@@ -476,6 +495,7 @@
                 let id = $(this).find("td:first").text();
                 let name = $(this).find("td:eq(1)").text();
                 let standard = $(this).find("td:eq(3)").text();
+                let costprice = $(this).find("td:eq(4)").text();
                 $("#itemModal").modal("hide");
                 // 给输入框赋值
                 let input_item_id = $("#" + 'inputrows-' + loop_index + '-item_id');
@@ -484,6 +504,8 @@
                 input_item_name.val(name);
                 let input_item_standard = $("#" + 'inputrows-' + loop_index + '-item_standard');
                 input_item_standard.val(standard);
+                let input_costprice = $("#" + 'inputrows-' + loop_index + '-costprice');
+                input_costprice.val(costprice);
             });
 
             {#Prefilters是一个预过滤器，在每个请求之前被发送和$.ajax()处理它们前处理。#}
@@ -513,7 +535,7 @@
                     }
                 }
             });
-        })
+        });
 
         // select2为已有的仓库设置初值
         function setStoreValue(select_id) {
