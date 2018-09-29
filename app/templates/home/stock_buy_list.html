@@ -18,6 +18,12 @@
                             <div class="pull-left border-right">
                                 <a href="{{ url_for('home.stock_buy_edit', id=0) }}" class="btn btn-primary btn-sm" role="button">
                                     添加</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                <label for="input_name">欠款 </label>
+                                <input type="checkbox" id="debt_check"
+                                {% if debt == 'true' %}
+                                        checked
+                                {% endif %}
+                                >&nbsp;&nbsp;&nbsp;
                                 <label for="input_name">临时 </label>
                                 <input type="checkbox" id="status_check"
                                 {% if status == 'true' %}
@@ -66,14 +72,24 @@
                                     <td>{{ v.amount }}</td>
                                     <td>{{ v.discount }}</td>
                                     <td>{{ v.payment }}</td>
+                                    {% if v.debt > 0 %}
+                                    <td style="color:red;">{{ v.debt }}</td>
+                                    {% else %}
                                     <td>{{ v.debt }}</td>
+                                    {% endif %}
                                     <td>{{ v.remarks }}</td>
                                     <td>{{ v.addtime }}</td>
                                     <td>
+                                        <a href="{{ url_for('home.stock_buy_view', id=v.id) }}" name="btn-detail"
+                                           class="label label-info">明细</a>&nbsp
+                                        {% if v.status == 1 and v.user_id == user.id %}
+                                        <a href="{{ url_for('home.stock_buy_debt', id=v.id) }}" name="btn-detail"
+                                           class="label label-warning">结款</a>&nbsp
+                                        {% endif %}
                                         {% if v.status == 0 and v.user_id == user.id %}
                                         <a href="{{ url_for('home.stock_buy_edit', id=v.id) }}" name="btn-edit"
-                                           class="label label-success">修改</a>
-                                        <a href="#" name="btn-stop"
+                                           class="label label-success">修改</a>&nbsp
+                                        <a href="{{ url_for('home.stock_buy_del', id=v.id) }}" name="btn-stop"
                                            class="label label-danger">删除</a>
                                         {% endif %}
                                     </td>
@@ -107,14 +123,16 @@
             $("#do_search").click(function () {
                 var key = $("#search_key").val();
                 var status_check = $("#status_check").is(':checked');
-                location.href = "{{ url_for('home.stock_buy_list') }}?key=" + key + "&status=" + status_check;
+                var debt_check = $("#debt_check").is(':checked');
+                location.href = "{{ url_for('home.stock_buy_list') }}?key=" + key + "&status=" + status_check + "&debt=" + debt_check;
             })
             $("#search_key").bind("keyup", function (event) {
                 if (event.keyCode == "13") {
                     //回车执行查询
                     var key = $("#search_key").val();
                     var status_check = $("#status_check").is(':checked');
-                    location.href = "{{ url_for('home.stock_buy_list') }}?key=" + key + "&status=" + status_check;
+                    var debt_check = $("#debt_check").is(':checked');
+                    location.href = "{{ url_for('home.stock_buy_list') }}?key=" + key + "&status=" + status_check + "&debt=" + debt_check;
                 }
             })
         })
