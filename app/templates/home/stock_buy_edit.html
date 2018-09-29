@@ -79,7 +79,12 @@
                                 </div>
                                 <div class="col-md-2 padding-defined">
                                     <label style="color: red">*</label>
-                                    <label class="small"> 仓库</label>
+                                    <label class="small">
+                                         仓库&nbsp;&nbsp;&nbsp;&nbsp;
+                                        <a id="batch">批量</a>
+                                        <label class="badge bg-green" data-toggle="tooltip"
+                                       title="根据第一行仓库批量维护">?</label>
+                                    </label>
                                 </div>
                                 <div class="col-md-1 padding-defined">
                                     <label class="small"> 数量(卷)</label>
@@ -322,6 +327,7 @@
             if (supplier_id == 0) {
                 $('#supplier_id').val('').trigger('change');
             }
+
             // 动态加载inputrows
             let MaxInputs = 20; //maximum input boxes allowed
             let InputsWrapper = $("#inputs"); //Input boxes wrapper ID
@@ -508,6 +514,21 @@
                 let input_costprice = $("#" + 'inputrows-' + loop_index + '-costprice');
                 input_costprice.val(costprice);
             });
+
+            // 批量维护仓库
+            $("#batch").on("click", function () {
+                let id = $("#inputrows-0-store").find("option:selected").val();
+                let name = $("#inputrows-0-store").find("option:selected").text();
+                let len = row_ins;
+                // 如果第一行没有值或者总行数小于2 返回
+                if (name == "" || len < 2) {
+                    return;
+                }
+                for (let i = 1; i < len; i++) {
+                    select = $("#inputrows-" + i + "-store");
+                    select.append(new Option(id, name, false, true));
+                }
+            })
 
             {#Prefilters是一个预过滤器，在每个请求之前被发送和$.ajax()处理它们前处理。#}
             {#options 是请求的选项#}

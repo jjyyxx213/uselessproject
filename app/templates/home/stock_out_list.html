@@ -5,7 +5,7 @@
         <h1> 门店管理系统</h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> 库存管理</a></li>
-            <li class="active"> 采购单列表</li>
+            <li class="active"> 出库单列表</li>
         </ol>
     </section>
     <section class="content" id="showcontent">
@@ -13,17 +13,11 @@
             <div class="col-md-12">
                 <div class="box box-primary">
                     <div class="box-header">
-                        <h3 class="box-title"> 采购单列表</h3>
+                        <h3 class="box-title"> 出库单列表</h3>
                         <div class="box-tools">
                             <div class="pull-left border-right">
-                                <a href="{{ url_for('home.stock_buy_edit', id=0) }}" class="btn btn-primary btn-sm" role="button">
+                                <a href="#" class="btn btn-primary btn-sm" role="button">
                                     添加</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                <label for="input_name">欠款 </label>
-                                <input type="checkbox" id="debt_check"
-                                {% if debt == 'true' %}
-                                        checked
-                                {% endif %}
-                                >&nbsp;&nbsp;&nbsp;
                                 <label for="input_name">临时 </label>
                                 <input type="checkbox" id="status_check"
                                 {% if status == 'true' %}
@@ -48,13 +42,9 @@
                             <tbody>
                             <tr>
                                 <th> 编号</th>
-                                <th> 采购员</th>
+                                <th> 出库员</th>
                                 <th> 供应商</th>
                                 <th> 状态</th>
-                                <th> 应付金额</th>
-                                <th> 优惠后金额</th>
-                                <th> 付款金额</th>
-                                <th> 欠款</th>
                                 <th> 备注</th>
                                 <th> 添加时间</th>
                                 <th> 操作方式</th>
@@ -69,27 +59,15 @@
                                     {% else %}
                                     <td>正式</td>
                                     {% endif %}
-                                    <td>{{ v.amount }}</td>
-                                    <td>{{ v.discount }}</td>
-                                    <td>{{ v.payment }}</td>
-                                    {% if v.debt > 0 %}
-                                    <td style="color:red;">{{ v.debt }}</td>
-                                    {% else %}
-                                    <td>{{ v.debt }}</td>
-                                    {% endif %}
                                     <td>{{ v.remarks }}</td>
                                     <td>{{ v.addtime }}</td>
                                     <td>
-                                        <a href="{{ url_for('home.stock_buy_view', id=v.id) }}" name="btn-detail"
+                                        <a href="#" name="btn-detail"
                                            class="label label-info">明细</a>&nbsp
-                                        {% if v.status == 1 and v.user_id == user.id %}
-                                        <a href="{{ url_for('home.stock_buy_debt', id=v.id) }}" name="btn-detail"
-                                           class="label label-warning">结款</a>&nbsp
-                                        {% endif %}
                                         {% if v.status == 0 and v.user_id == user.id %}
-                                        <a href="{{ url_for('home.stock_buy_edit', id=v.id) }}" name="btn-edit"
+                                        <a href="#" name="btn-edit"
                                            class="label label-success">修改</a>&nbsp
-                                        <a href="{{ url_for('home.stock_buy_del', id=v.id) }}" name="btn-stop"
+                                        <a href="#" name="btn-stop"
                                            class="label label-danger">删除</a>
                                         {% endif %}
                                     </td>
@@ -100,7 +78,7 @@
                     </div>
                     <div class="box-footer clearfix">
                         <ul class="pagination pagination-sm no-margin pull-right">
-                            {{ macros.pagination_widget(pagination, 'home.stock_buy_list', key=key, status=status, debt=debt) }}
+                            {{ macros.pagination_widget(pagination, 'home.stock_out_list', key=key, status=status) }}
                         </ul>
                     </div>
                 </div>
@@ -113,7 +91,7 @@
     <script>
         $(document).ready(function () {
             $("#g-stock").addClass("active");
-            $("#g-stock-buy-list").addClass("active");
+            $("#g-stock-out-list").addClass("active");
             //只要遇到radio,checkbox 直接转换为icheck
             $('input[type="checkbox"], input[type="radio"]').iCheck({
                 checkboxClass: 'icheckbox_square-blue',
@@ -123,16 +101,14 @@
             $("#do_search").click(function () {
                 var key = $("#search_key").val();
                 var status_check = $("#status_check").is(':checked');
-                var debt_check = $("#debt_check").is(':checked');
-                location.href = "{{ url_for('home.stock_buy_list') }}?key=" + key + "&status=" + status_check + "&debt=" + debt_check;
+                location.href = "{{ url_for('home.stock_out_list') }}?key=" + key + "&status=" + status_check;
             })
             $("#search_key").bind("keyup", function (event) {
                 if (event.keyCode == "13") {
                     //回车执行查询
                     var key = $("#search_key").val();
                     var status_check = $("#status_check").is(':checked');
-                    var debt_check = $("#debt_check").is(':checked');
-                    location.href = "{{ url_for('home.stock_buy_list') }}?key=" + key + "&status=" + status_check + "&debt=" + debt_check;
+                    location.href = "{{ url_for('home.stock_out_list') }}?key=" + key + "&status=" + status_check;
                 }
             })
         })
