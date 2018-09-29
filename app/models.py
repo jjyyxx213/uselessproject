@@ -144,6 +144,18 @@ class Mscard(db.Model):
     def __repr__(self):
         return '<Mscard %r>' % self.name
 
+    # 20180927 liuqq 转换json串儿
+    def to_json(self):
+        str_json = {'id': self.id,
+                    'name': self.name,
+                    'payment': self.payment,
+                    'interval': self.interval,
+                    'scorerule': self.scorerule,
+                    'scorelimit': self.scorelimit,
+                    'valid': self.valid
+                    }
+        return str_json
+
 # 会员卡明细
 class Msdetail(db.Model):
     __tablename__ = 'tb_msdetail'
@@ -162,6 +174,19 @@ class Msdetail(db.Model):
 
     def __repr__(self):
         return '<Msdetail %r>' % self.name
+
+    # 20180927 liuqq 转换json串儿
+    def to_json(self):
+        str_json = {'id': self.id,
+                    'mscard_id': self.mscard_id,
+                    'item_id': self.item_id,
+                    'discountprice': self.discountprice,
+                    'quantity': self.quantity,
+                    'interval': self.interval,
+                    'salesprice': self.item.salesprice,
+                    'item_name': self.item.name
+                    }
+        return str_json
 
 # 客户
 class Customer(db.Model):
@@ -246,6 +271,9 @@ class Vip(db.Model):
 
     # 客户会员卡明细外键
     vipdetails = db.relationship('Vipdetail', backref='vip')
+
+    # 2080928 liuqq 客户外键
+    customer = db.relationship('Customer',backref='vip')
 
     def __repr__(self):
         return '<Vip %r>' % self.name

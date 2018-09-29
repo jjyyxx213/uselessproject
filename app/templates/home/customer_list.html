@@ -43,7 +43,7 @@
                                 <th> 到店次数</th>
                                 <th> 累计消费</th>
                                 <th> 车牌号</th>
-                                <th> 车架号</th>
+                                {#<th> 车架号</th>#}
                                 <th> 品牌类型</th>
                                 <th> 邮箱</th>
                                 <th> 客户经理</th>
@@ -64,17 +64,23 @@
                                     <td>{{ v.freq }}</td>
                                     <td>{{ v.summary }}</td>
                                     <td>{{ v.pnumber }}</td>
-                                    <td>{{ v.vin }}</td>
+                                    {#<td>{{ v.vin }}</td>#}
                                     <td>{{ v.brand }}</td>
                                     <td>{{ v.email }}</td>
                                     <td>{{ v.user.name }}</td>
-                                    <td>{{ v.vip_id }}</td>
+                                    {% if v.vip_id %}
+                                        <td>{{ v.vip.name }}</td>
+                                    {% else %}
+                                        <td></td>
+                                    {% endif %}
                                     <td>{{ v.addtime }}</td>
                                     <td>
                                         <a href="{{ url_for('home.customer_edit', id=v.id) }}" name="btn-unfrozen"
                                            class="label label-success">修改</a>
-                                        <a href="#" name="btn-frozen"
-                                           class="label label-danger">会员卡</a>
+                                        {% if not v.vip_id %}
+                                            <a href="{{ url_for('home.cus_vip_add', id=v.id) }}" name="btn-frozen"
+                                               class="label label-danger">绑卡</a>
+                                        {% endif %}
                                     </td>
                                 </tr>
                             {% endfor %}
