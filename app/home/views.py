@@ -225,6 +225,98 @@ def customer_edit(id=None):
         return redirect(url_for('home.customer_list'))
     return render_template('home/customer_edit.html', form=form, customer=obj_customer)
 
+@home.route('/modal/item', methods=['GET'])
+def modal_item():
+    # 获取商品弹出框数据
+    key = request.args.get('key', '')
+    items = Item.query.outerjoin(
+        Stock, Item.id == Stock.item_id
+    )
+    items = items.filter(Item.valid == 1, Item.type == 0)
+    # 条件查询
+    if key:
+        # 库房/零件名称/类别/规格
+        items = items.filter(
+            or_(Stock.store.ilike('%' + key + '%'),
+                Item.name.ilike('%' + key + '%'),
+                Item.cate.ilike('%' + key + '%'),
+                Item.standard.ilike('%' + key + '%'),
+                )
+        )
+    items = items.order_by(Item.name.asc()).limit(current_app.config['POSTS_PER_PAGE']).all()
+    # 返回的数据格式为
+    # {
+    # "pages": 1,
+    # "data": [
+    #         {"id": "1",
+    #         "name": "xx"}
+    #         ]
+    # }
+    data = []
+    for v in items:
+        qty = 0
+        stock_costprice = v.costprice
+        for j in v.stocks:
+            qty += j.qty
+            # 上一次的进货价不准确，暂时懒得改了
+            stock_costprice = j.costprice
+        data.append(
+            {
+                "id": v.id,
+                "name": v.name,
+                "qty": qty,
+                "standard": v.standard,
+                "costprice": v.costprice,
+                "salesprice": v.salesprice,
+                "cate": v.cate,
+                "stock_costprice": stock_costprice,
+            }
+        )
+    res = {
+        "key": key,
+        "data": data,
+    }
+    return dumps(res)
+
+@home.route('/store/get', methods=['GET', 'POST'])
+def store_get():
+    # 获取库房分页清单
+    if request.method == 'POST':
+        params = request.form.to_dict()
+        page = int(params['curPage']) if (params.has_key('curPage')) else 1
+        key = params['selectInput'] if (params.has_key('selectInput')) else ''
+
+        pagination = Kvp.query.filter(Kvp.type == 'store')
+        # 如果查询了增加查询条件
+        if key:
+            pagination = pagination.filter(Kvp.value.ilike('%' + key + '%'))
+        pagination = pagination.order_by(
+            Kvp.value.asc()
+        ).paginate(page=page,
+                   per_page=current_app.config['POSTS_PER_PAGE'],
+                   error_out=False)
+
+        # 返回的数据格式为
+        # {
+        # "pages": 1,
+        # "data": [
+        #         {"id": "1",
+        #         "name": "xx"}
+        #         ]
+        # }
+        data = []
+        for v in pagination.items:
+            data.append(
+                {#key和值都用字符
+                    "id": v.value,
+                    "name": v.value
+                }
+            )
+        res = {
+            "pages": pagination.pages,
+            "data": data,
+        }
+    return dumps(res)
 
 @home.route('/stock/list', methods=['GET'])
 def stock_list():
@@ -472,95 +564,27 @@ def stock_buy_del(id=None):
     flash(u'采购单删除成功', 'ok')
     return redirect(url_for('home.stock_buy_list'))
 
-@home.route('/modal/item', methods=['GET'])
-def modal_item():
-    # 获取商品弹出框数据
+@home.route('/stock/out/list', methods=['GET'])
+def stock_out_list():
+    # 领料单列表
     key = request.args.get('key', '')
-    items = Item.query.outerjoin(
-        Stock, Item.id == Stock.item_id
-    )
-    items = items.filter(Item.valid == 1, Item.type == 0)
+    # 采购单状态 true 临时;false 全部
+    status = request.args.get('status', 'false')
+    page = request.args.get('page', 1, type=int)
+    pagination = Porder.query.filter_by(type=1)
     # 条件查询
     if key:
-        # 库房/零件名称/类别/规格
-        items = items.filter(
-            or_(Stock.store.ilike('%' + key + '%'),
-                Item.name.ilike('%' + key + '%'),
-                Item.cate.ilike('%' + key + '%'),
-                Item.standard.ilike('%' + key + '%'),
-                )
+        # 单号/备注
+        pagination = pagination.filter(
+            or_(Porder.id.ilike('%' + key + '%'),
+                Porder.remarks.ilike('%' + key + '%'),
+                Porder.addtime.ilike('%' + key + '%'))
         )
-    items = items.order_by(Item.name.asc()).limit(current_app.config['POSTS_PER_PAGE']).all()
-    # 返回的数据格式为
-    # {
-    # "pages": 1,
-    # "data": [
-    #         {"id": "1",
-    #         "name": "xx"}
-    #         ]
-    # }
-    data = []
-    for v in items:
-        qty = 0
-        stock_costprice = v.costprice
-        for j in v.stocks:
-            qty += j.qty
-            # 上一次的进货价不准确，暂时懒得改了
-            stock_costprice = j.costprice
-        data.append(
-            {
-                "id": v.id,
-                "name": v.name,
-                "qty": qty,
-                "standard": v.standard,
-                "costprice": v.costprice,
-                "salesprice": v.salesprice,
-                "cate": v.cate,
-                "stock_costprice": stock_costprice,
-            }
-        )
-    res = {
-        "key": key,
-        "data": data,
-    }
-    return dumps(res)
-
-@home.route('/store/get', methods=['GET', 'POST'])
-def store_get():
-    # 获取库房分页清单
-    if request.method == 'POST':
-        params = request.form.to_dict()
-        page = int(params['curPage']) if (params.has_key('curPage')) else 1
-        key = params['selectInput'] if (params.has_key('selectInput')) else ''
-
-        pagination = Kvp.query.filter(Kvp.type == 'store')
-        # 如果查询了增加查询条件
-        if key:
-            pagination = pagination.filter(Kvp.value.ilike('%' + key + '%'))
-        pagination = pagination.order_by(
-            Kvp.value.asc()
-        ).paginate(page=page,
-                   per_page=current_app.config['POSTS_PER_PAGE'],
-                   error_out=False)
-
-        # 返回的数据格式为
-        # {
-        # "pages": 1,
-        # "data": [
-        #         {"id": "1",
-        #         "name": "xx"}
-        #         ]
-        # }
-        data = []
-        for v in pagination.items:
-            data.append(
-                {#key和值都用字符
-                    "id": v.value,
-                    "name": v.value
-                }
-            )
-        res = {
-            "pages": pagination.pages,
-            "data": data,
-        }
-    return dumps(res)
+    if status == 'true':
+        pagination = pagination.filter(Porder.status == 0)
+    pagination = pagination.order_by(
+        Porder.addtime.desc()
+    ).paginate(page=page,
+               per_page=current_app.config['POSTS_PER_PAGE'],
+               error_out=False)
+    return render_template('home/stock_out_list.html', pagination=pagination, key=key, status=status)
