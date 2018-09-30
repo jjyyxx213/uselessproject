@@ -80,6 +80,9 @@
                                         {% if not v.vip_id %}
                                             <a href="{{ url_for('home.cus_vip_add', id=v.id) }}" name="btn-frozen"
                                                class="label label-danger">绑卡</a>
+                                        {% else %}
+                                            <a href="{{ url_for('home.cus_vip_list', vip_id=v.vip_id) }}" name="btn-frozen"
+                                               class="label label-info">查询</a>
                                         {% endif %}
                                     </td>
                                 </tr>

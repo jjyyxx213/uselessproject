@@ -689,3 +689,12 @@ def msdetails_get():
         for obj_msdetail in obj_msdetails:
             s_json.append(obj_msdetail.to_json())
         return (dumps(s_json))
+
+
+# 20180930 liuqq 查询客户-会员卡明细
+@home.route('/customer/cus_vip_list/<int:vip_id>', methods=['GET'])
+def cus_vip_list(vip_id=None):
+    # 明细查看
+    obj_vip = Vip.query.filter_by(id=vip_id).first()
+    obj_vip_details = Vipdetail.query.filter_by(vip_id=vip_id).order_by(Vipdetail.id.asc()).all()
+    return render_template('home/cus_vip_list.html', obj_vip=obj_vip, obj_vip_details=obj_vip_details)
