@@ -43,7 +43,6 @@
                             <tr>
                                 <th> 编号</th>
                                 <th> 出库员</th>
-                                <th> 供应商</th>
                                 <th> 状态</th>
                                 <th> 备注</th>
                                 <th> 添加时间</th>
@@ -53,7 +52,6 @@
                                 <tr>
                                     <td>{{ v.id }}</td>
                                     <td>{{ v.user.name }}</td>
-                                    <td>{{ v.supplier.name }}</td>
                                     {% if v.status == 0 %}
                                     <td style="color: red">临时</td>
                                     {% else %}

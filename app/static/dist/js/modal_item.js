@@ -2,11 +2,11 @@
 * 产品选择模态框
 * appendId: 表格ID
 * */
-function modal_item(appendId, url) {
+function modal_item(appendId, url, key) {
     $.ajax({
                     url: url,
                     type: "GET",
-                    data: "key=" + "",
+                    data: "key=" + key,
                     dataType: "json",
                     success: function (result) {
                         appendId.empty();
@@ -18,6 +18,7 @@ function modal_item(appendId, url) {
                                     '<td>' + data[i].name + '</td>' +
                                     '<td>' + data[i].qty + '</td>' +
                                     '<td>' + data[i].standard + '</td>' +
+                                    '<td>' + data[i].unit + '</td>' +
                                     '<td>' + data[i].costprice + '</td>' +
                                     '<td>' + data[i].salesprice + '</td>' +
                                     '<td>' + data[i].cate + '</td></tr>'

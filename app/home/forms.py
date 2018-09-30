@@ -215,6 +215,153 @@ class CustomerForm(FlaskForm):
         super(CustomerForm, self).__init__(*args, **kwargs)
         self.user_id.choices = [(v.id, v.name) for v in User.query.order_by(User.name).all()]
 
+# 20180929 liuqq 客户-会员卡明细表单
+class VipdetailListForm(FlaskForm):
+    item_id = HiddenField(
+        label=u'产品/服务ID',
+        description=u'产品/服务ID',
+        validators=[
+            DataRequired(message=u'请选择产品或服务'),
+        ],
+    )
+    item_name = HiddenField(
+        label=u'产品/服务',
+        description=u'产品/服务',
+    )
+    salesprice = StringField(
+        label=u'原售价',
+        description=u'原售价',
+    )
+    discountprice = StringField(
+        label=u'优惠价',
+        validators=[
+            DataRequired(message=u'请输入优惠价'),
+            Regexp('[\d+\.\d]', message=u'请输入数字'),
+        ],
+        description=u'优惠价',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入优惠价',
+        }
+    )
+    quantity = StringField(
+        label=u'次数',
+        validators=[
+            Regexp('[\d+]', message=u'请输入次数'),
+        ],
+        description=u'次数',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入次数',
+        }
+    )
+    interval = StringField(
+        label=u'有效期',
+        validators=[
+            Regexp('[\d+\.\d]', message=u'请输入数字'),
+        ],
+        description=u'有效期',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入有效期(月)',
+        }
+    )
+    #FieldList里的对象也是FormField，不知道怎么给CSRF_TOKEN赋值，关掉验证
+    def __init__(self, *args, **kwargs):
+        kwargs['csrf_enabled'] = False
+        FlaskForm.__init__(self, *args, **kwargs)
+
+
+# 20180920 liuqq 客户-会员卡表单
+class CusVipForm(FlaskForm):
+    cus_name = StringField(
+        label=u'客户姓名',
+        description=u'客户姓名',
+        render_kw={
+            'class': 'form-control',
+            'readonly': 'readonly'
+        }
+    )
+
+    name = SelectField(
+        label=u'会员卡名称',
+        validators=[
+            DataRequired(message=u'请选择会员卡')
+        ],
+        coerce=int,
+        choices=[],
+        render_kw={
+            "class": "form-control select2",
+            "data-placeholder": u"请选择会员卡",
+        }
+    )
+
+    payment = StringField(
+        label=u'开卡金额',
+        validators=[
+            Regexp('[\d+\.\d]', message=u'请输入数字'),
+        ],
+        description=u'开卡金额',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请选择会员卡',
+            'readonly': 'readonly'
+        }
+    )
+    interval = StringField(
+        label=u'有效期',
+        validators=[
+            Regexp('[\d+\.\d]', message=u'请输入数字'),
+        ],
+        description=u'有效期',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请选择会员卡',
+            'readonly': 'readonly'
+        }
+    )
+    scorerule = StringField(
+        label=u'积分规则',
+        validators=[
+            DataRequired(message=u'请输入积分规则'),
+            Regexp('[\d+\.\d]', message=u'请输入数字'),
+        ],
+        description=u'积分规则',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请选择会员卡',
+            'readonly': 'readonly'
+        }
+    )
+    scorelimit = StringField(
+        label=u'积分上限',
+        validators=[
+            Regexp('[\d+\.\d]', message=u'请输入数字'),
+        ],
+        description=u'积分上限',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请选择会员卡',
+            'readonly': 'readonly'
+        }
+    )
+
+    inputrows = FieldList(
+        FormField(VipdetailListForm), min_entries=0
+    )
+
+    submit = SubmitField(
+        label=u'添加',
+        render_kw={
+            'class': 'btn btn-primary',
+        }
+    )
+
+    # 如果需要从数据库取值，一定要重写__init__方法，因为db对象不是全局的
+    def __init__(self, *args, **kwargs):
+        super(CusVipForm, self).__init__(*args, **kwargs)
+        self.name.choices = [(v.id, v.name) for v in Mscard.query.filter_by(valid=1).order_by(Mscard.name).all()]
+
 class StockBuyListForm(FlaskForm):
     item_id = HiddenField(
         label=u'产品/服务ID',
@@ -242,6 +389,15 @@ class StockBuyListForm(FlaskForm):
         render_kw={
             'class': 'form-control',
             'readonly' : 'true',
+        }
+    )
+    # 单位
+    item_unit = StringField(
+        label=u'单位',
+        description=u'单位',
+        render_kw={
+            'class': 'form-control',
+            'readonly': 'true',
         }
     )
     # 仓库
@@ -465,8 +621,7 @@ class StockBuyDebtForm(FlaskForm):
     )
 
 
-# 20180929 liuqq 客户-会员卡明细表单
-class VipdetailListForm(FlaskForm):
+class StockOutListForm(FlaskForm):
     item_id = HiddenField(
         label=u'产品/服务ID',
         description=u'产品/服务ID',
@@ -474,140 +629,112 @@ class VipdetailListForm(FlaskForm):
             DataRequired(message=u'请选择产品或服务'),
         ],
     )
-    item_name = HiddenField(
-        label=u'产品/服务',
-        description=u'产品/服务',
-    )
-    salesprice = StringField(
-        label=u'原售价',
-        description=u'原售价',
-    )
-    discountprice = StringField(
-        label=u'优惠价',
+    item_name = StringField(
+        label=u'商品名称',
         validators=[
-            DataRequired(message=u'请输入优惠价'),
-            Regexp('[\d+\.\d]', message=u'请输入数字'),
+            DataRequired(message=u'请选择商品')
         ],
-        description=u'优惠价',
+        description=u'商品名称',
         render_kw={
             'class': 'form-control',
-            'placeholder': u'请输入优惠价',
+            'placeholder': u'请选择商品',
+            'readonly': 'true',
         }
     )
-    quantity = StringField(
-        label=u'次数',
-        validators=[
-            Regexp('[\d+]', message=u'请输入次数'),
-        ],
-        description=u'次数',
+    # 规格
+    item_standard = StringField(
+        label=u'规格',
+        description=u'规格',
         render_kw={
             'class': 'form-control',
-            'placeholder': u'请输入次数',
+            'readonly' : 'true',
         }
     )
-    interval = StringField(
-        label=u'有效期',
-        validators=[
-            Regexp('[\d+\.\d]', message=u'请输入数字'),
-        ],
-        description=u'有效期',
+    # 单位
+    item_unit = StringField(
+        label=u'单位',
+        description=u'单位',
         render_kw={
             'class': 'form-control',
-            'placeholder': u'请输入有效期(月)',
+            'readonly': 'true',
         }
     )
+    # 单价
+    costprice = StringField(
+        label=u'单价',
+        description=u'单价',
+        render_kw={
+            'class': 'form-control',
+            'readonly': 'true',
+        }
+    )
+    # 仓库
+    store = StringField(
+        label=u'仓库',
+        validators=[
+            DataRequired(message=u'请选择仓库'),
+        ],
+        description=u'仓库',
+        render_kw={
+            'class': 'form-control',
+            'readonly': 'true',
+        }
+    )
+    # 库存数量
+    stock_qty = StringField(
+        label=u'库存数量',
+        description=u'数量',
+        render_kw={
+            'class': 'form-control',
+            'readonly': 'true',
+        }
+    )
+    # 数量
+    qty = StringField(
+        label=u'数量',
+        validators=[
+            Regexp('^(([0-9]+[\.]?[0-9]+)|[1-9])$', message=u'请输入正数'),
+        ],
+        description=u'数量',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入数量',
+        }
+    )
+
     #FieldList里的对象也是FormField，不知道怎么给CSRF_TOKEN赋值，关掉验证
     def __init__(self, *args, **kwargs):
         kwargs['csrf_enabled'] = False
         FlaskForm.__init__(self, *args, **kwargs)
 
-
-# 20180920 liuqq 客户-会员卡表单
-class CusVipForm(FlaskForm):
-    cus_name = StringField(
-        label=u'客户姓名',
-        description=u'客户姓名',
-        render_kw={
-            'class': 'form-control',
-            'readonly': 'readonly'
-        }
-    )
-
-    name = SelectField(
-        label=u'会员卡名称',
-        validators=[
-            DataRequired(message=u'请选择会员卡')
-        ],
-        coerce=int,
-        choices=[],
-        render_kw={
-            "class": "form-control select2",
-            "data-placeholder": u"请选择会员卡",
-        }
-    )
-
-    payment = StringField(
-        label=u'开卡金额',
-        validators=[
-            Regexp('[\d+\.\d]', message=u'请输入数字'),
-        ],
-        description=u'开卡金额',
-        render_kw={
-            'class': 'form-control',
-            'placeholder': u'请选择会员卡',
-            'readonly': 'readonly'
-        }
-    )
-    interval = StringField(
-        label=u'有效期',
-        validators=[
-            Regexp('[\d+\.\d]', message=u'请输入数字'),
-        ],
-        description=u'有效期',
-        render_kw={
-            'class': 'form-control',
-            'placeholder': u'请选择会员卡',
-            'readonly': 'readonly'
-        }
-    )
-    scorerule = StringField(
-        label=u'积分规则',
-        validators=[
-            DataRequired(message=u'请输入积分规则'),
-            Regexp('[\d+\.\d]', message=u'请输入数字'),
-        ],
-        description=u'积分规则',
-        render_kw={
-            'class': 'form-control',
-            'placeholder': u'请选择会员卡',
-            'readonly': 'readonly'
-        }
-    )
-    scorelimit = StringField(
-        label=u'积分上限',
-        validators=[
-            Regexp('[\d+\.\d]', message=u'请输入数字'),
-        ],
-        description=u'积分上限',
-        render_kw={
-            'class': 'form-control',
-            'placeholder': u'请选择会员卡',
-            'readonly': 'readonly'
-        }
-    )
-
+class StockOutForm(FlaskForm):
     inputrows = FieldList(
-        FormField(VipdetailListForm), min_entries=0
+        FormField(StockBuyListForm), min_entries=1
     )
-
+    # 出库员
+    user_name = StringField(
+        label=u'出库员',
+        render_kw={
+            "class": "form-control",
+            "readonly": "true",
+        }
+    )
+    # 备注
+    remarks = StringField(
+        label=u'备注',
+        description=u'备注',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入备注',
+        }
+    )
+    type_switch = HiddenField(
+        label=u'开关',
+    )
+    # 保存
     submit = SubmitField(
-        label=u'添加',
+        label=u'确定',
         render_kw={
             'class': 'btn btn-primary',
         }
     )
-
-    # 如果需要从数据库取值，一定要重写__init__方法，因为db对象不是全局的
-    def __init__(self, *args, **kwargs):
-        super(CusVipForm, self).__init__(*args, **kwargs)
-        self.name.choices = [(v.id, v.name) for v in Mscard.query.filter_by(valid=1).order_by(Mscard.name).all()]

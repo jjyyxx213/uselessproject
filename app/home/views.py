@@ -226,6 +226,114 @@ def customer_edit(id=None):
         return redirect(url_for('home.customer_list'))
     return render_template('home/customer_edit.html', form=form, customer=obj_customer)
 
+# 20180920 liuqq 新增客户-会员卡
+@home.route('/customer/cus_vip_add/<int:id>', methods=['GET', 'POST'])
+def cus_vip_add(id=None):
+    form = CusVipForm()
+    obj_customer = Customer.query.filter_by(id=id).first()
+    form.cus_name.data = obj_customer.name
+    if form.validate_on_submit():
+        # 计算vip ID
+        obj_max_vip = Vip.query.order_by(Vip.id.desc()).first()
+        if(obj_max_vip):
+            max_vip_id = obj_max_vip.id + 1
+        else:
+            max_vip_id = 1
+
+        # 计算截止日期
+        interval_day = int(form.interval.data) * 30  # 卡的有效期*30天
+        add_time = datetime.now()
+        end_time = add_time + timedelta(days=interval_day)
+
+        # 计算引用vip卡的名称
+        obj_mscard = Mscard.query.filter_by(id=form.name.data).first()
+        # 创建VIP主表对象
+        obj_vip = Vip(
+            id = max_vip_id,
+            name=obj_mscard.name,  # 名称
+            balance=form.payment.data,  # 余额
+            scorerule=form.scorerule.data,  # 积分规则
+            scorelimit=form.scorelimit.data,  # 积分限制提醒
+            addtime=add_time,  # 办理时间
+            endtime=end_time,  # 截止时间 = 办理时间 + 有效期
+        )
+        obj_oplog_vip = Oplog(
+            user_id=session['user_id'],
+            ip=request.remote_addr,
+            reason=u'添加客户vip卡:%s' % max_vip_id
+        )
+        # 数据提交
+        objects = [obj_vip, obj_oplog_vip]
+        db.session.add_all(objects)
+        db.session.commit()
+
+        # 保存客户与vip—id关系
+        obj_customer.vip_id = max_vip_id
+        obj_oplog_cus = Oplog(
+            user_id=session['user_id'],
+            ip=request.remote_addr,
+            reason=u'添加客户与vip卡关系及明细:%s' % max_vip_id
+        )
+        objects = [obj_customer, obj_oplog_cus]
+        db.session.add_all(objects)
+
+        # 保存vip明细内容
+        for iter_add in form.inputrows:
+            interval_day = int(form.interval.data) * 30  # 卡的有效期*30天
+            obj_vip_detail = Vipdetail(
+                vip_id=max_vip_id,  # 客户会员卡号
+                item_id=iter_add.item_id.data,  # 服务/项目id
+                discountprice=iter_add.discountprice.data,  # 优惠后销售价
+                quantity=iter_add.quantity.data,  # 使用次数
+                addtime=add_time,  # 优惠开始时间
+                endtime=add_time + timedelta(days=interval_day)  # 优惠结束时间 = 优惠开始时间 + 有效期
+            )
+            db.session.add(obj_vip_detail)
+
+        db.session.commit()
+        flash(u'客户-会员卡添加成功', 'ok')
+        return redirect(url_for('home.customer_list'))
+
+    return render_template('home/cus_vip_add.html', form=form)
+
+
+# 20180922 liuqq 获取会员卡信息
+@home.route('/mscard/get', methods=['GET', 'POST'])
+def mscard_get():
+    # 获取产品分页清单
+    if request.method == 'POST':
+        # 获取json数据
+        data = request.get_json()
+        id = data.get('id')
+        obj_mscard = Mscard.query.filter_by(id=id).first()
+        s_json = obj_mscard.to_json()
+        return (dumps(s_json))
+
+
+# 20180923 liuqq 获取会员卡明细信息
+@home.route('/msdetails/get', methods=['GET', 'POST'])
+def msdetails_get():
+    # 获取产品分页清单
+    if request.method == 'POST':
+        # 获取json数据
+        data = request.get_json()
+        id = data.get('id')
+        # 将数据查询出来
+        obj_msdetails = Msdetail.query.filter_by(mscard_id=id).order_by(Msdetail.item_id.asc()).all()
+        s_json = [];
+        for obj_msdetail in obj_msdetails:
+            s_json.append(obj_msdetail.to_json())
+        return (dumps(s_json))
+
+
+# 20180930 liuqq 查询客户-会员卡明细
+@home.route('/customer/cus_vip_list/<int:vip_id>', methods=['GET'])
+def cus_vip_list(vip_id=None):
+    # 明细查看
+    obj_vip = Vip.query.filter_by(id=vip_id).first()
+    obj_vip_details = Vipdetail.query.filter_by(vip_id=vip_id).order_by(Vipdetail.id.asc()).all()
+    return render_template('home/cus_vip_list.html', obj_vip=obj_vip, obj_vip_details=obj_vip_details)
+
 @home.route('/modal/item', methods=['GET'])
 def modal_item():
     # 获取商品弹出框数据
@@ -267,6 +375,7 @@ def modal_item():
                 "name": v.name,
                 "qty": qty,
                 "standard": v.standard,
+                "unit": v.unit,
                 "costprice": v.costprice,
                 "salesprice": v.salesprice,
                 "cate": v.cate,
@@ -444,6 +553,7 @@ def stock_buy_edit(id=None):
                 listform.item_id = detail.item_id
                 listform.item_name = detail.item.name
                 listform.item_standard = detail.item.standard
+                listform.item_unit = detail.item.unit
                 listform.store = detail.nstore
                 listform.qty = detail.qty
                 listform.costprice = detail.costprice
@@ -589,112 +699,3 @@ def stock_out_list():
                per_page=current_app.config['POSTS_PER_PAGE'],
                error_out=False)
     return render_template('home/stock_out_list.html', pagination=pagination, key=key, status=status)
-
-
-# 20180920 liuqq 新增客户-会员卡
-@home.route('/customer/cus_vip_add/<int:id>', methods=['GET', 'POST'])
-def cus_vip_add(id=None):
-    form = CusVipForm()
-    obj_customer = Customer.query.filter_by(id=id).first()
-    form.cus_name.data = obj_customer.name
-    if form.validate_on_submit():
-        # 计算vip ID
-        obj_max_vip = Vip.query.order_by(Vip.id.desc()).first()
-        if(obj_max_vip):
-            max_vip_id = obj_max_vip.id + 1
-        else:
-            max_vip_id = 1
-
-        # 计算截止日期
-        interval_day = int(form.interval.data) * 30  # 卡的有效期*30天
-        add_time = datetime.now()
-        end_time = add_time + timedelta(days=interval_day)
-
-        # 计算引用vip卡的名称
-        obj_mscard = Mscard.query.filter_by(id=form.name.data).first()
-        # 创建VIP主表对象
-        obj_vip = Vip(
-            id = max_vip_id,
-            name=obj_mscard.name,  # 名称
-            balance=form.payment.data,  # 余额
-            scorerule=form.scorerule.data,  # 积分规则
-            scorelimit=form.scorelimit.data,  # 积分限制提醒
-            addtime=add_time,  # 办理时间
-            endtime=end_time,  # 截止时间 = 办理时间 + 有效期
-        )
-        obj_oplog_vip = Oplog(
-            user_id=session['user_id'],
-            ip=request.remote_addr,
-            reason=u'添加客户vip卡:%s' % max_vip_id
-        )
-        # 数据提交
-        objects = [obj_vip, obj_oplog_vip]
-        db.session.add_all(objects)
-        db.session.commit()
-
-        # 保存客户与vip—id关系
-        obj_customer.vip_id = max_vip_id
-        obj_oplog_cus = Oplog(
-            user_id=session['user_id'],
-            ip=request.remote_addr,
-            reason=u'添加客户与vip卡关系及明细:%s' % max_vip_id
-        )
-        objects = [obj_customer, obj_oplog_cus]
-        db.session.add_all(objects)
-
-        # 保存vip明细内容
-        for iter_add in form.inputrows:
-            interval_day = int(form.interval.data) * 30  # 卡的有效期*30天
-            obj_vip_detail = Vipdetail(
-                vip_id=max_vip_id,  # 客户会员卡号
-                item_id=iter_add.item_id.data,  # 服务/项目id
-                discountprice=iter_add.discountprice.data,  # 优惠后销售价
-                quantity=iter_add.quantity.data,  # 使用次数
-                addtime=add_time,  # 优惠开始时间
-                endtime=add_time + timedelta(days=interval_day)  # 优惠结束时间 = 优惠开始时间 + 有效期
-            )
-            db.session.add(obj_vip_detail)
-
-        db.session.commit()
-        flash(u'客户-会员卡添加成功', 'ok')
-        return redirect(url_for('home.customer_list'))
-
-    return render_template('home/cus_vip_add.html', form=form)
-
-
-# 20180922 liuqq 获取会员卡信息
-@home.route('/mscard/get', methods=['GET', 'POST'])
-def mscard_get():
-    # 获取产品分页清单
-    if request.method == 'POST':
-        # 获取json数据
-        data = request.get_json()
-        id = data.get('id')
-        obj_mscard = Mscard.query.filter_by(id=id).first()
-        s_json = obj_mscard.to_json()
-        return (dumps(s_json))
-
-
-# 20180923 liuqq 获取会员卡明细信息
-@home.route('/msdetails/get', methods=['GET', 'POST'])
-def msdetails_get():
-    # 获取产品分页清单
-    if request.method == 'POST':
-        # 获取json数据
-        data = request.get_json()
-        id = data.get('id')
-        # 将数据查询出来
-        obj_msdetails = Msdetail.query.filter_by(mscard_id=id).order_by(Msdetail.item_id.asc()).all()
-        s_json = [];
-        for obj_msdetail in obj_msdetails:
-            s_json.append(obj_msdetail.to_json())
-        return (dumps(s_json))
-
-
-# 20180930 liuqq 查询客户-会员卡明细
-@home.route('/customer/cus_vip_list/<int:vip_id>', methods=['GET'])
-def cus_vip_list(vip_id=None):
-    # 明细查看
-    obj_vip = Vip.query.filter_by(id=vip_id).first()
-    obj_vip_details = Vipdetail.query.filter_by(vip_id=vip_id).order_by(Vipdetail.id.asc()).all()
-    return render_template('home/cus_vip_list.html', obj_vip=obj_vip, obj_vip_details=obj_vip_details)
