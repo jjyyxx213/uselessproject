@@ -668,6 +668,15 @@ class StockOutListForm(FlaskForm):
             'readonly': 'true',
         }
     )
+    # 上次单价
+    stock_costprice = StringField(
+        label=u'上次进价',
+        description=u'上次进价',
+        render_kw={
+            'class': 'form-control',
+            'readonly': 'true',
+        }
+    )
     # 仓库
     store = StringField(
         label=u'仓库',

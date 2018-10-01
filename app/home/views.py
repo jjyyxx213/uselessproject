@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 from . import home
 from flask import render_template, session, redirect, request, url_for, flash, current_app
-from forms import LoginForm, PwdForm, CustomerForm, StockBuyForm, StockBuyListForm, StockBuyDebtForm, CusVipForm
+from forms import LoginForm, PwdForm, CustomerForm, StockBuyForm, StockBuyListForm, StockBuyDebtForm, CusVipForm, StockOutListForm, StockOutForm
 from app.models import User, Userlog, Oplog, Item, Supplier, Customer, Stock, Porder, Podetail, Kvp, Mscard, Msdetail, Vip, Vipdetail
 from app import db
 from werkzeug.security import generate_password_hash
@@ -699,3 +699,131 @@ def stock_out_list():
                per_page=current_app.config['POSTS_PER_PAGE'],
                error_out=False)
     return render_template('home/stock_out_list.html', pagination=pagination, key=key, status=status)
+
+@home.route('/stock/out/edit/<int:id>', methods=['GET', 'POST'])
+def stock_out_edit(id=None):
+    # 出库单
+    form = StockOutForm()
+    porder = Porder.query.filter_by(id=id).first()
+    # 表单不存在代表新增不做校验
+    if porder:
+        # 如果表单不属于用户，不是编辑状态 退出
+        if porder.user_id != int(session['user_id']) or porder.status == 1 or porder.type != 1:
+            return redirect(url_for('home.stock_out_list'))
+    #podetails = Podetail.query.filter_by(porder_id=id).order_by(Podetail.id.asc()).all()
+    podetails = db.session.query(Podetail, Stock).filter(
+        Podetail.item_id == Stock.item_id,
+        Podetail.nstore == Stock.store,
+        Podetail.porder_id == id,
+    ).order_by(Podetail.id.asc()).all()
+    if request.method == 'GET':
+        # porder赋值
+        if porder:
+            form.user_name.data = porder.user.name
+            form.remarks.data = porder.remarks
+        else:
+            form.user_name.data = session['user']
+        # 如果存在明细
+        if podetails:
+            # 先把空行去除
+            while len(form.inputrows) > 0:
+                form.inputrows.pop_entry()
+            # 对FormField赋值，要使用append_entry方法
+            for detail in podetails:
+                listform = StockOutListForm()
+                listform.item_id = detail.Podetail.item_id
+                listform.item_name = detail.Podetail.item.name
+                listform.item_standard = detail.Podetail.item.standard
+                listform.item_unit = detail.Podetail.item.unit
+                listform.costprice = detail.Podetail.item.costprice # 新增商品的价格
+                listform.stock_costprice = detail.Stock.costprice # 库存中最后一次采购价
+                listform.store = detail.Podetail.nstore
+                listform.stock_qty = detail.Stock.qty
+                listform.qty = detail.Podetail.qty
+                form.inputrows.append_entry(listform)
+    # 计算动态input的初值
+    form_count = len(form.inputrows)
+    # todo 以下内容未完成仍需调试
+    if form.validate_on_submit():
+        # type_switch:1结算;0暂存
+        switch = int(form.type_switch.data)
+        # 提交类别 1：生效；0：暂存
+        status = 1 if switch == 1 else 0
+        # 添加主表
+        if not porder:  # 没有新增一个
+            porder = Porder(
+                type=1,
+                user_id=int(session['user_id']),
+                status=status,
+                remarks=form.remarks.data,
+            )
+        else:  # 有更新值
+            porder.user_id = int(session['user_id'])
+            porder.status = status
+            porder.remarks = form.remarks.data
+        db.session.add(porder)
+        db.session.commit()  # 这里实现的不太好，提交一下后面要获取值
+        if switch == 1:#结算
+            # 删除所有明细
+            for iter_del in podetails:
+                db.session.delete(iter_del)
+            for iter_add in form.inputrows:
+                # 新增明细
+                podetail = Podetail(
+                    porder_id=porder.id,
+                    item_id=iter_add.item_id.data,
+                    nstore=iter_add.store.data,
+                    qty=iter_add.qty.data,
+                    costprice=iter_add.costprice.data,
+                    rowamount=iter_add.rowamount.data,
+                )
+                db.session.add(podetail)
+                # 判断库存是否存在
+                stock = Stock.query.filter_by(item_id=iter_add.item_id.data,
+                                              store=iter_add.store.data).first()
+                if stock: #存在就更新数量
+                    stock.qty += float(iter_add.qty.data)
+                    costprice = iter_add.costprice.data
+                else: #不存在库存表加一条
+                    stock = Stock(
+                        item_id=iter_add.item_id.data,
+                        costprice=iter_add.costprice.data,
+                        qty=iter_add.qty.data,
+                        store=iter_add.store.data,
+                    )
+                db.session.add(stock)
+                # 设置主表为发布
+                porder.status = 1
+                db.session.add(porder)
+            oplog = Oplog(
+                user_id=session['user_id'],
+                ip=request.remote_addr,
+                reason=u'结算采购单:%s' % porder.id
+            )
+            db.session.add(oplog)
+            db.session.commit()
+            flash(u'采购单结算成功', 'ok')
+        else:#暂存
+            # 删除所有明细
+            for iter_del in podetails:
+                db.session.delete(iter_del)
+            for iter_add in form.inputrows:
+                # 新增明细
+                podetail = Podetail(
+                    porder_id=porder.id,
+                    item_id=iter_add.item_id.data,
+                    nstore=iter_add.store.data,
+                    qty=iter_add.qty.data,
+                    costprice=iter_add.costprice.data,
+                    rowamount=iter_add.rowamount.data,
+                )
+                db.session.add(podetail)
+            oplog = Oplog(
+                user_id=session['user_id'],
+                ip=request.remote_addr,
+                reason=u'暂存采购单:%s' % porder.id
+            )
+            db.session.commit()
+            flash(u'采购单暂存成功', 'ok')
+        return redirect(url_for('home.stock_out_edit'))
+    return render_template('home/stock_out_edit.html', form=form, porder=porder, form_count=form_count)
