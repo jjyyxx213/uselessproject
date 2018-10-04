@@ -592,8 +592,10 @@ def stock_buy_edit(id=None):
         db.session.commit()  # 这里实现的不太好，提交一下后面要获取值
         if switch == 1:#结算
             # 删除所有明细
-            for iter_del in podetails:
-                db.session.delete(iter_del)
+            # for iter_del in podetails:
+            #     db.session.delete(iter_del)
+            # 更改删除方式直接找到全部删除
+            db.session.query(Podetail).filter(Podetail.porder_id == id).delete()
             for iter_add in form.inputrows:
                 # 新增明细
                 podetail = Podetail(
@@ -632,8 +634,10 @@ def stock_buy_edit(id=None):
             flash(u'采购单结算成功', 'ok')
         else:#暂存
             # 删除所有明细
-            for iter_del in podetails:
-                db.session.delete(iter_del)
+            # for iter_del in podetails:
+            #     db.session.delete(iter_del)
+            # 更改删除方式直接找到全部删除
+            db.session.query(Podetail).filter(Podetail.porder_id == id).delete()
             for iter_add in form.inputrows:
                 # 新增明细
                 podetail = Podetail(
@@ -710,11 +714,11 @@ def stock_out_edit(id=None):
         # 如果表单不属于用户，不是编辑状态 退出
         if porder.user_id != int(session['user_id']) or porder.status == 1 or porder.type != 1:
             return redirect(url_for('home.stock_out_list'))
-    #podetails = Podetail.query.filter_by(porder_id=id).order_by(Podetail.id.asc()).all()
+
     podetails = db.session.query(Podetail, Stock).filter(
+        Podetail.porder_id == id,
         Podetail.item_id == Stock.item_id,
         Podetail.nstore == Stock.store,
-        Podetail.porder_id == id,
     ).order_by(Podetail.id.asc()).all()
     if request.method == 'GET':
         # porder赋值
@@ -764,8 +768,10 @@ def stock_out_edit(id=None):
         db.session.commit()  # 这里实现的不太好，提交一下后面要获取值
         if switch == 1:#结算
             # 删除所有明细
-            for iter_del in podetails:
-                db.session.delete(iter_del)
+            # for iter_del in podetails:
+            #     db.session.delete(iter_del)
+            # 更改删除方式直接找到全部删除
+            db.session.query(Podetail).filter(Podetail.porder_id == id).delete()
             for iter_add in form.inputrows:
                 # 新增明细
                 podetail = Podetail(
@@ -800,8 +806,10 @@ def stock_out_edit(id=None):
             flash(u'出库单结算成功', 'ok')
         else:#暂存
             # 删除所有明细
-            for iter_del in podetails:
-                db.session.delete(iter_del)
+            # for iter_del in podetails:
+            #     db.session.delete(iter_del)
+            # 更改删除方式直接找到全部删除
+            db.session.query(Podetail).filter(Podetail.porder_id == id).delete()
             for iter_add in form.inputrows:
                 # 新增明细
                 podetail = Podetail(
@@ -850,6 +858,7 @@ def modal_stock():
         data.append(
             {
                 "id": v.id,
+                "item_id": v.item.id,
                 "item_name": v.item.name,
                 "item_standard": v.item.standard,
                 "item_unit": v.item.unit,

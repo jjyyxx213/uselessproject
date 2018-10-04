@@ -458,7 +458,8 @@
             });
             //modal_stock点击事件
             $("#stocks").on("dblclick", "tr", function () {
-                let item_id = $(this).find("td:first").text();
+                // item_id 放到stock_id 的v里面
+                let item_id = $(this).find("td:first").attr("v");
                 let item_name = $(this).find("td:eq(1)").text();
                 let item_standard = $(this).find("td:eq(2)").text();
                 let item_unit = $(this).find("td:eq(3)").text();

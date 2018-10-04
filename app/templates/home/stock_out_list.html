@@ -63,7 +63,7 @@
                                         <a href="#" name="btn-detail"
                                            class="label label-info">明细</a>&nbsp
                                         {% if v.status == 0 and v.user_id == user.id %}
-                                        <a href="#" name="btn-edit"
+                                        <a href="{{ url_for('home.stock_out_edit', id=v.id) }}" name="btn-edit"
                                            class="label label-success">修改</a>&nbsp
                                         <a href="#" name="btn-stop"
                                            class="label label-danger">删除</a>

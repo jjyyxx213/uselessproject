@@ -14,7 +14,7 @@ function modal_stock(appendId, url, key) {
             var len = data.length;
             for (var i = 0; i < len; i++) {
                 $('#stocks').append(
-                    '<tr><td>' + data[i].id + '</td>' +
+                    '<tr><td v=' + data[i].item_id + '>' + data[i].id + '</td>' +
                     '<td>' + data[i].item_name + '</td>' +
                     '<td>' + data[i].item_standard + '</td>' +
                     '<td>' + data[i].item_unit + '</td>' +
