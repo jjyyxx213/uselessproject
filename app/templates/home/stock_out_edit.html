@@ -78,8 +78,11 @@
                                 </div>
                                 <div class="col-md-1 padding-defined">
                                     <label class="small"> 库存数量</label>
+                                    <label class="badge bg-green" data-toggle="tooltip"
+                                       title="库存数量以结算时为准">?</label>
                                 </div>
                                 <div class="col-md-1 padding-defined">
+                                    <label style="color: red">*</label>
                                     <label class="small"> 数量</label>
                                 </div>
                                 <div class="col-md-1" style="padding-left: 5px">
@@ -422,7 +425,7 @@
                 let appendId = $('#stocks');
                 let url = "{{ url_for('home.modal_stock') }}";
                 let key = $("#stock_search").val();
-                modal_item(appendId, url, key);
+                modal_stock(appendId, url, key);
                 //显示modal
                 $('#stockModal').modal();
                 // 获取loop_index
@@ -433,7 +436,7 @@
                 let appendId = $('#stocks');
                 let url = "{{ url_for('home.modal_stock') }}";
                 let key = $("#stock_search").val();
-                modal_item(appendId, url, key);
+                modal_stock(appendId, url, key);
             });
             $("#stock_search").bind("keyup", function (event) {
                 if (event.keyCode == "13") {
@@ -441,7 +444,7 @@
                     let appendId = $('#stocks');
                     let url = "{{ url_for('home.modal_stock') }}";
                     let key = $("#stock_search").val();
-                    modal_item(appendId, url, key);
+                    modal_stock(appendId, url, key);
                 }
             });
 
@@ -455,23 +458,33 @@
             });
             //modal_stock点击事件
             $("#stocks").on("dblclick", "tr", function () {
-                let id = $(this).find("td:first").text();
-                let name = $(this).find("td:eq(1)").text();
-                let standard = $(this).find("td:eq(3)").text();
-                let unit = $(this).find("td:eq(4)").text();
-                let costprice = $(this).find("td:eq(5)").text();
+                let item_id = $(this).find("td:first").text();
+                let item_name = $(this).find("td:eq(1)").text();
+                let item_standard = $(this).find("td:eq(2)").text();
+                let item_unit = $(this).find("td:eq(3)").text();
+                let costprice = $(this).find("td:eq(4)").text();
+                let stock_costprice = $(this).find("td:eq(5)").text();
+                let store = $(this).find("td:eq(6)").text();
+                let stock_qty = $(this).find("td:eq(7)").text();
+
                 $("#stockModal").modal("hide");
                 // 给输入框赋值
                 let input_item_id = $("#" + 'inputrows-' + loop_index + '-item_id');
-                input_item_id.val(id);
+                input_item_id.val(item_id);
                 let input_item_name = $("#" + 'inputrows-' + loop_index + '-item_name');
-                input_item_name.val(name);
+                input_item_name.val(item_name);
                 let input_item_standard = $("#" + 'inputrows-' + loop_index + '-item_standard');
-                input_item_standard.val(standard);
+                input_item_standard.val(item_standard);
                 let input_item_unit = $("#" + 'inputrows-' + loop_index + '-item_unit');
-                input_item_unit.val(unit);
+                input_item_unit.val(item_unit);
                 let input_costprice = $("#" + 'inputrows-' + loop_index + '-costprice');
                 input_costprice.val(costprice);
+                let input_stock_costprice = $("#" + 'inputrows-' + loop_index + '-stock_costprice');
+                input_stock_costprice.val(stock_costprice);
+                let input_store = $("#" + 'inputrows-' + loop_index + '-store');
+                input_store.val(store);
+                let input_stock_qty = $("#" + 'inputrows-' + loop_index + '-stock_qty');
+                input_stock_qty.val(stock_qty);
             });
 
 
