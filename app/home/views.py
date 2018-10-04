@@ -743,7 +743,6 @@ def stock_out_edit(id=None):
                 form.inputrows.append_entry(listform)
     # 计算动态input的初值
     form_count = len(form.inputrows)
-    # todo 以下内容未完成仍需调试
     if form.validate_on_submit():
         # type_switch:1结算;0暂存
         switch = int(form.type_switch.data)
@@ -774,23 +773,19 @@ def stock_out_edit(id=None):
                     item_id=iter_add.item_id.data,
                     nstore=iter_add.store.data,
                     qty=iter_add.qty.data,
-                    costprice=iter_add.costprice.data,
-                    rowamount=iter_add.rowamount.data,
                 )
                 db.session.add(podetail)
                 # 判断库存是否存在
                 stock = Stock.query.filter_by(item_id=iter_add.item_id.data,
                                               store=iter_add.store.data).first()
-                if stock: #存在就更新数量
-                    stock.qty += float(iter_add.qty.data)
-                    costprice = iter_add.costprice.data
-                else: #不存在库存表加一条
-                    stock = Stock(
-                        item_id=iter_add.item_id.data,
-                        costprice=iter_add.costprice.data,
-                        qty=iter_add.qty.data,
-                        store=iter_add.store.data,
-                    )
+                if stock: #存在就减少数量
+                    stock.qty -= float(iter_add.qty.data)
+                    if stock.qty < 0:
+                        flash(u'零件:' + iter_add.item_name.data + u',出库后数量小于0' 'err')
+                        return redirect(url_for('home.stock_out_edit', id=id))
+                else: #如果零件在库存中不存在返回异常
+                    flash(u'零件:' + iter_add.item_name.data + u',库存不存在' 'err')
+                    return redirect(url_for('home.stock_out_edit', id=id))
                 db.session.add(stock)
                 # 设置主表为发布
                 porder.status = 1
@@ -798,11 +793,11 @@ def stock_out_edit(id=None):
             oplog = Oplog(
                 user_id=session['user_id'],
                 ip=request.remote_addr,
-                reason=u'结算采购单:%s' % porder.id
+                reason=u'结算出库单:%s' % porder.id
             )
             db.session.add(oplog)
             db.session.commit()
-            flash(u'采购单结算成功', 'ok')
+            flash(u'出库单结算成功', 'ok')
         else:#暂存
             # 删除所有明细
             for iter_del in podetails:
@@ -814,16 +809,59 @@ def stock_out_edit(id=None):
                     item_id=iter_add.item_id.data,
                     nstore=iter_add.store.data,
                     qty=iter_add.qty.data,
-                    costprice=iter_add.costprice.data,
-                    rowamount=iter_add.rowamount.data,
                 )
                 db.session.add(podetail)
             oplog = Oplog(
                 user_id=session['user_id'],
                 ip=request.remote_addr,
-                reason=u'暂存采购单:%s' % porder.id
+                reason=u'暂存出库单:%s' % porder.id
             )
             db.session.commit()
-            flash(u'采购单暂存成功', 'ok')
-        return redirect(url_for('home.stock_out_edit'))
+            flash(u'出库单暂存成功', 'ok')
+        return redirect(url_for('home.stock_out_list'))
     return render_template('home/stock_out_edit.html', form=form, porder=porder, form_count=form_count)
+
+@home.route('/modal/stock', methods=['GET'])
+def modal_stock():
+    # 获取库存弹出框数据
+    key = request.args.get('key', '')
+    stocks = Stock.query
+    # 条件查询
+    if key:
+        # 库房/零件名称/类别/规格
+        stocks = stocks.filter(
+            or_(Stock.store.ilike('%' + key + '%'),
+                Stock.item.name.ilike('%' + key + '%'),
+                Stock.item.cate.ilike('%' + key + '%'),
+                Stock.item.standard.ilike('%' + key + '%'),
+                )
+        )
+    stocks = stocks.order_by(Stock.item_id.asc(), Stock.store.asc()).limit(current_app.config['POSTS_PER_PAGE']).all()
+    # 返回的数据格式为
+    # {
+    # "pages": 1,
+    # "data": [
+    #         {"id": "1",
+    #         "name": "xx"}
+    #         ]
+    # }
+    data = []
+    for v in stocks:
+        data.append(
+            {
+                "id": v.id,
+                "item_name": v.item.name,
+                "item_standard": v.item.standard,
+                "item_unit": v.item.unit,
+                "item_costprice": v.item.costprice,
+                "costprice": v.costprice,
+                "store": v.store,
+                "qty": v.qty,
+                "cate": v.item.cate,
+            }
+        )
+    res = {
+        "key": key,
+        "data": data,
+    }
+    return dumps(res)

@@ -57,7 +57,7 @@
                         </div>
                         <div class="box-body">
                             <div class="row" style="margin-bottom: 5px">
-                                <div class="col-md-3 padding-defined">
+                                <div class="col-md-2 padding-defined">
                                     <label style="color: red">*</label>
                                     <label class="small"> 商品</label>
                                 </div>
@@ -67,14 +67,14 @@
                                 <div class="col-md-1 padding-defined">
                                     <label class="small"> 单位</label>
                                 </div>
-                                <div class="col-md-2 padding-defined">
-                                    <label class="small">仓库</label>
-                                </div>
                                 <div class="col-md-1 padding-defined">
                                     <label class="small"> 单价</label>
                                 </div>
                                 <div class="col-md-1 padding-defined">
-                                    <label class="small"> 上次单价</label>
+                                    <label class="small"> 上次进价</label>
+                                </div>
+                                <div class="col-md-2 padding-defined">
+                                    <label class="small"> 仓库</label>
                                 </div>
                                 <div class="col-md-1 padding-defined">
                                     <label class="small"> 库存数量</label>
@@ -91,7 +91,7 @@
                             <div id="inputs">
                                 {% for v in form.inputrows %}
                                     <div class="row" style="margin-bottom: 0px">
-                                        <div class="col-md-3 padding-defined">
+                                        <div class="col-md-2 padding-defined">
                                             <div class="input-group">
                                                 <input id="inputrows-{{ loop.index0 }}-item_id"
                                                        name="inputrows-{{ loop.index0 }}-item_id" type="hidden"
@@ -102,7 +102,7 @@
                                                        value="{{ v.data.item_name or '' }}">
                                                 <span class="input-group-btn">
                                                 <button class="btn btn-default" type="button"
-                                                        loop_index="{{ loop.index0 }}" name="item_choice"> ...</button>
+                                                        loop_index="{{ loop.index0 }}" name="stock_choice"> ...</button>
                                             </span>
                                             </div>
                                             {% for err in v.item_name.errors %}
@@ -145,7 +145,7 @@
                                             <div class="form-group">
                                                 <input id="inputrows-{{ loop.index0 }}-costprice"
                                                        name="inputrows-{{ loop.index0 }}-costprice"
-                                                       class="form-control"
+                                                       class="form-control" readonly
                                                        placeholder="单价" type="text"
                                                        value="{{ v.data.costprice or '' }}">
                                             </div>
@@ -159,7 +159,7 @@
                                             <div class="form-group">
                                                 <input id="inputrows-{{ loop.index0 }}-stock_costprice"
                                                        name="inputrows-{{ loop.index0 }}-stock_costprice"
-                                                       class="form-control"
+                                                       class="form-control" readonly
                                                        placeholder="上次进价" type="text"
                                                        value="{{ v.data.stock_costprice or '' }}">
                                             </div>
@@ -186,7 +186,7 @@
                                         </div>
                                         <div class="col-md-1 padding-defined">
                                             <div class="form-group">
-                                                <input id="inputrows-{{ loop.index0 }}-stock_qty"
+                                                <input id="inputrows-{{ loop.index0 }}-stock_qty" readonly
                                                        name="inputrows-{{ loop.index0 }}-stock_qty" class="form-control"
                                                        placeholder="库存数量" type="text" value="{{ v.data.stock_qty or '' }}">
                                             </div>
@@ -311,15 +311,6 @@
             // 默认为保存
             $('#switch').bootstrapSwitch('state',true);
 
-
-            // 下拉框设置
-            $('.select2').select2(
-                {
-                    language: "zh-CN",
-                    allowClear: true,
-                }
-            );
-
             // 动态加载inputrows
             let MaxInputs = 20; //maximum input boxes allowed
             let InputsWrapper = $("#inputs"); //Input boxes wrapper ID
@@ -332,7 +323,7 @@
                 {
                     InputsWrapper.append('' +
                         '<div class="row" style="margin-bottom: 0px">\n' +
-                        '                                    <div class="col-md-3 padding-defined">\n' +
+                        '                                    <div class="col-md-2 padding-defined">\n' +
                         '                                        <div class="input-group">\n' +
                         '                                            <input id="inputrows-' + id_ins + '-item_id"\n' +
                         '                                                   name="inputrows-' + id_ins + '-item_id" type="hidden">\n' +
@@ -340,7 +331,7 @@
                         '                                                   name="inputrows-' + id_ins + '-item_name" class="form-control" ' +
                         '                                                   placeholder="请选择商品" type="text" readonly>' +
                         '                                            <span class="input-group-btn">\n' +
-                        '                                                <button class="btn btn-default" type="button" loop_index="' + id_ins + '" name="item_choice"> ...</button>\n' +
+                        '                                                <button class="btn btn-default" type="button" loop_index="' + id_ins + '" name="stock_choice"> ...</button>\n' +
                         '                                            </span>\n' +
                         '                                        </div>\n' +
                         '                                    </div>\n' +
@@ -364,7 +355,7 @@
                         '                                        <div class="form-group">\n' +
                         '                                            <input id="inputrows-' + id_ins + '-costprice"\n' +
                         '                                                   name="inputrows-' + id_ins + '-costprice"\n' +
-                        '                                                   class="form-control costprice"\n' +
+                        '                                                   class="form-control costprice" readonly\n' +
                         '                                                   placeholder="单价" type="text">\n' +
                         '                                        </div>\n' +
                         '                                    </div>\n' +
@@ -372,17 +363,17 @@
                         '                                        <div class="form-group">\n' +
                         '                                            <input id="inputrows-' + id_ins + '-stock_costprice"\n' +
                         '                                                   name="inputrows-' + id_ins + '-stock_costprice"\n' +
-                        '                                                   class="form-control costprice"\n' +
+                        '                                                   class="form-control costprice" readonly\n' +
                         '                                                   placeholder="上次进价" type="text">\n' +
                         '                                        </div>\n' +
                         '                                    </div>\n' +
                         '                                    <div class="col-md-2 padding-defined">\n' +
-                        '                                    <div class="form-group">\n' +
-                        '                                        <input id="inputrows-' + id_ins + '-store"\n' +
-                        '                                               name="inputrows-' + id_ins + '-store"\n' +
-                        '                                               class="form-control"\n' +
-                        '                                               placeholder="仓库" type="text"\n' +
-                        '                                               readonly>\n' +
+                        '                                        <div class="form-group">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-store"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-store"\n' +
+                        '                                                   class="form-control" readonly\n' +
+                        '                                                   placeholder="仓库" type="text">\n' +
+                        '                                        </div>\n' +
                         '                                    </div>\n' +
                         '                                    <div class="col-md-1 padding-defined">\n' +
                         '                                        <div class="form-group">\n' +
@@ -406,16 +397,8 @@
                         '                                        </button>\n' +
                         '                                    </div>\n' +
                         '                                </div>');
-                    // 动态添加行后，要处理select2下拉框初始化
-                    let options = {
-                        url: "{{ url_for('home.store_get') }}",      // 数据接口url
-                        pageSize: 10, // 每次加载的数据条数[屏蔽，目前从后台获取]
-                        value: "id",  // 下拉框value字段名称
-                        name: "name", // 下拉框显示字段名称
-                        selected: []  // 默认选中项，格式：[{id:1,text:"选项1"},{id:2,text:"选项2"}]
-                    };
-                    ajaxSelect2("inputrows-" + id_ins + "-store", options);
-                    id_ins++; //这个要放到select2监听后面，否则id错误
+
+                    id_ins++;
                     row_ins++;
                     $("#cnt").text(row_ins)//显示总行数
                 }
@@ -430,67 +413,54 @@
                 }
                 return false;
             });
-            //这里要处理仓库下拉
-            let options = {
-                url: "{{ url_for('home.store_get') }}",      // 数据接口url
-                pageSize: 10, // 每次加载的数据条数[屏蔽，目前从后台获取]
-                value: "id",  // 下拉框value字段名称
-                name: "name", // 下拉框显示字段名称
-                selected: []  // 默认选中项，格式：[{id:1,text:"选项1"},{id:2,text:"选项2"}]
-            };
-            //遍历.store-choice，为进入时所有的库房下拉框动态初始化
-            $(".store-choice").each(function () {
-                id = $(this).attr("id");
-                ajaxSelect2(id, options);
-                setStoreValue(id);
-            });
+
 
             //定义loop_index,获取所选行数据
             let loop_index;
             //弹出模态框选择物料
-            $("#inputs").on("click", "button[name='item_choice']", function () {
-                let appendId = $('#items');
-                let url = "{{ url_for('home.modal_item') }}";
-                let key = $("#item_search").val();
+            $("#inputs").on("click", "button[name='stock_choice']", function () {
+                let appendId = $('#stocks');
+                let url = "{{ url_for('home.modal_stock') }}";
+                let key = $("#stock_search").val();
                 modal_item(appendId, url, key);
                 //显示modal
-                $('#itemModal').modal();
+                $('#stockModal').modal();
                 // 获取loop_index
                 loop_index = $(this).attr('loop_index');
             });
             //模态框模糊查询
-            $("#do_item_search").click(function () {
-                let appendId = $('#items');
-                let url = "{{ url_for('home.modal_item') }}";
-                let key = $("#item_search").val();
+            $("#do_stock_search").click(function () {
+                let appendId = $('#stocks');
+                let url = "{{ url_for('home.modal_stock') }}";
+                let key = $("#stock_search").val();
                 modal_item(appendId, url, key);
             });
-            $("#item_search").bind("keyup", function (event) {
+            $("#stock_search").bind("keyup", function (event) {
                 if (event.keyCode == "13") {
                     //回车执行查询
-                    let appendId = $('#items');
-                    let url = "{{ url_for('home.modal_item') }}";
-                    let key = $("#item_search").val();
+                    let appendId = $('#stocks');
+                    let url = "{{ url_for('home.modal_stock') }}";
+                    let key = $("#stock_search").val();
                     modal_item(appendId, url, key);
                 }
             });
 
-            //modal_item高亮事件
-            $("#items").on("mouseenter", "tr", function () {
+            //modal_stock高亮事件
+            $("#stocks").on("mouseenter", "tr", function () {
                 $(this).addClass("danger");
             });
-            //modal_item高亮事件
-            $("#items").on("mouseleave", "tr", function () {
+            //modal_stock高亮事件
+            $("#stocks").on("mouseleave", "tr", function () {
                 $(this).removeClass("danger");
             });
-            //modal_item点击事件
-            $("#items").on("dblclick", "tr", function () {
+            //modal_stock点击事件
+            $("#stocks").on("dblclick", "tr", function () {
                 let id = $(this).find("td:first").text();
                 let name = $(this).find("td:eq(1)").text();
                 let standard = $(this).find("td:eq(3)").text();
                 let unit = $(this).find("td:eq(4)").text();
                 let costprice = $(this).find("td:eq(5)").text();
-                $("#itemModal").modal("hide");
+                $("#stockModal").modal("hide");
                 // 给输入框赋值
                 let input_item_id = $("#" + 'inputrows-' + loop_index + '-item_id');
                 input_item_id.val(id);

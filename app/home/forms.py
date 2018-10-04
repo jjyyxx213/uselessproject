@@ -718,7 +718,7 @@ class StockOutListForm(FlaskForm):
 
 class StockOutForm(FlaskForm):
     inputrows = FieldList(
-        FormField(StockBuyListForm), min_entries=1
+        FormField(StockOutListForm), min_entries=1
     )
     # 出库员
     user_name = StringField(
