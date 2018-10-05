@@ -589,13 +589,13 @@ def stock_buy_edit(id=None):
             porder.status = status
             porder.remarks = form.remarks.data
         db.session.add(porder)
-        db.session.commit()  # 这里实现的不太好，提交一下后面要获取值
+        db.session.flush()  # 提交一下获取id,不要使用commit
         if switch == 1:#结算
             # 删除所有明细
             # for iter_del in podetails:
             #     db.session.delete(iter_del)
             # 更改删除方式直接找到全部删除
-            db.session.query(Podetail).filter(Podetail.porder_id == id).delete()
+            db.session.query(Podetail).filter(Podetail.porder_id == porder.id).delete()
             for iter_add in form.inputrows:
                 # 新增明细
                 podetail = Podetail(
@@ -637,7 +637,7 @@ def stock_buy_edit(id=None):
             # for iter_del in podetails:
             #     db.session.delete(iter_del)
             # 更改删除方式直接找到全部删除
-            db.session.query(Podetail).filter(Podetail.porder_id == id).delete()
+            db.session.query(Podetail).filter(Podetail.porder_id == porder.id).delete()
             for iter_add in form.inputrows:
                 # 新增明细
                 podetail = Podetail(
@@ -750,8 +750,6 @@ def stock_out_edit(id=None):
     if form.validate_on_submit():
         # type_switch:1结算;0暂存
         switch = int(form.type_switch.data)
-        # valid True可以提交; False 不能提交
-        valid = True
         # 添加主表
         if not porder:  # 没有新增一个
             porder = Porder(
@@ -765,40 +763,48 @@ def stock_out_edit(id=None):
             porder.status = 0
             porder.remarks = form.remarks.data
         db.session.add(porder)
-        db.session.commit()  # 这里实现的不太好，提交一下后面要获取值
-        if switch == 1:#结算
-            # 删除所有明细
-            # for iter_del in podetails:
-            #     db.session.delete(iter_del)
-            # 更改删除方式直接找到全部删除
-            db.session.query(Podetail).filter(Podetail.porder_id == id).delete()
-            for iter_add in form.inputrows:
-                # 新增明细
-                podetail = Podetail(
-                    porder_id=porder.id,
-                    item_id=iter_add.item_id.data,
-                    nstore=iter_add.store.data,
-                    qty=iter_add.qty.data,
-                )
-                db.session.add(podetail)
-                # 判断库存是否存在
-                stock = Stock.query.filter_by(item_id=iter_add.item_id.data,
-                                              store=iter_add.store.data).first()
-                if stock: #存在就减少数量
-                    stock.qty -= float(iter_add.qty.data)
-                    if stock.qty < 0:
-                        flash(iter_add.item_name.data + u',出库后数量小于0', 'err')
-                        valid = False
-                else: #如果零件在库存中不存在返回异常
-                    flash(iter_add.item_name.data + u',库存不存在', 'err')
+        # 主表暂存，需要使用id
+        db.session.flush()
+
+        # 删除所有明细
+        # for iter_del in podetails:
+        #     db.session.delete(iter_del)
+        # 更改删除方式直接找到全部删除
+        db.session.query(Podetail).filter(Podetail.porder_id == porder.id).delete()
+        for iter_add in form.inputrows:
+            # 新增明细
+            podetail = Podetail(
+                porder_id=porder.id,
+                item_id=iter_add.item_id.data,
+                nstore=iter_add.store.data,
+                qty=float(iter_add.qty.data), # 这里一定要强转，临时数据后面要比较
+            )
+            db.session.add(podetail)
+        # 把所有明细暂存，后面用于计算是否存在核减为负数的情况
+        db.session.flush()
+
+
+        if switch == 1:# 结算
+            # valid True可以提交; False 不能提交
+            valid = True
+            # 遍历临时数据
+            checklists = db.session.query(Podetail, Stock).filter(
+                Podetail.porder_id == porder.id,
+                Podetail.item_id == Stock.item_id,
+                Podetail.nstore == Stock.store,
+            ).order_by(Podetail.id.asc()).all()
+            for iter in checklists:
+                if iter.Stock.qty < iter.Podetail.qty:
+                    flash(iter.Podetail.item.name + u',出库后数量小于0', 'err')
                     valid = False
-                # 校验通过，才能计算库存
-                if valid:
-                    db.session.add(stock)
-            # 校验通过，设置主表为发布
+            # 校验通过
             if valid:
-                porder.status = 1
+                # 减少库存数量
+                for iter in checklists:
+                    iter.Stock.qty -= iter.Podetail.qty
+                porder.status = 1 # 设置为发布状态
                 db.session.add(porder)
+                # 记录出库日志
                 oplog = Oplog(
                     user_id=session['user_id'],
                     ip=request.remote_addr,
@@ -807,32 +813,19 @@ def stock_out_edit(id=None):
                 db.session.add(oplog)
                 db.session.commit()
                 flash(u'出库单结算成功', 'ok')
-            # 校验不通过暂存
+                return redirect(url_for('home.stock_out_list'))
+            # 校验不通过,暂存
             else:
                 oplog = Oplog(
                     user_id=session['user_id'],
                     ip=request.remote_addr,
-                    reason=u'结算出库单:%s失败' % porder.id
+                     reason=u'结算出库单:%s失败' % porder.id
                 )
                 db.session.add(oplog)
                 db.session.commit()
                 return redirect(url_for('home.stock_out_edit', id=porder.id))
 
-        else:#暂存
-            # 删除所有明细
-            # for iter_del in podetails:
-            #     db.session.delete(iter_del)
-            # 更改删除方式直接找到全部删除
-            db.session.query(Podetail).filter(Podetail.porder_id == id).delete()
-            for iter_add in form.inputrows:
-                # 新增明细
-                podetail = Podetail(
-                    porder_id=porder.id,
-                    item_id=iter_add.item_id.data,
-                    nstore=iter_add.store.data,
-                    qty=iter_add.qty.data,
-                )
-                db.session.add(podetail)
+        else: # 暂存
             oplog = Oplog(
                 user_id=session['user_id'],
                 ip=request.remote_addr,
@@ -840,7 +833,8 @@ def stock_out_edit(id=None):
             )
             db.session.commit()
             flash(u'出库单暂存成功', 'ok')
-        return redirect(url_for('home.stock_out_list'))
+            return redirect(url_for('home.stock_out_list'))
+
     return render_template('home/stock_out_edit.html', form=form, porder=porder, form_count=form_count)
 
 @home.route('/modal/stock', methods=['GET'])
