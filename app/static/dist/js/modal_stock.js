@@ -1,8 +1,8 @@
 /*
-* 产品选择模态框
+* 库存选择模态框
 * appendId: 表格ID
 * */
-function modal_item(appendId, url, key) {
+function modal_stock(appendId, url, key) {
     $.ajax({
         url: url,
         type: "GET",
@@ -13,18 +13,17 @@ function modal_item(appendId, url, key) {
             var data = result.data;
             var len = data.length;
             for (var i = 0; i < len; i++) {
-                $('#items').append(
-                    '<tr><td>' + data[i].id + '</td>' +
-                    '<td>' + data[i].name + '</td>' +
-                    '<td>' + data[i].qty + '</td>' +
-                    '<td>' + data[i].standard + '</td>' +
-                    '<td>' + data[i].unit + '</td>' +
+                $('#stocks').append(
+                    '<tr><td v=' + data[i].item_id + '>' + data[i].id + '</td>' +
+                    '<td>' + data[i].item_name + '</td>' +
+                    '<td>' + data[i].item_standard + '</td>' +
+                    '<td>' + data[i].item_unit + '</td>' +
+                    '<td>' + data[i].item_costprice + '</td>' +
                     '<td>' + data[i].costprice + '</td>' +
-                    '<td>' + data[i].salesprice + '</td>' +
+                    '<td>' + data[i].store + '</td>' +
+                    '<td>' + data[i].qty + '</td>' +
                     '<td>' + data[i].cate + '</td></tr>'
                 );
-                //var option = {"id": data[i][value], "text": data[i][name]};
-                //cbData.push(option);
             }
         },
         error: function (jqXHR, textStatus, errorThrown) {

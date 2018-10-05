@@ -1,11 +1,11 @@
 # -*- coding:utf-8 -*-
 from . import home
 from flask import render_template, session, redirect, request, url_for, flash, current_app
-from forms import LoginForm, PwdForm, CustomerForm, StockBuyForm, StockBuyListForm, StockBuyDebtForm, CusVipForm
+from forms import LoginForm, PwdForm, CustomerForm, StockBuyForm, StockBuyListForm, StockBuyDebtForm, CusVipForm, StockOutListForm, StockOutForm
 from app.models import User, Userlog, Oplog, Item, Supplier, Customer, Stock, Porder, Podetail, Kvp, Mscard, Msdetail, Vip, Vipdetail
 from app import db
 from werkzeug.security import generate_password_hash
-from sqlalchemy import or_, and_
+from sqlalchemy import or_, and_, func
 from json import dumps
 from datetime import datetime, timedelta
 
@@ -226,6 +226,114 @@ def customer_edit(id=None):
         return redirect(url_for('home.customer_list'))
     return render_template('home/customer_edit.html', form=form, customer=obj_customer)
 
+# 20180920 liuqq 新增客户-会员卡
+@home.route('/customer/cus_vip_add/<int:id>', methods=['GET', 'POST'])
+def cus_vip_add(id=None):
+    form = CusVipForm()
+    obj_customer = Customer.query.filter_by(id=id).first()
+    form.cus_name.data = obj_customer.name
+    if form.validate_on_submit():
+        # 计算vip ID
+        obj_max_vip = Vip.query.order_by(Vip.id.desc()).first()
+        if(obj_max_vip):
+            max_vip_id = obj_max_vip.id + 1
+        else:
+            max_vip_id = 1
+
+        # 计算截止日期
+        interval_day = int(form.interval.data) * 30  # 卡的有效期*30天
+        add_time = datetime.now()
+        end_time = add_time + timedelta(days=interval_day)
+
+        # 计算引用vip卡的名称
+        obj_mscard = Mscard.query.filter_by(id=form.name.data).first()
+        # 创建VIP主表对象
+        obj_vip = Vip(
+            id = max_vip_id,
+            name=obj_mscard.name,  # 名称
+            balance=form.payment.data,  # 余额
+            scorerule=form.scorerule.data,  # 积分规则
+            scorelimit=form.scorelimit.data,  # 积分限制提醒
+            addtime=add_time,  # 办理时间
+            endtime=end_time,  # 截止时间 = 办理时间 + 有效期
+        )
+        obj_oplog_vip = Oplog(
+            user_id=session['user_id'],
+            ip=request.remote_addr,
+            reason=u'添加客户vip卡:%s' % max_vip_id
+        )
+        # 数据提交
+        objects = [obj_vip, obj_oplog_vip]
+        db.session.add_all(objects)
+        db.session.commit()
+
+        # 保存客户与vip—id关系
+        obj_customer.vip_id = max_vip_id
+        obj_oplog_cus = Oplog(
+            user_id=session['user_id'],
+            ip=request.remote_addr,
+            reason=u'添加客户与vip卡关系及明细:%s' % max_vip_id
+        )
+        objects = [obj_customer, obj_oplog_cus]
+        db.session.add_all(objects)
+
+        # 保存vip明细内容
+        for iter_add in form.inputrows:
+            interval_day = int(form.interval.data) * 30  # 卡的有效期*30天
+            obj_vip_detail = Vipdetail(
+                vip_id=max_vip_id,  # 客户会员卡号
+                item_id=iter_add.item_id.data,  # 服务/项目id
+                discountprice=iter_add.discountprice.data,  # 优惠后销售价
+                quantity=iter_add.quantity.data,  # 使用次数
+                addtime=add_time,  # 优惠开始时间
+                endtime=add_time + timedelta(days=interval_day)  # 优惠结束时间 = 优惠开始时间 + 有效期
+            )
+            db.session.add(obj_vip_detail)
+
+        db.session.commit()
+        flash(u'客户-会员卡添加成功', 'ok')
+        return redirect(url_for('home.customer_list'))
+
+    return render_template('home/cus_vip_add.html', form=form)
+
+
+# 20180922 liuqq 获取会员卡信息
+@home.route('/mscard/get', methods=['GET', 'POST'])
+def mscard_get():
+    # 获取产品分页清单
+    if request.method == 'POST':
+        # 获取json数据
+        data = request.get_json()
+        id = data.get('id')
+        obj_mscard = Mscard.query.filter_by(id=id).first()
+        s_json = obj_mscard.to_json()
+        return (dumps(s_json))
+
+
+# 20180923 liuqq 获取会员卡明细信息
+@home.route('/msdetails/get', methods=['GET', 'POST'])
+def msdetails_get():
+    # 获取产品分页清单
+    if request.method == 'POST':
+        # 获取json数据
+        data = request.get_json()
+        id = data.get('id')
+        # 将数据查询出来
+        obj_msdetails = Msdetail.query.filter_by(mscard_id=id).order_by(Msdetail.item_id.asc()).all()
+        s_json = [];
+        for obj_msdetail in obj_msdetails:
+            s_json.append(obj_msdetail.to_json())
+        return (dumps(s_json))
+
+
+# 20180930 liuqq 查询客户-会员卡明细
+@home.route('/customer/cus_vip_list/<int:vip_id>', methods=['GET'])
+def cus_vip_list(vip_id=None):
+    # 明细查看
+    obj_vip = Vip.query.filter_by(id=vip_id).first()
+    obj_vip_details = Vipdetail.query.filter_by(vip_id=vip_id).order_by(Vipdetail.id.asc()).all()
+    return render_template('home/cus_vip_list.html', obj_vip=obj_vip, obj_vip_details=obj_vip_details)
+
 @home.route('/modal/item', methods=['GET'])
 def modal_item():
     # 获取商品弹出框数据
@@ -267,6 +375,7 @@ def modal_item():
                 "name": v.name,
                 "qty": qty,
                 "standard": v.standard,
+                "unit": v.unit,
                 "costprice": v.costprice,
                 "salesprice": v.salesprice,
                 "cate": v.cate,
@@ -444,6 +553,7 @@ def stock_buy_edit(id=None):
                 listform.item_id = detail.item_id
                 listform.item_name = detail.item.name
                 listform.item_standard = detail.item.standard
+                listform.item_unit = detail.item.unit
                 listform.store = detail.nstore
                 listform.qty = detail.qty
                 listform.costprice = detail.costprice
@@ -479,11 +589,13 @@ def stock_buy_edit(id=None):
             porder.status = status
             porder.remarks = form.remarks.data
         db.session.add(porder)
-        db.session.commit()  # 这里实现的不太好，提交一下后面要获取值
+        db.session.flush()  # 提交一下获取id,不要使用commit
         if switch == 1:#结算
             # 删除所有明细
-            for iter_del in podetails:
-                db.session.delete(iter_del)
+            # for iter_del in podetails:
+            #     db.session.delete(iter_del)
+            # 更改删除方式直接找到全部删除
+            db.session.query(Podetail).filter(Podetail.porder_id == porder.id).delete()
             for iter_add in form.inputrows:
                 # 新增明细
                 podetail = Podetail(
@@ -522,8 +634,10 @@ def stock_buy_edit(id=None):
             flash(u'采购单结算成功', 'ok')
         else:#暂存
             # 删除所有明细
-            for iter_del in podetails:
-                db.session.delete(iter_del)
+            # for iter_del in podetails:
+            #     db.session.delete(iter_del)
+            # 更改删除方式直接找到全部删除
+            db.session.query(Podetail).filter(Podetail.porder_id == porder.id).delete()
             for iter_add in form.inputrows:
                 # 新增明细
                 podetail = Podetail(
@@ -590,111 +704,193 @@ def stock_out_list():
                error_out=False)
     return render_template('home/stock_out_list.html', pagination=pagination, key=key, status=status)
 
+@home.route('/stock/out/edit/<int:id>', methods=['GET', 'POST'])
+def stock_out_edit(id=None):
+    # 出库单
+    form = StockOutForm()
+    porder = Porder.query.filter_by(id=id).first()
+    # 表单不存在代表新增不做校验
+    if porder:
+        # 如果表单不属于用户，不是编辑状态 退出
+        if porder.user_id != int(session['user_id']) or porder.status == 1 or porder.type != 1:
+            return redirect(url_for('home.stock_out_list'))
 
-# 20180920 liuqq 新增客户-会员卡
-@home.route('/customer/cus_vip_add/<int:id>', methods=['GET', 'POST'])
-def cus_vip_add(id=None):
-    form = CusVipForm()
-    obj_customer = Customer.query.filter_by(id=id).first()
-    form.cus_name.data = obj_customer.name
-    if form.validate_on_submit():
-        # 计算vip ID
-        obj_max_vip = Vip.query.order_by(Vip.id.desc()).first()
-        if(obj_max_vip):
-            max_vip_id = obj_max_vip.id + 1
+    podetails = db.session.query(Podetail, Stock).filter(
+        Podetail.porder_id == id,
+        Podetail.item_id == Stock.item_id,
+        Podetail.nstore == Stock.store,
+    ).order_by(Podetail.id.asc()).all()
+    if request.method == 'GET':
+        # porder赋值
+        if porder:
+            form.user_name.data = porder.user.name
+            form.remarks.data = porder.remarks
         else:
-            max_vip_id = 1
-
-        # 计算截止日期
-        interval_day = int(form.interval.data) * 30  # 卡的有效期*30天
-        add_time = datetime.now()
-        end_time = add_time + timedelta(days=interval_day)
-
-        # 计算引用vip卡的名称
-        obj_mscard = Mscard.query.filter_by(id=form.name.data).first()
-        # 创建VIP主表对象
-        obj_vip = Vip(
-            id = max_vip_id,
-            name=obj_mscard.name,  # 名称
-            balance=form.payment.data,  # 余额
-            scorerule=form.scorerule.data,  # 积分规则
-            scorelimit=form.scorelimit.data,  # 积分限制提醒
-            addtime=add_time,  # 办理时间
-            endtime=end_time,  # 截止时间 = 办理时间 + 有效期
-        )
-        obj_oplog_vip = Oplog(
-            user_id=session['user_id'],
-            ip=request.remote_addr,
-            reason=u'添加客户vip卡:%s' % max_vip_id
-        )
-        # 数据提交
-        objects = [obj_vip, obj_oplog_vip]
-        db.session.add_all(objects)
-        db.session.commit()
-
-        # 保存客户与vip—id关系
-        obj_customer.vip_id = max_vip_id
-        obj_oplog_cus = Oplog(
-            user_id=session['user_id'],
-            ip=request.remote_addr,
-            reason=u'添加客户与vip卡关系及明细:%s' % max_vip_id
-        )
-        objects = [obj_customer, obj_oplog_cus]
-        db.session.add_all(objects)
-
-        # 保存vip明细内容
-        for iter_add in form.inputrows:
-            interval_day = int(form.interval.data) * 30  # 卡的有效期*30天
-            obj_vip_detail = Vipdetail(
-                vip_id=max_vip_id,  # 客户会员卡号
-                item_id=iter_add.item_id.data,  # 服务/项目id
-                discountprice=iter_add.discountprice.data,  # 优惠后销售价
-                quantity=iter_add.quantity.data,  # 使用次数
-                addtime=add_time,  # 优惠开始时间
-                endtime=add_time + timedelta(days=interval_day)  # 优惠结束时间 = 优惠开始时间 + 有效期
+            form.user_name.data = session['user']
+        # 如果存在明细
+        if podetails:
+            # 先把空行去除
+            while len(form.inputrows) > 0:
+                form.inputrows.pop_entry()
+            # 对FormField赋值，要使用append_entry方法
+            for detail in podetails:
+                listform = StockOutListForm()
+                listform.item_id = detail.Podetail.item_id
+                listform.item_name = detail.Podetail.item.name
+                listform.item_standard = detail.Podetail.item.standard
+                listform.item_unit = detail.Podetail.item.unit
+                listform.costprice = detail.Podetail.item.costprice # 新增商品的价格
+                listform.stock_costprice = detail.Stock.costprice # 库存中最后一次采购价
+                listform.store = detail.Podetail.nstore
+                listform.stock_qty = detail.Stock.qty
+                listform.qty = detail.Podetail.qty
+                form.inputrows.append_entry(listform)
+    # 计算动态input的初值
+    form_count = len(form.inputrows)
+    if form.validate_on_submit():
+        # type_switch:1结算;0暂存
+        switch = int(form.type_switch.data)
+        # 添加主表
+        if not porder:  # 没有新增一个
+            porder = Porder(
+                type=1,
+                user_id=int(session['user_id']),
+                status=0,
+                remarks=form.remarks.data,
             )
-            db.session.add(obj_vip_detail)
+        else:  # 有更新值
+            porder.user_id = int(session['user_id'])
+            porder.status = 0
+            porder.remarks = form.remarks.data
+        db.session.add(porder)
+        # 主表暂存，需要使用id
+        db.session.flush()
 
-        db.session.commit()
-        flash(u'客户-会员卡添加成功', 'ok')
-        return redirect(url_for('home.customer_list'))
+        # 删除所有明细
+        # for iter_del in podetails:
+        #     db.session.delete(iter_del)
+        # 更改删除方式直接找到全部删除
+        db.session.query(Podetail).filter(Podetail.porder_id == porder.id).delete()
+        for iter_add in form.inputrows:
+            # 新增明细
+            podetail = Podetail(
+                porder_id=porder.id,
+                item_id=iter_add.item_id.data,
+                nstore=iter_add.store.data,
+                qty=float(iter_add.qty.data), # 这里一定要强转，临时数据后面要比较
+            )
+            db.session.add(podetail)
+        # 把所有明细暂存，后面用于计算是否存在核减为负数的情况
+        db.session.flush()
 
-    return render_template('home/cus_vip_add.html', form=form)
+        if switch == 1:# 结算
+            # valid True可以提交; False 不能提交
+            valid = True
+            # 判断临时数据中有无库房，零件号重复的
+            grouplists = db.session.query(
+                Podetail.item_id,
+                Podetail.nstore,
+                func.count('*').label('cnt')
+            ).filter(Podetail.porder_id == porder.id).group_by(
+                Podetail.item_id,
+                Podetail.nstore
+            ).having(func.count('*')>1).first()
+            if grouplists:
+                flash(u'同一仓库的相同零件，请将明细合并到一行', 'err')
+                valid = False
 
+            # 遍历临时数据
+            checklists = db.session.query(Podetail, Stock).filter(
+                Podetail.porder_id == porder.id,
+                Podetail.item_id == Stock.item_id,
+                Podetail.nstore == Stock.store,
+            ).order_by(Podetail.id.asc()).all()
+            for iter in checklists:
+                if iter.Stock.qty < iter.Podetail.qty:
+                    flash(u'零件:' + iter.Podetail.item.name + u',出库后数量小于0', 'err')
+                    valid = False
+            # 校验通过
+            if valid:
+                # 减少库存数量
+                for iter in checklists:
+                    iter.Stock.qty -= iter.Podetail.qty
+                porder.status = 1 # 设置为发布状态
+                db.session.add(porder)
+                # 记录出库日志
+                oplog = Oplog(
+                    user_id=session['user_id'],
+                    ip=request.remote_addr,
+                    reason=u'结算出库单:%s' % porder.id
+                )
+                db.session.add(oplog)
+                db.session.commit()
+                flash(u'出库单结算成功', 'ok')
+                return redirect(url_for('home.stock_out_list'))
+            # 校验不通过,暂存
+            else:
+                oplog = Oplog(
+                    user_id=session['user_id'],
+                    ip=request.remote_addr,
+                     reason=u'结算出库单:%s失败' % porder.id
+                )
+                db.session.add(oplog)
+                db.session.commit()
+                return redirect(url_for('home.stock_out_edit', id=porder.id))
 
-# 20180922 liuqq 获取会员卡信息
-@home.route('/mscard/get', methods=['GET', 'POST'])
-def mscard_get():
-    # 获取产品分页清单
-    if request.method == 'POST':
-        # 获取json数据
-        data = request.get_json()
-        id = data.get('id')
-        obj_mscard = Mscard.query.filter_by(id=id).first()
-        s_json = obj_mscard.to_json()
-        return (dumps(s_json))
+        else: # 暂存
+            oplog = Oplog(
+                user_id=session['user_id'],
+                ip=request.remote_addr,
+                reason=u'暂存出库单:%s' % porder.id
+            )
+            db.session.commit()
+            flash(u'出库单暂存成功', 'ok')
+            return redirect(url_for('home.stock_out_list'))
 
+    return render_template('home/stock_out_edit.html', form=form, porder=porder, form_count=form_count)
 
-# 20180923 liuqq 获取会员卡明细信息
-@home.route('/msdetails/get', methods=['GET', 'POST'])
-def msdetails_get():
-    # 获取产品分页清单
-    if request.method == 'POST':
-        # 获取json数据
-        data = request.get_json()
-        id = data.get('id')
-        # 将数据查询出来
-        obj_msdetails = Msdetail.query.filter_by(mscard_id=id).order_by(Msdetail.item_id.asc()).all()
-        s_json = [];
-        for obj_msdetail in obj_msdetails:
-            s_json.append(obj_msdetail.to_json())
-        return (dumps(s_json))
-
-
-# 20180930 liuqq 查询客户-会员卡明细
-@home.route('/customer/cus_vip_list/<int:vip_id>', methods=['GET'])
-def cus_vip_list(vip_id=None):
-    # 明细查看
-    obj_vip = Vip.query.filter_by(id=vip_id).first()
-    obj_vip_details = Vipdetail.query.filter_by(vip_id=vip_id).order_by(Vipdetail.id.asc()).all()
-    return render_template('home/cus_vip_list.html', obj_vip=obj_vip, obj_vip_details=obj_vip_details)
+@home.route('/modal/stock', methods=['GET'])
+def modal_stock():
+    # 获取库存弹出框数据
+    key = request.args.get('key', '')
+    stocks = Stock.query
+    # 条件查询
+    if key:
+        # 库房/零件名称/类别/规格
+        stocks = stocks.filter(
+            or_(Stock.store.ilike('%' + key + '%'),
+                Stock.item.name.ilike('%' + key + '%'),
+                Stock.item.cate.ilike('%' + key + '%'),
+                Stock.item.standard.ilike('%' + key + '%'),
+                )
+        )
+    stocks = stocks.order_by(Stock.item_id.asc(), Stock.store.asc()).limit(current_app.config['POSTS_PER_PAGE']).all()
+    # 返回的数据格式为
+    # {
+    # "pages": 1,
+    # "data": [
+    #         {"id": "1",
+    #         "name": "xx"}
+    #         ]
+    # }
+    data = []
+    for v in stocks:
+        data.append(
+            {
+                "id": v.id,
+                "item_id": v.item.id,
+                "item_name": v.item.name,
+                "item_standard": v.item.standard,
+                "item_unit": v.item.unit,
+                "item_costprice": v.item.costprice,
+                "costprice": v.costprice,
+                "store": v.store,
+                "qty": v.qty,
+                "cate": v.item.cate,
+            }
+        )
+    res = {
+        "key": key,
+        "data": data,
+    }
+    return dumps(res)
