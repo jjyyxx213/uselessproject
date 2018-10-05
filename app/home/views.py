@@ -5,7 +5,7 @@ from forms import LoginForm, PwdForm, CustomerForm, StockBuyForm, StockBuyListFo
 from app.models import User, Userlog, Oplog, Item, Supplier, Customer, Stock, Porder, Podetail, Kvp, Mscard, Msdetail, Vip, Vipdetail
 from app import db
 from werkzeug.security import generate_password_hash
-from sqlalchemy import or_, and_
+from sqlalchemy import or_, and_, func
 from json import dumps
 from datetime import datetime, timedelta
 
@@ -783,10 +783,22 @@ def stock_out_edit(id=None):
         # 把所有明细暂存，后面用于计算是否存在核减为负数的情况
         db.session.flush()
 
-
         if switch == 1:# 结算
             # valid True可以提交; False 不能提交
             valid = True
+            # 判断临时数据中有无库房，零件号重复的
+            grouplists = db.session.query(
+                Podetail.item_id,
+                Podetail.nstore,
+                func.count('*').label('cnt')
+            ).filter(Podetail.porder_id == porder.id).group_by(
+                Podetail.item_id,
+                Podetail.nstore
+            ).having(func.count('*')>1).first()
+            if grouplists:
+                flash(u'同一仓库的相同零件，请将明细合并到一行', 'err')
+                valid = False
+
             # 遍历临时数据
             checklists = db.session.query(Podetail, Stock).filter(
                 Podetail.porder_id == porder.id,
@@ -795,7 +807,7 @@ def stock_out_edit(id=None):
             ).order_by(Podetail.id.asc()).all()
             for iter in checklists:
                 if iter.Stock.qty < iter.Podetail.qty:
-                    flash(iter.Podetail.item.name + u',出库后数量小于0', 'err')
+                    flash(u'零件:' + iter.Podetail.item.name + u',出库后数量小于0', 'err')
                     valid = False
             # 校验通过
             if valid:
