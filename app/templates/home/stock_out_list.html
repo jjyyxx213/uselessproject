@@ -65,7 +65,7 @@
                                         {% if v.status == 0 and v.user_id == user.id %}
                                         <a href="{{ url_for('home.stock_out_edit', id=v.id) }}" name="btn-edit"
                                            class="label label-success">修改</a>&nbsp
-                                        <a href="#" name="btn-stop"
+                                        <a href="{{ url_for('home.stock_out_del', id=v.id) }}" name="btn-stop"
                                            class="label label-danger">删除</a>
                                         {% endif %}
                                     </td>
