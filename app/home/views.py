@@ -481,7 +481,7 @@ def stock_buy_list():
 
 @home.route('/stock/buy/view/<int:id>', methods=['GET'])
 def stock_buy_view(id=None):
-    # 明细查看
+    # 采购单明细查看
     porder = Porder.query.filter_by(id=id).first_or_404()
     podetails = Podetail.query.filter_by(porder_id=id).order_by(Podetail.id.asc()).all()
     return render_template('home/stock_buy_view.html', porder=porder, podetails=podetails)
@@ -910,3 +910,10 @@ def stock_out_del(id=None):
     db.session.commit()
     flash(u'出库单删除成功', 'ok')
     return redirect(url_for('home.stock_out_list'))
+
+@home.route('/stock/out/view/<int:id>', methods=['GET'])
+def stock_out_view(id=None):
+    # 出库单明细查看
+    porder = Porder.query.filter_by(id=id).first_or_404()
+    podetails = Podetail.query.filter_by(porder_id=id).order_by(Podetail.id.asc()).all()
+    return render_template('home/stock_out_view.html', porder=porder, podetails=podetails)
