@@ -481,7 +481,7 @@ def stock_buy_list():
 
 @home.route('/stock/buy/view/<int:id>', methods=['GET'])
 def stock_buy_view(id=None):
-    # 明细查看
+    # 采购单明细查看
     porder = Porder.query.filter_by(id=id).first_or_404()
     podetails = Podetail.query.filter_by(porder_id=id).order_by(Podetail.id.asc()).all()
     return render_template('home/stock_buy_view.html', porder=porder, podetails=podetails)
@@ -663,12 +663,10 @@ def stock_buy_edit(id=None):
 def stock_buy_del(id=None):
     # 采购单删除
     porder = Porder.query.filter_by(id=id).first_or_404()
-    podetails = Podetail.query.filter_by(porder_id=id).all()
     if porder.type != 0 or porder.user_id != int(session['user_id']) or porder.status == 1:
         return redirect(url_for('home.stock_buy_list'))
+    Podetail.query.filter_by(porder_id=id).delete()
     db.session.delete(porder)
-    for iter_del in podetails:
-        db.session.delete(iter_del)
     oplog = Oplog(
         user_id=session['user_id'],
         ip=request.remote_addr,
@@ -678,6 +676,52 @@ def stock_buy_del(id=None):
     db.session.commit()
     flash(u'采购单删除成功', 'ok')
     return redirect(url_for('home.stock_buy_list'))
+
+@home.route('/modal/stock', methods=['GET'])
+def modal_stock():
+    # 获取库存弹出框数据
+    key = request.args.get('key', '')
+    stocks = Stock.query
+    # 条件查询
+    if key:
+        # 库房/零件名称/类别/规格
+        stocks = stocks.filter(
+            or_(Stock.store.ilike('%' + key + '%'),
+                Stock.item.name.ilike('%' + key + '%'),
+                Stock.item.cate.ilike('%' + key + '%'),
+                Stock.item.standard.ilike('%' + key + '%'),
+                )
+        )
+    stocks = stocks.order_by(Stock.item_id.asc(), Stock.store.asc()).limit(current_app.config['POSTS_PER_PAGE']).all()
+    # 返回的数据格式为
+    # {
+    # "pages": 1,
+    # "data": [
+    #         {"id": "1",
+    #         "name": "xx"}
+    #         ]
+    # }
+    data = []
+    for v in stocks:
+        data.append(
+            {
+                "id": v.id,
+                "item_id": v.item.id,
+                "item_name": v.item.name,
+                "item_standard": v.item.standard,
+                "item_unit": v.item.unit,
+                "item_costprice": v.item.costprice,
+                "costprice": v.costprice,
+                "store": v.store,
+                "qty": v.qty,
+                "cate": v.item.cate,
+            }
+        )
+    res = {
+        "key": key,
+        "data": data,
+    }
+    return dumps(res)
 
 @home.route('/stock/out/list', methods=['GET'])
 def stock_out_list():
@@ -849,48 +893,27 @@ def stock_out_edit(id=None):
 
     return render_template('home/stock_out_edit.html', form=form, porder=porder, form_count=form_count)
 
-@home.route('/modal/stock', methods=['GET'])
-def modal_stock():
-    # 获取库存弹出框数据
-    key = request.args.get('key', '')
-    stocks = Stock.query
-    # 条件查询
-    if key:
-        # 库房/零件名称/类别/规格
-        stocks = stocks.filter(
-            or_(Stock.store.ilike('%' + key + '%'),
-                Stock.item.name.ilike('%' + key + '%'),
-                Stock.item.cate.ilike('%' + key + '%'),
-                Stock.item.standard.ilike('%' + key + '%'),
-                )
-        )
-    stocks = stocks.order_by(Stock.item_id.asc(), Stock.store.asc()).limit(current_app.config['POSTS_PER_PAGE']).all()
-    # 返回的数据格式为
-    # {
-    # "pages": 1,
-    # "data": [
-    #         {"id": "1",
-    #         "name": "xx"}
-    #         ]
-    # }
-    data = []
-    for v in stocks:
-        data.append(
-            {
-                "id": v.id,
-                "item_id": v.item.id,
-                "item_name": v.item.name,
-                "item_standard": v.item.standard,
-                "item_unit": v.item.unit,
-                "item_costprice": v.item.costprice,
-                "costprice": v.costprice,
-                "store": v.store,
-                "qty": v.qty,
-                "cate": v.item.cate,
-            }
-        )
-    res = {
-        "key": key,
-        "data": data,
-    }
-    return dumps(res)
+@home.route('/stock/out/del/<int:id>', methods=['GET'])
+def stock_out_del(id=None):
+    # 出库单删除
+    porder = Porder.query.filter_by(id=id).first_or_404()
+    if porder.type != 1 or porder.user_id != int(session['user_id']) or porder.status == 1:
+        return redirect(url_for('home.stock_out_list'))
+    Podetail.query.filter_by(porder_id=id).delete()
+    db.session.delete(porder)
+    oplog = Oplog(
+        user_id=session['user_id'],
+        ip=request.remote_addr,
+        reason=u'删除出库单:%s' % porder.id
+    )
+    db.session.add(oplog)
+    db.session.commit()
+    flash(u'出库单删除成功', 'ok')
+    return redirect(url_for('home.stock_out_list'))
+
+@home.route('/stock/out/view/<int:id>', methods=['GET'])
+def stock_out_view(id=None):
+    # 出库单明细查看
+    porder = Porder.query.filter_by(id=id).first_or_404()
+    podetails = Podetail.query.filter_by(porder_id=id).order_by(Podetail.id.asc()).all()
+    return render_template('home/stock_out_view.html', porder=porder, podetails=podetails)
