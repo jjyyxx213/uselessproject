@@ -29,7 +29,7 @@
                         <!--启动CSRF-->
                         {{ form.hidden_tag() }}
                         <div class="box-header with-border">
-                            <h3 class="box-title"> 调拨管理</h3>
+                            <h3 class="box-title"> 调拨管理 {% if porder %}- {{ porder.id }} {% endif %}</h3>
                             <div class="pull-right">总行数：<strong id="cnt">{{ form_count }}</strong>/<strong>20</strong></div>
                             <div class="row">
                                 <div class="input-group col-md-3 pull-left margin-defined">

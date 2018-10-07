@@ -694,15 +694,15 @@ def stock_buy_del(id=None):
 def modal_stock():
     # 获取库存弹出框数据
     key = request.args.get('key', '')
-    stocks = Stock.query
+    stocks = Stock.query.join(Item)
     # 条件查询
     if key:
         # 库房/零件名称/类别/规格
         stocks = stocks.filter(
             or_(Stock.store.ilike('%' + key + '%'),
-                Stock.item.name.ilike('%' + key + '%'),
-                Stock.item.cate.ilike('%' + key + '%'),
-                Stock.item.standard.ilike('%' + key + '%'),
+                Item.name.ilike('%' + key + '%'),
+                Item.cate.ilike('%' + key + '%'),
+                Item.standard.ilike('%' + key + '%'),
                 )
         )
     stocks = stocks.order_by(Stock.item_id.asc(), Stock.store.asc()).limit(current_app.config['POSTS_PER_PAGE']).all()
@@ -1035,7 +1035,7 @@ def stock_allot_edit(id=None):
             # valid True可以提交; False 不能提交
             valid = True
             # 判断临时数据中有无调拨数量大于库存的
-            sql_text = 'select b.item_id, d.name as item_name, b.nstore, b.sum_qty, c.qty from ' \
+            sql_text = 'select b.item_id, d.name as item_name, b.ostore, b.sum_qty, c.qty from ' \
                        '(select a.item_id, ostore, sum(qty) as sum_qty from tb_podetail as a ' \
                        'where a.porder_id = :id group by item_id, ostore) as b, tb_stock as c, tb_item as d ' \
                        'where b.item_id = c.item_id and b.ostore = c.store and b.item_id = d.id'
@@ -1051,7 +1051,7 @@ def stock_allot_edit(id=None):
                 checklists = db.session.query(Podetail, Stock).filter(
                     Podetail.porder_id == porder.id,
                     Podetail.item_id == Stock.item_id,
-                    Podetail.ostore == Stock.ostore,
+                    Podetail.ostore == Stock.store,
                 ).order_by(Podetail.id.asc()).all()
                 for iter in checklists:
                     # 减少原库存数量
@@ -1059,7 +1059,7 @@ def stock_allot_edit(id=None):
                     # 增加新库存数量
                     # 判断库存是否存在
                     stock = Stock.query.filter_by(item_id=iter.Podetail.item_id,
-                                                  store=iter.Stock.store.data).first()
+                                                  store=iter.Podetail.nstore).first()
                     if stock:  # 存在就更新数量
                         stock.qty += float(iter.Podetail.qty)
                     else:  # 不存在库存表加一条
@@ -1069,6 +1069,7 @@ def stock_allot_edit(id=None):
                             qty=iter.Podetail.qty,
                             store=iter.Podetail.nstore,
                         )
+                    db.session.add(iter.Stock)
                     db.session.add(stock)
 
                 porder.status = 1 # 设置为发布状态
@@ -1082,7 +1083,7 @@ def stock_allot_edit(id=None):
                 db.session.add(oplog)
                 db.session.commit()
                 flash(u'调拨单结算成功', 'ok')
-                return redirect(url_for('home.stock_out_list'))
+                return redirect(url_for('home.stock_allot_list'))
             # 校验不通过,暂存
             else:
                 oplog = Oplog(
