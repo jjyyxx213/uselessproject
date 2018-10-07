@@ -1106,3 +1106,28 @@ def stock_allot_edit(id=None):
             return redirect(url_for('home.stock_allot_list'))
 
     return render_template('home/stock_allot_edit.html', form=form, porder=porder, form_count=form_count)
+
+@home.route('/stock/allot/del/<int:id>', methods=['GET'])
+def stock_allot_del(id=None):
+    # 调拨单删除
+    porder = Porder.query.filter_by(id=id).first_or_404()
+    if porder.type != 2 or porder.user_id != int(session['user_id']) or porder.status == 1:
+        return redirect(url_for('home.stock_allot_list'))
+    Podetail.query.filter_by(porder_id=id).delete()
+    db.session.delete(porder)
+    oplog = Oplog(
+        user_id=session['user_id'],
+        ip=request.remote_addr,
+        reason=u'删除调拨单:%s' % porder.id
+    )
+    db.session.add(oplog)
+    db.session.commit()
+    flash(u'调拨单删除成功', 'ok')
+    return redirect(url_for('home.stock_allot_list'))
+
+@home.route('/stock/allot/view/<int:id>', methods=['GET'])
+def stock_allot_view(id=None):
+    # 调拨单明细查看
+    porder = Porder.query.filter_by(id=id).first_or_404()
+    podetails = Podetail.query.filter_by(porder_id=id).order_by(Podetail.id.asc()).all()
+    return render_template('home/stock_allot_view.html', porder=porder, podetails=podetails)
