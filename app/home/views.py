@@ -327,12 +327,24 @@ def msdetails_get():
 
 
 # 20180930 liuqq 查询客户-会员卡明细
-@home.route('/customer/cus_vip_list/<int:vip_id>', methods=['GET'])
+# 20181007 liuqq 注销客户-会员卡
+@home.route('/customer/cus_vip_list/<int:vip_id>', methods=['GET', 'POST'])
 def cus_vip_list(vip_id=None):
     # 明细查看
+    obj_customer = Customer.query.filter_by(vip_id=vip_id).first()
     obj_vip = Vip.query.filter_by(id=vip_id).first()
     obj_vip_details = Vipdetail.query.filter_by(vip_id=vip_id).order_by(Vipdetail.id.asc()).all()
-    return render_template('home/cus_vip_list.html', obj_vip=obj_vip, obj_vip_details=obj_vip_details)
+    if request.method == 'GET':
+        return render_template('home/cus_vip_list.html', obj_vip=obj_vip, obj_vip_details=obj_vip_details)
+    if request.method == 'POST':
+        obj_customer.vip_id = None
+        db.session.add(obj_customer)
+        db.session.flush()
+        db.session.query(Vipdetail).filter(Vipdetail.vip_id == vip_id).delete()
+        db.session.delete(obj_vip)
+        db.session.commit()
+        flash(u'会员卡注销成功', 'ok')
+        return redirect(url_for('home.customer_list'))
 
 @home.route('/modal/item', methods=['GET'])
 def modal_item():
