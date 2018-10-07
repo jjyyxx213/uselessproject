@@ -1034,34 +1034,25 @@ def stock_allot_edit(id=None):
         if switch == 1:# 结算
             # valid True可以提交; False 不能提交
             valid = True
-            # 判断临时数据中有无调拨数量大于库存的 todo
-            '''
-            grouplists = db.session.query(
-                Podetail.item_id,
-                Podetail.nstore,
-                func.count('*').label('cnt')
-            ).filter(Podetail.porder_id == porder.id).group_by(
-                Podetail.item_id,
-                Podetail.nstore
-            ).having(func.count('*')>1).first()
-            if grouplists:
-                flash(u'同一仓库的相同零件，请将明细合并到一行', 'err')
-                valid = False
-            '''
-            # 遍历临时数据
-            checklists = db.session.query(Podetail, Stock).filter(
-                Podetail.porder_id == porder.id,
-                Podetail.item_id == Stock.item_id,
-                Podetail.ostore == Stock.ostore,
-            ).order_by(Podetail.id.asc()).all()
-            for iter in checklists:
-                if iter.Stock.qty < iter.Podetail.qty:
-                    flash(u'零件:' + iter.Podetail.item.name + u',出库后数量小于0', 'err')
+            # 判断临时数据中有无调拨数量大于库存的
+            sql_text = 'select b.item_id, d.name as item_name, b.nstore, b.sum_qty, c.qty from ' \
+                       '(select a.item_id, ostore, sum(qty) as sum_qty from tb_podetail as a ' \
+                       'where a.porder_id = :id group by item_id, ostore) as b, tb_stock as c, tb_item as d ' \
+                       'where b.item_id = c.item_id and b.ostore = c.store and b.item_id = d.id'
+            grouplists = db.session.execute(text(sql_text), {'id': porder.id})
+            for iter in grouplists:
+                if iter.qty < iter.sum_qty:
+                    flash(u'零件:' + iter.item_name + u',调拨后数量小于0', 'err')
                     valid = False
 
             # 校验通过
             if valid:
-
+                # 遍历临时数据
+                checklists = db.session.query(Podetail, Stock).filter(
+                    Podetail.porder_id == porder.id,
+                    Podetail.item_id == Stock.item_id,
+                    Podetail.ostore == Stock.ostore,
+                ).order_by(Podetail.id.asc()).all()
                 for iter in checklists:
                     # 减少原库存数量
                     iter.Stock.qty -= iter.Podetail.qty

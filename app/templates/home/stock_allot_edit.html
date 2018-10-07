@@ -17,7 +17,7 @@
         <h1> 门店管理系统</h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> 库存管理</a></li>
-            <li><a href="{{ url_for('home.stock_buy_list') }}"> 出库单列表</a></li>
+            <li><a href="{{ url_for('home.stock_allot_list') }}"> 调拨单列表</a></li>
             <li class="active"> 维护</li>
         </ol>
     </section>
@@ -29,12 +29,12 @@
                         <!--启动CSRF-->
                         {{ form.hidden_tag() }}
                         <div class="box-header with-border">
-                            <h3 class="box-title"> 领料出库</h3>
+                            <h3 class="box-title"> 调拨管理</h3>
                             <div class="pull-right">总行数：<strong id="cnt">{{ form_count }}</strong>/<strong>20</strong></div>
                             <div class="row">
                                 <div class="input-group col-md-3 pull-left margin-defined">
                                     <span class="input-group-btn">
-                                        <button class="btn btn-default" type="button"> 出库员</button>
+                                        <button class="btn btn-default" type="button"> 调拨员</button>
                                     </span>
                                     {{ form.user_name }}
                                 </div>
@@ -61,7 +61,7 @@
                                     <label style="color: red">*</label>
                                     <label class="small"> 商品</label>
                                 </div>
-                                <div class="col-md-2 padding-defined">
+                                <div class="col-md-1 padding-defined">
                                     <label class="small"> 规格</label>
                                 </div>
                                 <div class="col-md-1 padding-defined">
@@ -70,11 +70,16 @@
                                 <div class="col-md-1 padding-defined">
                                     <label class="small"> 单价</label>
                                 </div>
-                                <div class="col-md-1 padding-defined">
-                                    <label class="small"> 上次进价</label>
+                                <div class="col-md-2 padding-defined">
+                                    <label class="small"> 从..</label>
                                 </div>
                                 <div class="col-md-2 padding-defined">
-                                    <label class="small"> 仓库</label>
+                                    <label class="small">
+                                        到..&nbsp;&nbsp;&nbsp;&nbsp;
+                                        <a id="batch">批量</a>
+                                        <label class="badge bg-green" data-toggle="tooltip"
+                                       title="根据第一行仓库批量维护">?</label>
+                                    </label>
                                 </div>
                                 <div class="col-md-1 padding-defined">
                                     <label class="small"> 库存数量</label>
@@ -114,7 +119,7 @@
                                                 </div>
                                             {% endfor %}
                                         </div>
-                                        <div class="col-md-2 padding-defined">
+                                        <div class="col-md-1 padding-defined">
                                             <div class="form-group">
                                                 <input id="inputrows-{{ loop.index0 }}-item_standard"
                                                        name="inputrows-{{ loop.index0 }}-item_standard"
@@ -146,27 +151,13 @@
                                         </div>
                                         <div class="col-md-1 padding-defined">
                                             <div class="form-group">
-                                                <input id="inputrows-{{ loop.index0 }}-costprice"
-                                                       name="inputrows-{{ loop.index0 }}-costprice"
+                                                <input id="inputrows-{{ loop.index0 }}-item_costprice"
+                                                       name="inputrows-{{ loop.index0 }}-item_costprice"
                                                        class="form-control" readonly
                                                        placeholder="单价" type="text"
-                                                       value="{{ v.data.costprice or '' }}">
+                                                       value="{{ v.data.item_costprice or '' }}">
                                             </div>
-                                            {% for err in v.costprice.errors %}
-                                                <div class="col-md-12">
-                                                    <p style="color: red" class="small">{{ err }}</p>
-                                                </div>
-                                            {% endfor %}
-                                        </div>
-                                        <div class="col-md-1 padding-defined">
-                                            <div class="form-group">
-                                                <input id="inputrows-{{ loop.index0 }}-stock_costprice"
-                                                       name="inputrows-{{ loop.index0 }}-stock_costprice"
-                                                       class="form-control" readonly
-                                                       placeholder="上次进价" type="text"
-                                                       value="{{ v.data.stock_costprice or '' }}">
-                                            </div>
-                                            {% for err in v.stock_costprice.errors %}
+                                            {% for err in v.item_costprice.errors %}
                                                 <div class="col-md-12">
                                                     <p style="color: red" class="small">{{ err }}</p>
                                                 </div>
@@ -174,14 +165,29 @@
                                         </div>
                                         <div class="col-md-2 padding-defined">
                                             <div class="form-group">
-                                                <input id="inputrows-{{ loop.index0 }}-store"
-                                                       name="inputrows-{{ loop.index0 }}-store"
+                                                <input id="inputrows-{{ loop.index0 }}-ostore"
+                                                       name="inputrows-{{ loop.index0 }}-ostore"
                                                        class="form-control"
-                                                       placeholder="仓库" type="text"
-                                                       value="{{ v.data.store or '' }}"
+                                                       placeholder="原仓库" type="text"
+                                                       value="{{ v.data.ostore or '' }}"
                                                        readonly>
                                             </div>
-                                            {% for err in v.store.errors %}
+                                            {% for err in v.ostore.errors %}
+                                                <div class="col-md-12">
+                                                    <p style="color: red" class="small">{{ err }}</p>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-md-2 padding-defined">
+                                            <div class="form-group">
+                                                <select class="form-control select2 store-choice"
+                                                    id="inputrows-{{ loop.index0 }}-nstore"
+                                                    name="inputrows-{{ loop.index0 }}-nstore"
+                                                    data-placeholder="调拨仓库"
+                                                    v="{{ v.data.nstore or '' }}">
+                                            </select>
+                                            </div>
+                                            {% for err in v.nstore.errors %}
                                                 <div class="col-md-12">
                                                     <p style="color: red" class="small">{{ err }}</p>
                                                 </div>
@@ -224,7 +230,7 @@
                                 {{ form.submit }}
                                 {{ form.type_switch }}
                                 <input name="switch" id="switch" type="checkbox" data-size="small">
-                                <a href="{{ url_for('home.stock_out_list') }}" class="btn btn-default pull-right"
+                                <a href="{{ url_for('home.stock_allot_list') }}" class="btn btn-default pull-right"
                                    role="button"> 返回</a>
                             </div>
                         </div>
@@ -289,7 +295,7 @@
     <script>
         $(document).ready(function () {
             $("#g-stock").addClass("active");
-            $("#g-stock-out-list").addClass("active");
+            $("#g-stock-allot-list").addClass("active");
             // 弹出提示初始化
             $(function () {
                 $('[data-toggle="tooltip"]').tooltip()
@@ -297,7 +303,7 @@
             // switch
             $('#switch').bootstrapSwitch(
                 {
-                    onText: "出库",
+                    onText: "调拨",
                     offText: "暂存",
                     onColor: "success",
                     offColor: "warning",
@@ -313,6 +319,14 @@
             );
             // 默认为保存
             $('#switch').bootstrapSwitch('state',true);
+
+            // 下拉框设置
+            $('.select2').select2(
+                {
+                    language: "zh-CN",
+                    allowClear: true,
+                }
+            );
 
             // 动态加载inputrows
             let MaxInputs = 20; //maximum input boxes allowed
@@ -338,7 +352,7 @@
                         '                                            </span>\n' +
                         '                                        </div>\n' +
                         '                                    </div>\n' +
-                        '                                    <div class="col-md-2 padding-defined">\n' +
+                        '                                    <div class="col-md-1 padding-defined">\n' +
                         '                                        <div class="form-group">\n' +
                         '                                            <input id="inputrows-' + id_ins + '-item_standard"\n' +
                         '                                                   name="inputrows-' + id_ins + '-item_standard" class="form-control"\n' +
@@ -356,26 +370,27 @@
                         '                                     </div>\n' +
                         '                                    <div class="col-md-1 padding-defined">\n' +
                         '                                        <div class="form-group">\n' +
-                        '                                            <input id="inputrows-' + id_ins + '-costprice"\n' +
-                        '                                                   name="inputrows-' + id_ins + '-costprice"\n' +
-                        '                                                   class="form-control costprice" readonly\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-item_costprice"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-item_costprice"\n' +
+                        '                                                   class="form-control" readonly\n' +
                         '                                                   placeholder="单价" type="text">\n' +
-                        '                                        </div>\n' +
-                        '                                    </div>\n' +
-                        '                                    <div class="col-md-1 padding-defined">\n' +
-                        '                                        <div class="form-group">\n' +
-                        '                                            <input id="inputrows-' + id_ins + '-stock_costprice"\n' +
-                        '                                                   name="inputrows-' + id_ins + '-stock_costprice"\n' +
-                        '                                                   class="form-control costprice" readonly\n' +
-                        '                                                   placeholder="上次进价" type="text">\n' +
                         '                                        </div>\n' +
                         '                                    </div>\n' +
                         '                                    <div class="col-md-2 padding-defined">\n' +
                         '                                        <div class="form-group">\n' +
-                        '                                            <input id="inputrows-' + id_ins + '-store"\n' +
-                        '                                                   name="inputrows-' + id_ins + '-store"\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-ostore"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-ostore"\n' +
                         '                                                   class="form-control" readonly\n' +
-                        '                                                   placeholder="仓库" type="text">\n' +
+                        '                                                   placeholder="原仓库" type="text">\n' +
+                        '                                        </div>\n' +
+                        '                                    </div>\n' +
+                        '                                    <div class="col-md-2 padding-defined">\n' +
+                        '                                        <div class="form-group">\n' +
+                        '                                           <select class="form-control select2 store-choice"\n' +
+                        '                                                id="inputrows-' + id_ins + '-nstore"\n' +
+                        '                                                name="inputrows-' + id_ins + '-nstore"\n' +
+                        '                                                data-placeholder="调拨仓库">\n' +
+                        '                                           </select>\n' +
                         '                                        </div>\n' +
                         '                                    </div>\n' +
                         '                                    <div class="col-md-1 padding-defined">\n' +
@@ -400,7 +415,15 @@
                         '                                        </button>\n' +
                         '                                    </div>\n' +
                         '                                </div>');
-
+                    // 动态添加行后，要处理select2下拉框初始化
+                    let options = {
+                        url: "{{ url_for('home.store_get') }}",      // 数据接口url
+                        pageSize: 10, // 每次加载的数据条数[屏蔽，目前从后台获取]
+                        value: "id",  // 下拉框value字段名称
+                        name: "name", // 下拉框显示字段名称
+                        selected: []  // 默认选中项，格式：[{id:1,text:"选项1"},{id:2,text:"选项2"}]
+                    };
+                    ajaxSelect2("inputrows-" + id_ins + "-nstore", options);
                     id_ins++;
                     row_ins++;
                     $("#cnt").text(row_ins)//显示总行数
@@ -415,6 +438,20 @@
                     $("#cnt").text(row_ins) //显示总行数
                 }
                 return false;
+            });
+            //这里要处理仓库下拉
+            let options = {
+                url: "{{ url_for('home.store_get') }}",      // 数据接口url
+                pageSize: 10, // 每次加载的数据条数[屏蔽，目前从后台获取]
+                value: "id",  // 下拉框value字段名称
+                name: "name", // 下拉框显示字段名称
+                selected: []  // 默认选中项，格式：[{id:1,text:"选项1"},{id:2,text:"选项2"}]
+            };
+            //遍历.store-choice，为进入时所有的库房下拉框动态初始化
+            $(".store-choice").each(function () {
+                id = $(this).attr("id");
+                ajaxSelect2(id, options);
+                setStoreValue(id);
             });
 
 
@@ -463,9 +500,8 @@
                 let item_name = $(this).find("td:eq(1)").text();
                 let item_standard = $(this).find("td:eq(2)").text();
                 let item_unit = $(this).find("td:eq(3)").text();
-                let costprice = $(this).find("td:eq(4)").text();
-                let stock_costprice = $(this).find("td:eq(5)").text();
-                let store = $(this).find("td:eq(6)").text();
+                let item_costprice = $(this).find("td:eq(4)").text();
+                let ostore = $(this).find("td:eq(6)").text();
                 let stock_qty = $(this).find("td:eq(7)").text();
 
                 $("#stockModal").modal("hide");
@@ -478,14 +514,29 @@
                 input_item_standard.val(item_standard);
                 let input_item_unit = $("#" + 'inputrows-' + loop_index + '-item_unit');
                 input_item_unit.val(item_unit);
-                let input_costprice = $("#" + 'inputrows-' + loop_index + '-costprice');
-                input_costprice.val(costprice);
-                let input_stock_costprice = $("#" + 'inputrows-' + loop_index + '-stock_costprice');
-                input_stock_costprice.val(stock_costprice);
-                let input_store = $("#" + 'inputrows-' + loop_index + '-store');
-                input_store.val(store);
+                let input_item_costprice = $("#" + 'inputrows-' + loop_index + '-item_costprice');
+                input_item_costprice.val(item_costprice);
+                //let input_stock_costprice = $("#" + 'inputrows-' + loop_index + '-stock_costprice');
+                //input_stock_costprice.val(stock_costprice);
+                let input_ostore = $("#" + 'inputrows-' + loop_index + '-ostore');
+                input_ostore.val(ostore);
                 let input_stock_qty = $("#" + 'inputrows-' + loop_index + '-stock_qty');
                 input_stock_qty.val(stock_qty);
+            });
+
+            // 批量维护仓库
+            $("#batch").on("click", function () {
+                let id = $("#inputrows-0-nstore").find("option:selected").val();
+                let name = $("#inputrows-0-nstore").find("option:selected").text();
+                let len = row_ins;
+                // 如果第一行没有值或者总行数小于2 返回
+                if (name == "" || len < 2) {
+                    return;
+                }
+                for (let i = 1; i < len; i++) {
+                    select = $("#inputrows-" + i + "-nstore");
+                    select.append(new Option(id, name, false, true));
+                }
             });
 
             {#Prefilters是一个预过滤器，在每个请求之前被发送和$.ajax()处理它们前处理。#}
@@ -516,6 +567,12 @@
                 }
             });
         });
+        // select2为已有的仓库设置初值
+        function setStoreValue(select_id) {
+            let select = $("#" + select_id);
+            let store = select.attr('v') == 'None' ? '' : select.attr('v');
+            select.append(new Option(store, store, false, true));
+        }
 
     </script>
 {% endblock %}
