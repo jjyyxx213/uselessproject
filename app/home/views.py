@@ -727,7 +727,7 @@ def modal_stock():
 def stock_out_list():
     # 领料单列表
     key = request.args.get('key', '')
-    # 采购单状态 true 临时;false 全部
+    # 出库单状态 true 临时;false 全部
     status = request.args.get('status', 'false')
     page = request.args.get('page', 1, type=int)
     pagination = Porder.query.filter_by(type=1)
@@ -917,3 +917,28 @@ def stock_out_view(id=None):
     porder = Porder.query.filter_by(id=id).first_or_404()
     podetails = Podetail.query.filter_by(porder_id=id).order_by(Podetail.id.asc()).all()
     return render_template('home/stock_out_view.html', porder=porder, podetails=podetails)
+
+@home.route('/stock/allot/list', methods=['GET'])
+def stock_allot_list():
+    # 调拨单列表
+    key = request.args.get('key', '')
+    # 调拨单状态 true 临时;false 全部
+    status = request.args.get('status', 'false')
+    page = request.args.get('page', 1, type=int)
+    pagination = Porder.query.filter_by(type=2)
+    # 条件查询
+    if key:
+        # 单号/备注
+        pagination = pagination.filter(
+            or_(Porder.id.ilike('%' + key + '%'),
+                Porder.remarks.ilike('%' + key + '%'),
+                Porder.addtime.ilike('%' + key + '%'))
+        )
+    if status == 'true':
+        pagination = pagination.filter(Porder.status == 0)
+    pagination = pagination.order_by(
+        Porder.addtime.desc()
+    ).paginate(page=page,
+               per_page=current_app.config['POSTS_PER_PAGE'],
+               error_out=False)
+    return render_template('home/stock_allot_list.html', pagination=pagination, key=key, status=status)
