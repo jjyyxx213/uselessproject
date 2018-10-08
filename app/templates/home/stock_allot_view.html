@@ -64,7 +64,7 @@
                             </tr>
                             {% for v in podetails %}
                                 <tr>
-                                    <td>{{ v.id }}</td>
+                                    <td>{{ loop.index0 + 1 }}</td>
                                     <td>{{ v.item.name }}</td>
                                     <td>{{ v.item.standard }}</td>
                                     <td>{{ v.item.unit }}</td>
