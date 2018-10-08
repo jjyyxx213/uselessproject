@@ -863,9 +863,139 @@ class StockAllotForm(FlaskForm):
     inputrows = FieldList(
         FormField(StockAllotListForm), min_entries=1
     )
-    # 出库员
+    # 调拨员
     user_name = StringField(
         label=u'调拨员',
+        render_kw={
+            "class": "form-control",
+            "readonly": "true",
+        }
+    )
+    # 备注
+    remarks = StringField(
+        label=u'备注',
+        description=u'备注',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入备注',
+        }
+    )
+    type_switch = HiddenField(
+        label=u'开关',
+    )
+    # 保存
+    submit = SubmitField(
+        label=u'确定',
+        render_kw={
+            'class': 'btn btn-primary',
+        }
+    )
+
+class StockLossListForm(FlaskForm):
+    item_id = HiddenField(
+        label=u'产品/服务ID',
+        description=u'产品/服务ID',
+        validators=[
+            DataRequired(message=u'请选择产品或服务'),
+        ],
+    )
+    item_name = StringField(
+        label=u'商品名称',
+        validators=[
+            DataRequired(message=u'请选择商品')
+        ],
+        description=u'商品名称',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请选择商品',
+            'readonly': 'true',
+        }
+    )
+    # 规格
+    item_standard = StringField(
+        label=u'规格',
+        description=u'规格',
+        render_kw={
+            'class': 'form-control',
+            'readonly' : 'true',
+        }
+    )
+    # 单位
+    item_unit = StringField(
+        label=u'单位',
+        description=u'单位',
+        render_kw={
+            'class': 'form-control',
+            'readonly': 'true',
+        }
+    )
+    # 单价
+    item_costprice = StringField(
+        label=u'单价',
+        description=u'单价',
+        render_kw={
+            'class': 'form-control',
+            'readonly': 'true',
+        }
+    )
+    # 上次进价
+    '''
+    stock_costprice = StringField(
+        label=u'上次进价',
+        description=u'上次进价',
+        render_kw={
+            'class': 'form-control',
+            'readonly': 'true',
+        }
+    )
+    '''
+    # 仓库
+    ostore = StringField(
+        label=u'仓库',
+        validators=[
+            DataRequired(message=u'请选择仓库'),
+        ],
+        description=u'仓库',
+        render_kw={
+            'class': 'form-control',
+            'readonly': 'true',
+        }
+    )
+
+    # 库存数量
+    stock_qty = StringField(
+        label=u'库存数量',
+        description=u'数量',
+        render_kw={
+            'class': 'form-control',
+            'readonly': 'true',
+        }
+    )
+    # 数量
+    qty = StringField(
+        label=u'数量',
+        validators=[
+            Regexp('^(([0-9]+[\.]?[0-9]+)|[1-9])$', message=u'请输入正数'),
+        ],
+        description=u'数量',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入数量',
+        }
+    )
+
+    #FieldList里的对象也是FormField，不知道怎么给CSRF_TOKEN赋值，关掉验证
+    def __init__(self, *args, **kwargs):
+        kwargs['csrf_enabled'] = False
+        FlaskForm.__init__(self, *args, **kwargs)
+
+class StockLossForm(FlaskForm):
+    inputrows = FieldList(
+        FormField(StockLossListForm), min_entries=1
+    )
+    # 报损员
+    user_name = StringField(
+        label=u'报损员',
         render_kw={
             "class": "form-control",
             "readonly": "true",
