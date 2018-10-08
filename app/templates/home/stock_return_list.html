@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% import 'ui/admin_page.html' as macros %}
+{% block page_content %}
+    <section class="content-header">
+        <h1> 门店管理系统</h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> 库存管理</a></li>
+            <li class="active"> 退货单列表</li>
+        </ol>
+    </section>
+    <section class="content" id="showcontent">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="box-header">
+                        <h3 class="box-title"> 退货单列表</h3>
+                        <div class="box-tools">
+                            <div class="pull-left border-right">
+                                <a href="{{ url_for('home.stock_return_edit', id=0) }}" class="btn btn-primary btn-sm" role="button">
+                                    添加</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                <label for="input_name">欠款 </label>
+                                <input type="checkbox" id="debt_check"
+                                {% if debt == 'true' %}
+                                        checked
+                                {% endif %}
+                                >&nbsp;&nbsp;&nbsp;
+                                <label for="input_name">临时 </label>
+                                <input type="checkbox" id="status_check"
+                                {% if status == 'true' %}
+                                        checked
+                                {% endif %}
+                                >&nbsp;&nbsp;&nbsp;
+                            </div>
+                            <div class="input-group input-group-sm" style="width: 250px;">
+                                <input type="text" name="table_search" class="form-control pull-right"
+                                       placeholder="请输入关键字...  (单号/备注/日期)" id="search_key" value="{{ key }}">
+
+                                <div class="input-group-btn">
+                                    <button type="submit" class="btn btn-default" id="do_search">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-body table-responsive no-padding">
+                        <table id="ex1" class="table table-striped table-hover">
+                            <tbody>
+                            <tr>
+                                <th> 编号</th>
+                                <th> 退货员</th>
+                                <th> 供应商</th>
+                                <th> 状态</th>
+                                <th> 应退金额</th>
+                                <th> 优惠后金额</th>
+                                <th> 退款金额</th>
+                                <th> 欠款</th>
+                                <th> 备注</th>
+                                <th> 添加时间</th>
+                                <th> 操作方式</th>
+                            </tr>
+                            {% for v in pagination.items %}
+                                <tr>
+                                    <td>{{ v.id }}</td>
+                                    <td>{{ v.user.name }}</td>
+                                    <td>{{ v.supplier.name }}</td>
+                                    {% if v.status == 0 %}
+                                    <td style="color: red">临时</td>
+                                    {% else %}
+                                    <td>正式</td>
+                                    {% endif %}
+                                    <td>{{ v.amount }}</td>
+                                    <td>{{ v.discount }}</td>
+                                    <td>{{ v.payment }}</td>
+                                    {% if v.debt > 0 %}
+                                    <td style="color:red;">{{ v.debt }}</td>
+                                    {% else %}
+                                    <td>{{ v.debt }}</td>
+                                    {% endif %}
+                                    <td>{{ v.remarks }}</td>
+                                    <td>{{ v.addtime }}</td>
+                                    <td>
+                                        <a href="{{ url_for('home.stock_return_view', id=v.id) }}" name="btn-detail"
+                                           class="label label-info">明细</a>&nbsp
+                                        {% if v.status == 1 and v.user_id == user.id %}
+                                        <a href="{{ url_for('home.stock_return_debt', id=v.id) }}" name="btn-detail"
+                                           class="label label-warning">结款</a>&nbsp
+                                        {% endif %}
+                                        {% if v.status == 0 and v.user_id == user.id %}
+                                        <a href="{{ url_for('home.stock_return_edit', id=v.id) }}" name="btn-edit"
+                                           class="label label-success">修改</a>&nbsp
+                                        <a href="{{ url_for('home.stock_return_del', id=v.id) }}" name="btn-stop"
+                                           class="label label-danger">删除</a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="box-footer clearfix">
+                        <ul class="pagination pagination-sm no-margin pull-right">
+                            {{ macros.pagination_widget(pagination, 'home.stock_return_list', key=key, status=status, debt=debt) }}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block js %}
+    <script>
+        $(document).ready(function () {
+            $("#g-stock").addClass("active");
+            $("#g-stock-return-list").addClass("active");
+            //只要遇到radio,checkbox 直接转换为icheck
+            $('input[type="checkbox"], input[type="radio"]').iCheck({
+                checkboxClass: 'icheckbox_square-blue',
+                radioClass: 'iradio_square-blue',
+            });
+            // 搜索按钮
+            $("#do_search").click(function () {
+                var key = $("#search_key").val();
+                var status_check = $("#status_check").is(':checked');
+                var debt_check = $("#debt_check").is(':checked');
+                location.href = "{{ url_for('home.stock_return_list') }}?key=" + key + "&status=" + status_check + "&debt=" + debt_check;
+            })
+            $("#search_key").bind("keyup", function (event) {
+                if (event.keyCode == "13") {
+                    //回车执行查询
+                    var key = $("#search_key").val();
+                    var status_check = $("#status_check").is(':checked');
+                    var debt_check = $("#debt_check").is(':checked');
+                    location.href = "{{ url_for('home.stock_return_list') }}?key=" + key + "&status=" + status_check + "&debt=" + debt_check;
+                }
+            })
+        })
+    </script>
+{% endblock %}
