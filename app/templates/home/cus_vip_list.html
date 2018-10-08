@@ -92,7 +92,7 @@
                                 </tr>
                                 {% for v in obj_vip_details %}
                                     <tr>
-                                        <td>{{ v.id }}</td>
+                                        <td>{{ loop.index0 + 1 }}</td>
                                         <td>{{ v.item.name }}</td>
                                         <td>{{ v.item.salesprice }}</td>
                                         <td>{{ v.discountprice }}</td>

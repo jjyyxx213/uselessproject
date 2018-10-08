@@ -2,7 +2,7 @@
 from . import home
 from flask import render_template, session, redirect, request, url_for, flash, current_app
 from forms import LoginForm, PwdForm, CustomerForm, CusVipForm, StockBuyForm, StockBuyListForm, StockBuyDebtForm, \
-    StockOutListForm, StockOutForm, StockAllotListForm, StockAllotForm, StockLossListForm, StockLossForm, StockReturnListForm, StockReturnForm, StockReturnDebtForm
+    StockOutListForm, StockOutForm, StockAllotListForm, StockAllotForm, StockLossListForm, StockLossForm, StockReturnListForm, StockReturnForm, StockReturnDebtForm, CusVipDepositForm
 from app.models import User, Userlog, Oplog, Item, Supplier, Customer, Stock, Porder, Podetail, Kvp, Mscard, Msdetail, Vip, Vipdetail
 from app import db
 from werkzeug.security import generate_password_hash
@@ -280,7 +280,9 @@ def cus_vip_add(id=None):
 
         # 保存vip明细内容
         for iter_add in form.inputrows:
-            interval_day = int(form.interval.data) * 30  # 卡的有效期*30天
+            #interval_day = int(form.interval.data) * 30  # 卡的有效期*30天
+            # 20181008 liuqq 修改bug
+            interval_day = int(iter_add.interval.data) * 30  # 卡的有效期*30天
             obj_vip_detail = Vipdetail(
                 vip_id=max_vip_id,  # 客户会员卡号
                 item_id=iter_add.item_id.data,  # 服务/项目id
@@ -1560,3 +1562,44 @@ def stock_return_debt(id=None):
         flash(u'结款修改成功', 'ok')
         return redirect(url_for('home.stock_return_list'))
     return render_template('home/stock_return_debt.html', form=form, porder=porder)
+
+
+# 20181008 liuqq 客户-会员卡充值
+@home.route('/customer/cus_vip_deposit/<int:vip_id>', methods=['GET', 'POST'])
+def cus_vip_deposit(vip_id=None):
+    form = CusVipDepositForm()
+    obj_vip = Vip.query.filter_by(id=vip_id).first()
+    if form.validate_on_submit():
+        if form.deposit.data != form.re_deposit.data:
+            flash(u'充值金额与确认充值金额不一致！', 'err')
+            return render_template('home/cus_vip_deposit.html', obj_vip=obj_vip, form=form)
+
+        obj_vip.balance = float(form.sum_deposit.data)
+        obj_oplog_vip = Oplog(
+            user_id=session['user_id'],
+            ip=request.remote_addr,
+            reason=u'充值vip卡:%s 金额:%s' % (obj_vip.id, form.deposit.data)
+        )
+        # 数据提交
+        objects = [obj_vip, obj_oplog_vip]
+        db.session.add_all(objects)
+        db.session.flush()
+
+        # 保存vip明细内容
+        add_time = datetime.now()
+        for iter_add in form.inputrows:
+            interval_day = int(iter_add.interval.data) * 30  # 卡的有效期*30天
+            obj_vip_detail = Vipdetail(
+                vip_id=obj_vip.id,  # 客户会员卡号
+                item_id=iter_add.item_id.data,  # 服务/项目id
+                discountprice=iter_add.discountprice.data,  # 优惠后销售价
+                quantity=iter_add.quantity.data,  # 使用次数
+                addtime=add_time,  # 优惠开始时间
+                endtime=add_time + timedelta(days=interval_day)  # 优惠结束时间 = 优惠开始时间 + 有效期
+            )
+            db.session.add(obj_vip_detail)
+        db.session.commit()
+
+        flash(u'充值成功', 'ok')
+        return redirect(url_for('home.customer_list'))
+    return render_template('home/cus_vip_deposit.html', obj_vip=obj_vip, form=form)
