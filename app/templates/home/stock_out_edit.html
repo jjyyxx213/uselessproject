@@ -17,7 +17,7 @@
         <h1> 门店管理系统</h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> 库存管理</a></li>
-            <li><a href="{{ url_for('home.stock_buy_list') }}"> 出库单列表</a></li>
+            <li><a href="{{ url_for('home.stock_out_list') }}"> 出库单列表</a></li>
             <li class="active"> 维护</li>
         </ol>
     </section>
@@ -29,7 +29,7 @@
                         <!--启动CSRF-->
                         {{ form.hidden_tag() }}
                         <div class="box-header with-border">
-                            <h3 class="box-title"> 领料出库</h3>
+                            <h3 class="box-title"> 领料出库 {% if porder %}- {{ porder.id }} {% endif %}</h3>
                             <div class="pull-right">总行数：<strong id="cnt">{{ form_count }}</strong>/<strong>20</strong></div>
                             <div class="row">
                                 <div class="input-group col-md-3 pull-left margin-defined">

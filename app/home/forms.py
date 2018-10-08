@@ -819,15 +819,17 @@ class StockAllotListForm(FlaskForm):
         }
     )
     # 目标仓库
-    nstore = StringField(
+    nstore = NoValidateSelectField(
         label=u'到..',
         validators=[
             DataRequired(message=u'请选择仓库'),
         ],
         description=u'仓库',
+        coerce=unicode,
+        choices=[],
         render_kw={
-            'class': 'form-control',
-            'readonly': 'true',
+            "class": "form-control select2",
+            "data-placeholder": u"请选择仓库",
         }
     )
     # 库存数量
@@ -859,7 +861,7 @@ class StockAllotListForm(FlaskForm):
 
 class StockAllotForm(FlaskForm):
     inputrows = FieldList(
-        FormField(StockOutListForm), min_entries=1
+        FormField(StockAllotListForm), min_entries=1
     )
     # 出库员
     user_name = StringField(

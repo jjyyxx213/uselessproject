@@ -694,15 +694,15 @@ def stock_buy_del(id=None):
 def modal_stock():
     # 获取库存弹出框数据
     key = request.args.get('key', '')
-    stocks = Stock.query
+    stocks = Stock.query.join(Item)
     # 条件查询
     if key:
         # 库房/零件名称/类别/规格
         stocks = stocks.filter(
             or_(Stock.store.ilike('%' + key + '%'),
-                Stock.item.name.ilike('%' + key + '%'),
-                Stock.item.cate.ilike('%' + key + '%'),
-                Stock.item.standard.ilike('%' + key + '%'),
+                Item.name.ilike('%' + key + '%'),
+                Item.cate.ilike('%' + key + '%'),
+                Item.standard.ilike('%' + key + '%'),
                 )
         )
     stocks = stocks.order_by(Stock.item_id.asc(), Stock.store.asc()).limit(current_app.config['POSTS_PER_PAGE']).all()
@@ -1034,41 +1034,32 @@ def stock_allot_edit(id=None):
         if switch == 1:# 结算
             # valid True可以提交; False 不能提交
             valid = True
-            # 判断临时数据中有无调拨数量大于库存的 todo
-            '''
-            grouplists = db.session.query(
-                Podetail.item_id,
-                Podetail.nstore,
-                func.count('*').label('cnt')
-            ).filter(Podetail.porder_id == porder.id).group_by(
-                Podetail.item_id,
-                Podetail.nstore
-            ).having(func.count('*')>1).first()
-            if grouplists:
-                flash(u'同一仓库的相同零件，请将明细合并到一行', 'err')
-                valid = False
-            '''
-            # 遍历临时数据
-            checklists = db.session.query(Podetail, Stock).filter(
-                Podetail.porder_id == porder.id,
-                Podetail.item_id == Stock.item_id,
-                Podetail.ostore == Stock.ostore,
-            ).order_by(Podetail.id.asc()).all()
-            for iter in checklists:
-                if iter.Stock.qty < iter.Podetail.qty:
-                    flash(u'零件:' + iter.Podetail.item.name + u',出库后数量小于0', 'err')
+            # 判断临时数据中有无调拨数量大于库存的
+            sql_text = 'select b.item_id, d.name as item_name, b.ostore, b.sum_qty, c.qty from ' \
+                       '(select a.item_id, ostore, sum(qty) as sum_qty from tb_podetail as a ' \
+                       'where a.porder_id = :id group by item_id, ostore) as b, tb_stock as c, tb_item as d ' \
+                       'where b.item_id = c.item_id and b.ostore = c.store and b.item_id = d.id'
+            grouplists = db.session.execute(text(sql_text), {'id': porder.id})
+            for iter in grouplists:
+                if iter.qty < iter.sum_qty:
+                    flash(u'零件:' + iter.item_name + u',调拨后数量小于0', 'err')
                     valid = False
 
             # 校验通过
             if valid:
-
+                # 遍历临时数据
+                checklists = db.session.query(Podetail, Stock).filter(
+                    Podetail.porder_id == porder.id,
+                    Podetail.item_id == Stock.item_id,
+                    Podetail.ostore == Stock.store,
+                ).order_by(Podetail.id.asc()).all()
                 for iter in checklists:
                     # 减少原库存数量
                     iter.Stock.qty -= iter.Podetail.qty
                     # 增加新库存数量
                     # 判断库存是否存在
                     stock = Stock.query.filter_by(item_id=iter.Podetail.item_id,
-                                                  store=iter.Stock.store.data).first()
+                                                  store=iter.Podetail.nstore).first()
                     if stock:  # 存在就更新数量
                         stock.qty += float(iter.Podetail.qty)
                     else:  # 不存在库存表加一条
@@ -1078,6 +1069,7 @@ def stock_allot_edit(id=None):
                             qty=iter.Podetail.qty,
                             store=iter.Podetail.nstore,
                         )
+                    db.session.add(iter.Stock)
                     db.session.add(stock)
 
                 porder.status = 1 # 设置为发布状态
@@ -1091,7 +1083,7 @@ def stock_allot_edit(id=None):
                 db.session.add(oplog)
                 db.session.commit()
                 flash(u'调拨单结算成功', 'ok')
-                return redirect(url_for('home.stock_out_list'))
+                return redirect(url_for('home.stock_allot_list'))
             # 校验不通过,暂存
             else:
                 oplog = Oplog(
@@ -1114,3 +1106,28 @@ def stock_allot_edit(id=None):
             return redirect(url_for('home.stock_allot_list'))
 
     return render_template('home/stock_allot_edit.html', form=form, porder=porder, form_count=form_count)
+
+@home.route('/stock/allot/del/<int:id>', methods=['GET'])
+def stock_allot_del(id=None):
+    # 调拨单删除
+    porder = Porder.query.filter_by(id=id).first_or_404()
+    if porder.type != 2 or porder.user_id != int(session['user_id']) or porder.status == 1:
+        return redirect(url_for('home.stock_allot_list'))
+    Podetail.query.filter_by(porder_id=id).delete()
+    db.session.delete(porder)
+    oplog = Oplog(
+        user_id=session['user_id'],
+        ip=request.remote_addr,
+        reason=u'删除调拨单:%s' % porder.id
+    )
+    db.session.add(oplog)
+    db.session.commit()
+    flash(u'调拨单删除成功', 'ok')
+    return redirect(url_for('home.stock_allot_list'))
+
+@home.route('/stock/allot/view/<int:id>', methods=['GET'])
+def stock_allot_view(id=None):
+    # 调拨单明细查看
+    porder = Porder.query.filter_by(id=id).first_or_404()
+    podetails = Podetail.query.filter_by(porder_id=id).order_by(Podetail.id.asc()).all()
+    return render_template('home/stock_allot_view.html', porder=porder, podetails=podetails)

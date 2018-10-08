@@ -23,7 +23,7 @@
         <h1> 门店管理系统</h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> 库存管理</a></li>
-            <li><a href="{{ url_for('home.stock_out_list') }}"> 出库单列表</a></li>
+            <li><a href="{{ url_for('home.stock_out_list') }}"> 调拨单列表</a></li>
             <li class="active"> 明细查看</li>
         </ol>
     </section>
@@ -32,11 +32,11 @@
             <div class="col-md-12">
                 <div class="box box-primary">
                     <div class="box-header with-border">
-                        <h3 class="box-title"> 出库单 - {{ porder.id }}</h3>
+                        <h3 class="box-title"> 调拨单 - {{ porder.id }}</h3>
                         <div class="row">
                             <div class="input-group col-md-2 pull-left margin-defined">
                                 <span class="input-group-btn">
-                                    <button class="btn btn-default" type="button"> 出库员</button>
+                                    <button class="btn btn-default" type="button"> 调拨员</button>
                                 </span>
                                 <input class="form-control" type="text" value="{{ porder.user.name }}">
                             </div>
@@ -58,7 +58,8 @@
                                 <th> 规格</th>
                                 <th> 单位</th>
                                 <th> 单价</th>
-                                <th> 仓库</th>
+                                <th> 从..</th>
+                                <th> 到..</th>
                                 <th> 出库数量</th>
                             </tr>
                             {% for v in podetails %}
@@ -68,6 +69,7 @@
                                     <td>{{ v.item.standard }}</td>
                                     <td>{{ v.item.unit }}</td>
                                     <td>{{ v.item.costprice }}</td>
+                                    <td>{{ v.ostore }}</td>
                                     <td>{{ v.nstore }}</td>
                                     <td>{{ v.qty }}</td>
                                 </tr>
@@ -76,7 +78,7 @@
                         </table>
 
                         <div class="box-footer">
-                            <a href="{{ url_for('home.stock_out_list') }}" class="btn btn-default pull-right"
+                            <a href="{{ url_for('home.stock_allot_list') }}" class="btn btn-default pull-right"
                                role="button"> 返回</a>
                         </div>
                     </div>
