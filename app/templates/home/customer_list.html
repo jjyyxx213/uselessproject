@@ -83,6 +83,8 @@
                                         {% else %}
                                             <a href="{{ url_for('home.cus_vip_list', vip_id=v.vip_id) }}" name="btn-frozen"
                                                class="label label-info">查询</a>
+                                            <a href="{{ url_for('home.cus_vip_deposit', vip_id=v.vip_id) }}" name="btn-frozen"
+                                               class="label label-warning">充值</a>
                                         {% endif %}
                                     </td>
                                 </tr>

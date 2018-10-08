@@ -1293,3 +1293,66 @@ class StockReturnDebtForm(FlaskForm):
             'class': 'btn btn-primary',
         }
     )
+
+
+# 20180920 liuqq 客户-会员卡表单
+class CusVipDepositForm(FlaskForm):
+    deposit = StringField(
+        label=u'充值金额',
+        validators=[
+            Regexp('[\d+\.\d]', message=u'请输入数字'),
+            DataRequired(message=u'请输入充值金额'),
+        ],
+        description=u'充值金额',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'充值金额'
+        }
+    )
+
+    re_deposit = StringField(
+        label=u'确认充值金额',
+        validators=[
+            Regexp('[\d+\.\d]', message=u'请输入数字'),
+            DataRequired(message=u'请重复输入充值金额'),
+        ],
+        description=u'确认充值金额',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'确认充值金额'
+        }
+    )
+
+    sum_deposit = StringField(
+        label=u'充值后金额',
+        description=u'充值后金额',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'充值后金额',
+            'readonly': 'readonly'
+        }
+    )
+
+    inputrows = FieldList(
+        FormField(VipdetailListForm), min_entries=0
+    )
+
+    submit = SubmitField(
+        label=u'充值',
+        render_kw={
+            'class': 'btn btn-primary',
+        }
+    )
+
+    meal = RadioField(
+        label=u'套餐充值',
+        description=u'套餐充值',
+        coerce=int,
+        choices=[(0, u'否'), (1, u'是')],
+        default=0
+    )
+
+    # 如果需要从数据库取值，一定要重写__init__方法，因为db对象不是全局的
+    def __init__(self, *args, **kwargs):
+        kwargs['csrf_enabled'] = False
+        FlaskForm.__init__(self, *args, **kwargs)

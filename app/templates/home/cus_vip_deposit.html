@@ -1,0 +1,414 @@
+{% extends 'base.html' %}
+{% import 'ui/admin_page.html' as macros %}
+{% block css %}
+    <style>
+        .padding-defined {
+            padding-left: 25px;
+            padding-right: 25px;
+        }
+
+        .margin-defined {
+            margin-right: 10px;
+        }
+
+        .margin-defined-2 {
+            margin-top: 10px;
+            margin-left: 0px;
+        }
+    </style>
+{% endblock %}
+{% block page_content %}
+    <section class="content-header">
+        <h1> 门店管理系统</h1>
+        <ol class="breadcrumb">
+            <li><a href="{{ url_for('home.customer_list') }}"><i class="fa fa-dashboard"></i> 客户列表</a></li>
+            <li class="active"> 客户会员卡明细</li>
+        </ol>
+    </section>
+    <section class="content" id="showcontent">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <div class="col-xs-4 col-sm-4">
+                            <div class="form-group">
+                                <label for="cus_name">客户姓名</label>
+                                <input class="form-control" id="cus_name" name="cus_name" readonly="readonly" type="text" value={{ obj_vip.customer[0].name }}>
+                            </div>
+                            <div class="form-group">
+                                <label for="name">会员卡名称</label>
+                                <input class="form-control" id="name" name="name" readonly="readonly" type="text" value={{ obj_vip.name }}>
+                            </div>
+                            <div class="form-group">
+                                <label for="payment">卡内余额</label>
+                                <input class="form-control" id="balance" name="balance" readonly="readonly" type="text" value={{ obj_vip.balance }}>
+                            </div>
+
+                        </div>
+                        <div class="col-xs-4 col-sm-4">
+                            <div class="form-group">
+                                <label for="scorerule">积分规则</label>
+                                <label for="input_scorerule" class="badge bg-green" data-toggle="tooltip"
+                                       title="积分=消费金额*积分规则">?</label>
+                                <input class="form-control" id="scorerule" name="scorerule" readonly="readonly" required type="text" value={{ obj_vip.scorerule }}>
+                            </div>
+                            <div class="form-group">
+                                <label for="scorelimit">积分上限</label>
+                                <label for="input_scorerule" class="badge bg-green" data-toggle="tooltip"
+                                       title="积分积攒到上限，可消耗积分额度升级会员卡等级">?</label>
+                                <input class="form-control" id="scorelimit" name="scorelimit"  readonly="readonly" type="text" value={{ obj_vip.scorelimit }}>
+                            </div>
+                            <div class="form-group">
+                                <label for="payment">卡内积分</label>
+                                <input class="form-control" id="balance" name="balance" readonly="readonly" type="text" value={{ obj_vip.score }}>
+                            </div>
+
+                        </div>
+                        <div class="col-xs-4 col-sm-4">
+                            <div class="form-group">
+                                <label for="interval">开卡时间</label>
+                                <input class="form-control" id="addtime" name="addtime" readonly="readonly" type="text" value={{ obj_vip.addtime }}>
+                            </div>
+                            <div class="form-group">
+                                <label for="interval">截止时间</label>
+                                <input class="form-control" id="endtime" name="endtime" readonly="readonly" type="text" value={{ obj_vip.endtime }}>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <form role="form" method="post">
+                        {{ form.hidden_tag() }}
+                        <div class="box-body">
+                            <div class="form-group col-xs-3 col-sm-3">
+                                <label for="input_name" style="color: red">*</label>
+                                {{ form.deposit.label }}
+                                {{ form.deposit }}
+                                {% for err in form.deposit.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="form-group col-xs-3 col-sm-3">
+                                <label for="input_name" style="color: red">*</label>
+                                {{ form.re_deposit.label }}
+                                {{ form.re_deposit }}
+                                {% for err in form.re_deposit.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="form-group col-xs-3 col-sm-3">
+                                {{ form.sum_deposit.label }}
+                                {{ form.sum_deposit }}
+                                {% for err in form.sum_deposit.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="form-group col-xs-3 col-sm-3">
+                                <div>
+                                    <label for="input_name" style="color: red">*</label>
+                                    <label for="input_name">套餐充值 </label>
+                                </div>
+                                {% for meal in form.meal %}
+                                    {{ meal }}
+                                    {% if meal.data == 0 %}
+                                        <label for="input_meal">否</label>
+                                    {% else %}
+                                        <label for="input_meal">是</label>
+                                    {% endif %}
+                                {% endfor %}
+                                {% for err in form.meal.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="box-body" id="inputs">
+                            {% if form.inputrows %}
+                                <div class="row" style="margin-bottom: 5px">
+                                    <div class="col-md-3 padding-defined">
+                                        <label for="input_url" style="color: red">*</label>
+                                        <label> 商品/服务</label>
+                                    </div>
+                                    <div class="col-md-2 padding-defined">
+                                        <label> 原售价</label>
+                                    </div>
+                                    <div class="col-md-2 padding-defined">
+                                        <label for="input_url" style="color: red">*</label>
+                                        <label> 优惠价</label>
+                                    </div>
+                                    <div class="col-md-2 padding-defined">
+                                        <label for="input_url" style="color: red">*</label>
+                                        <label> 次数</label>
+                                    </div>
+                                    <div class="col-md-2 padding-defined">
+                                        <label for="input_url" style="color: red">*</label>
+                                        <label> 有效期</label>
+                                        <label for="input_interval" class="badge bg-green" data-toggle="tooltip"
+                                               title="月">?</label>
+                                    </div>
+                                    <div class="col-md-1" style="padding-left: 5px">
+                                        <button type="button" class="btn btn-box-tool" data-widget="collapse" id="row-plus">
+                                            <i class="fa fa-plus-square fa-lg"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            {% for v in form.inputrows %}
+                                <div class="row">
+                                    <div class="col-md-3 padding-defined">
+                                        <input id="inputrows-{{ loop.index0 }}-item_id"
+                                               name="inputrows-{{ loop.index0 }}-item_id" type="hidden"
+                                               value="{{ v.data.item_id or '' }}">
+                                        <input id="inputrows-{{ loop.index0 }}-item_name"
+                                               name="inputrows-{{ loop.index0 }}-item_name" type="hidden"
+                                               value="{{ v.data.item_name or '' }}">
+                                        <select class="form-control select2 item-choice"
+                                                id="inputrows-{{ loop.index0 }}-item"
+                                                name="inputrows-{{ loop.index0 }}-item"
+                                                data-placeholder="请选择商品或服务">
+                                        </select>
+                                        {% for err in v.item_id.errors %}
+                                            <div class="col-md-12">
+                                                <p style="color: red" class="small">{{ err }}</p>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="col-md-2 padding-defined">
+                                        <div class="form-group">
+                                            <input id="inputrows-{{ loop.index0 }}-salesprice"
+                                                   name="inputrows-{{ loop.index0 }}-salesprice" class="form-control"
+                                                   placeholder="原售价" type="text" value="{{ v.data.salesprice or '' }}"
+                                                   readonly>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 padding-defined">
+                                        <div class="form-group">
+                                            <input id="inputrows-{{ loop.index0 }}-discountprice"
+                                                   name="inputrows-{{ loop.index0 }}-discountprice" class="form-control"
+                                                   placeholder="优惠价" type="text" value="{{ v.data.discountprice or '' }}">
+                                            {% for err in v.discountprice.errors %}
+                                                <div class="col-md-12">
+                                                    <p style="color: red" class="small">{{ err }}</p>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 padding-defined">
+                                        <div class="form-group">
+                                            <input id="inputrows-{{ loop.index0 }}-quantity"
+                                                   name="inputrows-{{ loop.index0 }}-quantity" class="form-control"
+                                                   placeholder="次数" type="text" value="{{ v.data.quantity or '' }}">
+                                            {% for err in v.quantity.errors %}
+                                                <div class="col-md-12">
+                                                    <p style="color: red" class="small">{{ err }}</p>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 padding-defined">
+                                        <div class="form-group">
+                                            <input id="inputrows-{{ loop.index0 }}-interval"
+                                                   name="inputrows-{{ loop.index0 }}-interval" class="form-control"
+                                                   placeholder="有效期(月)" type="text" value="{{ v.data.interval or '' }}">
+                                            {% for err in v.interval.errors %}
+                                                <div class="col-md-12">
+                                                    <p style="color: red" class="small">{{ err }}</p>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-1" style="padding-left: 5px">
+                                        <button type="button" class="btn btn-box-tool" data-widget="collapse"
+                                                name="row-minus">
+                                            <i class="fa fa-minus-square fa-lg" aria-hidden="true"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="box-footer">
+                            {{ form.submit }}
+                            <a href="{{ url_for('home.customer_list') }}" class="btn btn-default pull-right  margin-defined"
+                               role="button"> 返回</a>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block js %}
+    <script>
+        $(document).ready(function () {
+
+            $("#g-customer").addClass("active");
+            $("#g-customer-list").addClass("active");
+            //只要遇到radio,checkbox 直接转换为icheck
+            $('input[type="checkbox"], input[type="radio"]').iCheck({
+                checkboxClass: 'icheckbox_square-blue',
+                radioClass: 'iradio_square-blue',
+            });
+
+            // 计算充值后金额
+            $(".box-body").delegate("#deposit","propertychange input",function(){
+                var deposit = parseFloat($("#deposit").val());
+                $("#sum_deposit").val(parseFloat($("#balance").val())+(isNaN(deposit)?0:deposit));
+            });
+
+            $meal_no=$("#meal-0").parent();
+            $meal_yes=$("#meal-1").parent();
+            let InputsWrapper = $("#inputs");
+
+            // 如果否被选中
+            $meal_no.on('ifChecked', function(event){
+                InputsWrapper.empty();
+            });
+
+            //如果是被选中
+            $meal_yes.on('ifChecked', function(event){
+                InputsWrapper.append('<div class="row" style="margin-bottom: 5px">\n' +
+                    '                                    <div class="col-md-3 padding-defined">\n' +
+                    '                                        <label for="input_url" style="color: red">*</label>\n' +
+                    '                                        <label> 商品/服务</label>\n' +
+                    '                                    </div>\n' +
+                    '                                    <div class="col-md-2 padding-defined">\n' +
+                    '                                       <label> 原售价</label>\n' +
+                    '                                    </div>\n' +
+                    '                                    <div class="col-md-2 padding-defined">\n' +
+                    '                                        <label for="input_url" style="color: red">*</label>\n' +
+                    '                                        <label> 优惠价</label>\n' +
+                    '                                    </div>\n' +
+                    '                                    <div class="col-md-2 padding-defined">\n' +
+                    '                                        <label for="input_url" style="color: red">*</label>\n' +
+                    '                                        <label> 次数</label>\n' +
+                    '                                    </div>\n' +
+                    '                                    <div class="col-md-2 padding-defined">\n' +
+                    '                                        <label for="input_url" style="color: red">*</label>\n' +
+                    '                                        <label> 有效期</label>\n' +
+                    '                                        <label for="input_interval" class="badge bg-green" data-toggle="tooltip"\n' +
+                    '                                               title="月">?</label>\n' +
+                    '                                    </div>\n' +
+                    '                                    <div class="col-md-1" style="padding-left: 5px">\n' +
+                    '                                        <button type="button" class="btn btn-box-tool" data-widget="collapse" id="row-plus">\n' +
+                    '                                            <i class="fa fa-plus-square fa-lg"></i>\n' +
+                    '                                        </button>\n' +
+                    '                                    </div>\n' +
+                    '                                </div>');
+                //加载‘+’方法
+                $('#row-plus').on('click', (function (e) //on add input button click
+                {
+                    let id_ins = $('.row').length - 3;
+                    InputsWrapper.append('<div class="row">\n' +
+                        '                                    <div class="col-md-3 padding-defined">\n' +
+                        '                                       <input id="inputrows-' + id_ins + '-item_id" name="inputrows-' + id_ins + '-item_id" type="hidden">' +
+                        '                                       <input id="inputrows-' + id_ins + '-item_name" name="inputrows-' + id_ins + '-item_name" type="hidden">' +
+                        '                                       <select class="form-control select2 item-choice" id="inputrows-' + id_ins + '-item"' +
+                        '                                               name="inputrows-' + id_ins + '-item"' +
+                        '                                               data-placeholder="请选择商品或服务">' +
+                        '                                       </select>' +
+                        '                                    </div>\n' +
+                        '                                    <div class="col-md-2 padding-defined">\n' +
+                        '                                        <div class="form-group">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-salesprice"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-salesprice" class="form-control"\n' +
+                        '                                                   placeholder="原售价" type="text" readonly>\n' +
+                        '                                        </div>\n' +
+                        '                                    </div>\n' +
+                        '                                    <div class="col-md-2 padding-defined">\n' +
+                        '                                        <div class="form-group">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-discountprice"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-discountprice" class="form-control"\n' +
+                        '                                                   placeholder="优惠价" type="text" >\n' +
+                        '                                        </div>\n' +
+                        '                                    </div>\n' +
+                        '                                    <div class="col-md-2 padding-defined">\n' +
+                        '                                        <div class="form-group">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-quantity"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-quantity" class="form-control"\n' +
+                        '                                                   placeholder="次数" type="text">\n' +
+                        '                                        </div>\n' +
+                        '                                    </div>\n' +
+                        '                                    <div class="col-md-2 padding-defined">\n' +
+                        '                                        <div class="form-group">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-interval"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-interval" class="form-control"\n' +
+                        '                                                   placeholder="有效期(月)" type="text">\n' +
+                        '                                        </div>\n' +
+                        '                                    </div>\n' +
+                        '                                    <div class="col-md-1" style="padding-left: 5px">\n' +
+                        '                                        <button type="button" class="btn btn-box-tool" data-widget="collapse"\n' +
+                        '                                                name="row-minus">\n' +
+                        '                                            <i class="fa fa-minus-square fa-lg" aria-hidden="true"></i>\n' +
+                        '                                        </button>\n' +
+                        '                                    </div>\n' +
+                        '                                </div>');
+                    // 动态添加行后，要处理select2下拉框初始化
+                    let options = {
+                        url: "{{ url_for('admin.item_get') }}",      // 数据接口url
+                        pageSize: 10, // 每次加载的数据条数[屏蔽，目前从后台获取]
+                        value: "id",  // 下拉框value字段名称
+                        name: "name", // 下拉框显示字段名称
+                        selected: []  // 默认选中项，格式：[{id:1,text:"选项1"},{id:2,text:"选项2"}]
+                    };
+                    ajaxSelect2("inputrows-" + id_ins + "-item", options);
+                }));
+                $('#row-plus').trigger('click');
+            });
+
+            //加载‘-’方法
+            $("#inputs").on("click", "button[name='row-minus']", function () {
+                $(this).parent('div').parent('div').remove(); //remove text box
+            });
+
+            //这里要处理商品和服务下拉
+            let options = {
+                url: "{{ url_for('admin.item_get') }}",      // 数据接口url
+                pageSize: 10, // 每次加载的数据条数[屏蔽，目前从后台获取]
+                value: "id",  // 下拉框value字段名称
+                name: "name", // 下拉框显示字段名称
+                selected: []  // 默认选中项，格式：[{id:1,text:"选项1"},{id:2,text:"选项2"}]
+            };
+
+            //遍历.item-choice，为进入时所有的下拉框动态初始化
+            $(".item-choice").each(function () {
+                id = $(this).attr("id");
+                console.log(id);
+                ajaxSelect2(id, options);
+                setSelect2Value(id);
+            });
+
+            // 点击保存时，如果有校验信息。要为item_id/item_name赋值。否则setSelect2Value获取不到值，下拉框为空
+            $("#inputs").on("change", ".item-choice", function () {
+                // 获取下拉选中的值和文本
+                let select_val = $(this).val();
+                let select_text = $(this).find("option:selected").text();
+                if (select_val !== null) {
+                    // 给item_id赋值
+                    $(this).siblings().eq(0).val(select_val);
+                    // 给item_name赋值
+                    $(this).siblings().eq(1).val(select_text);
+                }
+            })
+
+        })
+
+        // select2为已有的数据设置初值
+        function setSelect2Value(select_id) {
+            let select = $("#" + select_id);
+            let item_id = select.siblings().eq(0).val();
+            let item_name = select.siblings().eq(1).val();
+            select.append(new Option(item_name, item_id, false, true));
+        }
+    </script>
+{% endblock %}
