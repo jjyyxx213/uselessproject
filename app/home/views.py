@@ -2,7 +2,7 @@
 from . import home
 from flask import render_template, session, redirect, request, url_for, flash, current_app
 from forms import LoginForm, PwdForm, CustomerForm, CusVipForm, StockBuyForm, StockBuyListForm, StockBuyDebtForm, \
-    StockOutListForm, StockOutForm, StockAllotListForm, StockAllotForm, StockLossListForm, StockLossForm, StockReturnListForm, StockReturnForm
+    StockOutListForm, StockOutForm, StockAllotListForm, StockAllotForm, StockLossListForm, StockLossForm, StockReturnListForm, StockReturnForm, StockReturnDebtForm
 from app.models import User, Userlog, Oplog, Item, Supplier, Customer, Stock, Porder, Podetail, Kvp, Mscard, Msdetail, Vip, Vipdetail
 from app import db
 from werkzeug.security import generate_password_hash
@@ -523,7 +523,7 @@ def stock_buy_debt(id=None):
         oplog = Oplog(
             user_id=session['user_id'],
             ip=request.remote_addr,
-            reason=u'修改结款,订单号:%s' % porder.id
+            reason=u'修改结款,采购单:%s' % porder.id
         )
         db.session.add(oplog)
         db.session.commit()
@@ -1503,3 +1503,60 @@ def stock_return_edit(id=None):
             return redirect(url_for('home.stock_return_list'))
 
     return render_template('home/stock_return_edit.html', form=form, porder=porder, form_count=form_count)
+
+@home.route('/stock/return/del/<int:id>', methods=['GET'])
+def stock_return_del(id=None):
+    # 退货单删除
+    porder = Porder.query.filter_by(id=id).first_or_404()
+    if porder.type != 4 or porder.user_id != int(session['user_id']) or porder.status == 1:
+        return redirect(url_for('home.stock_return_list'))
+    Podetail.query.filter_by(porder_id=id).delete()
+    db.session.delete(porder)
+    oplog = Oplog(
+        user_id=session['user_id'],
+        ip=request.remote_addr,
+        reason=u'删除退货单:%s' % porder.id
+    )
+    db.session.add(oplog)
+    db.session.commit()
+    flash(u'退货单删除成功', 'ok')
+    return redirect(url_for('home.stock_return_list'))
+
+@home.route('/stock/return/view/<int:id>', methods=['GET'])
+def stock_return_view(id=None):
+    # 退货单明细查看
+    porder = Porder.query.filter_by(id=id).first_or_404()
+    podetails = Podetail.query.filter_by(porder_id=id).order_by(Podetail.id.asc()).all()
+    return render_template('home/stock_return_view.html', porder=porder, podetails=podetails)
+
+@home.route('/stock/return/debt/<int:id>', methods=['GET', 'POST'])
+def stock_return_debt(id=None):
+    # 退货单结款
+    form = StockReturnDebtForm()
+    porder = Porder.query.filter_by(id=id).first_or_404()
+    # 如果表单不属于用户，不是发布状态 退出
+    if porder.user_id != int(session['user_id']) or porder.status == 0 or porder.type != 4:
+        return redirect(url_for('home.stock_return_list'))
+    if request.method == 'GET':
+        form.amount.data = porder.amount
+        form.discount.data = porder.discount
+        form.payment.data = porder.payment
+        form.debt.data = porder.debt
+        form.remarks.data = porder.remarks
+    if form.validate_on_submit():
+        porder.amount = form.amount.data
+        porder.discount = form.discount.data
+        porder.payment = form.payment.data
+        porder.debt = form.debt.data
+        porder.remarks = form.remarks.data
+        db.session.add(porder)
+        oplog = Oplog(
+            user_id=session['user_id'],
+            ip=request.remote_addr,
+            reason=u'修改结款,退货单号:%s' % porder.id
+        )
+        db.session.add(oplog)
+        db.session.commit()
+        flash(u'结款修改成功', 'ok')
+        return redirect(url_for('home.stock_return_list'))
+    return render_template('home/stock_return_debt.html', form=form, porder=porder)

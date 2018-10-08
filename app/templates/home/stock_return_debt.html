@@ -17,7 +17,7 @@
         <h1> 门店管理系统</h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> 库存管理</a></li>
-            <li><a href="{{ url_for('home.stock_buy_list') }}"> 采购单列表</a></li>
+            <li><a href="{{ url_for('home.stock_buy_list') }}"> 退货单列表</a></li>
             <li class="active"> 结款修改</li>
         </ol>
     </section>
@@ -29,14 +29,14 @@
                         <!--启动CSRF-->
                         {{ form.hidden_tag() }}
                         <div class="box-header with-border">
-                            <h3 class="box-title"> 采购单 - {{ porder.id }}</h3>
+                            <h3 class="box-title"> 退货单 - {{ porder.id }}</h3>
                         </div>
                         <div class="box-body">
                             <div class="row">
                                 <div class="col-md-7 padding-defined pull-left">
                                     <div class="input-group">
                                         <span class="input-group-btn">
-                                                <button class="btn btn-default" type="button"> 应付金额</button>
+                                                <button class="btn btn-default" type="button"> 应退金额</button>
                                         </span>
                                         {{ form.amount }}
                                         <span class="input-group-btn">
@@ -44,7 +44,7 @@
                                         </span>
                                         {{ form.discount }}
                                         <span class="input-group-btn">
-                                            <button class="btn btn-default" type="button"> 本次付款</button>
+                                            <button class="btn btn-default" type="button"> 本次退款</button>
                                         </span>
                                         {{ form.payment }}
                                         <span class="input-group-btn">
@@ -77,7 +77,7 @@
                             </div>
                             <div class="box-footer">
                                 {{ form.submit }}
-                                <a href="{{ url_for('home.stock_buy_list') }}" class="btn btn-default pull-right"
+                                <a href="{{ url_for('home.stock_return_list') }}" class="btn btn-default pull-right"
                                    role="button"> 返回</a>
                             </div>
                         </div>
@@ -92,7 +92,7 @@
     <script>
         $(document).ready(function () {
             $("#g-stock").addClass("active");
-            $("#g-stock-buy-list").addClass("active");
+            $("#g-stock-return-list").addClass("active");
             // 弹出提示初始化
             $(function () {
                 $('[data-toggle="tooltip"]').tooltip()
