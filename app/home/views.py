@@ -349,6 +349,46 @@ def cus_vip_list(vip_id=None):
         flash(u'会员卡注销成功', 'ok')
         return redirect(url_for('home.customer_list'))
 
+# 20181008 liuqq 客户-会员卡充值
+@home.route('/customer/cus_vip_deposit/<int:vip_id>', methods=['GET', 'POST'])
+def cus_vip_deposit(vip_id=None):
+    form = CusVipDepositForm()
+    obj_vip = Vip.query.filter_by(id=vip_id).first()
+    if form.validate_on_submit():
+        if form.deposit.data != form.re_deposit.data:
+            flash(u'充值金额与确认充值金额不一致！', 'err')
+            return render_template('home/cus_vip_deposit.html', obj_vip=obj_vip, form=form)
+
+        obj_vip.balance = float(form.sum_deposit.data)
+        obj_oplog_vip = Oplog(
+            user_id=session['user_id'],
+            ip=request.remote_addr,
+            reason=u'充值vip卡:%s 金额:%s' % (obj_vip.id, form.deposit.data)
+        )
+        # 数据提交
+        objects = [obj_vip, obj_oplog_vip]
+        db.session.add_all(objects)
+        db.session.flush()
+
+        # 保存vip明细内容
+        add_time = datetime.now()
+        for iter_add in form.inputrows:
+            interval_day = int(iter_add.interval.data) * 30  # 卡的有效期*30天
+            obj_vip_detail = Vipdetail(
+                vip_id=obj_vip.id,  # 客户会员卡号
+                item_id=iter_add.item_id.data,  # 服务/项目id
+                discountprice=iter_add.discountprice.data,  # 优惠后销售价
+                quantity=iter_add.quantity.data,  # 使用次数
+                addtime=add_time,  # 优惠开始时间
+                endtime=add_time + timedelta(days=interval_day)  # 优惠结束时间 = 优惠开始时间 + 有效期
+            )
+            db.session.add(obj_vip_detail)
+        db.session.commit()
+
+        flash(u'充值成功', 'ok')
+        return redirect(url_for('home.customer_list'))
+    return render_template('home/cus_vip_deposit.html', obj_vip=obj_vip, form=form)
+
 @home.route('/modal/item', methods=['GET'])
 def modal_item():
     # 获取商品弹出框数据
@@ -577,10 +617,17 @@ def stock_buy_edit(id=None):
     # 计算动态input的初值
     form_count = len(form.inputrows)
     if form.validate_on_submit():
+        # 1009判断是否选择仓库
+        for iter_add in form.inputrows:
+            ns = Kvp.query.filter_by(
+                type='store',
+                value=iter_add.store.data,
+            ).first()
+            if not ns:
+                flash(iter_add.item_name.data + u':未选择仓库', 'err')
+                return redirect(url_for('home.stock_buy_edit', id=porder.id))
         # type_switch:1结算;0暂存
         switch = int(form.type_switch.data)
-        # 提交类别 1：生效；0：暂存
-        status = 1 if switch == 1 else 0
         # 添加主表
         if not porder:  # 没有新增一个
             porder = Porder(
@@ -591,7 +638,7 @@ def stock_buy_edit(id=None):
                 discount=form.discount.data,
                 payment=form.payment.data,
                 debt=form.debt.data,
-                status=status,
+                status=0,
                 remarks=form.remarks.data,
             )
         else:  # 有更新值
@@ -601,77 +648,87 @@ def stock_buy_edit(id=None):
             porder.discount = form.discount.data
             porder.payment = form.payment.data
             porder.debt = form.debt.data
-            porder.status = status
             porder.remarks = form.remarks.data
-        db.session.add(porder)
-        db.session.flush()  # 提交一下获取id,不要使用commit
-        if switch == 1:#结算
-            # 删除所有明细
-            # for iter_del in podetails:
-            #     db.session.delete(iter_del)
-            # 更改删除方式直接找到全部删除
-            db.session.query(Podetail).filter(Podetail.porder_id == porder.id).delete()
-            for iter_add in form.inputrows:
-                # 新增明细
-                podetail = Podetail(
-                    porder_id=porder.id,
-                    item_id=iter_add.item_id.data,
-                    nstore=iter_add.store.data,
-                    qty=iter_add.qty.data,
-                    costprice=iter_add.costprice.data,
-                    rowamount=iter_add.rowamount.data,
-                )
-                db.session.add(podetail)
-                # 判断库存是否存在
-                stock = Stock.query.filter_by(item_id=iter_add.item_id.data,
-                                              store=iter_add.store.data).first()
-                if stock: #存在就更新数量
-                    stock.qty += float(iter_add.qty.data)
-                    costprice = iter_add.costprice.data
-                else: #不存在库存表加一条
-                    stock = Stock(
+            porder.addtime = datetime.now()#更新为发布日期
+        try:
+            db.session.begin_nested()
+            db.session.add(porder)
+            db.session.flush()  # 提交一下获取id,不要使用commit
+
+            if switch == 1:#结算
+                # 删除所有明细
+                # for iter_del in podetails:
+                #     db.session.delete(iter_del)
+                # 更改删除方式直接找到全部删除
+                db.session.query(Podetail).filter(Podetail.porder_id == porder.id).delete()
+                for iter_add in form.inputrows:
+                    # 新增明细
+                    podetail = Podetail(
+                        porder_id=porder.id,
                         item_id=iter_add.item_id.data,
-                        costprice=iter_add.costprice.data,
+                        nstore=iter_add.store.data,
                         qty=iter_add.qty.data,
-                        store=iter_add.store.data,
+                        costprice=iter_add.costprice.data,
+                        rowamount=iter_add.rowamount.data,
                     )
-                db.session.add(stock)
-                # 设置主表为发布
-                porder.status = 1
-                db.session.add(porder)
-            oplog = Oplog(
-                user_id=session['user_id'],
-                ip=request.remote_addr,
-                reason=u'结算采购单:%s' % porder.id
-            )
-            db.session.add(oplog)
-            db.session.commit()
-            flash(u'采购单结算成功', 'ok')
-        else:#暂存
-            # 删除所有明细
-            # for iter_del in podetails:
-            #     db.session.delete(iter_del)
-            # 更改删除方式直接找到全部删除
-            db.session.query(Podetail).filter(Podetail.porder_id == porder.id).delete()
-            for iter_add in form.inputrows:
-                # 新增明细
-                podetail = Podetail(
-                    porder_id=porder.id,
-                    item_id=iter_add.item_id.data,
-                    nstore=iter_add.store.data,
-                    qty=iter_add.qty.data,
-                    costprice=iter_add.costprice.data,
-                    rowamount=iter_add.rowamount.data,
+                    db.session.add(podetail)
+                    # 判断库存是否存在
+                    stock = Stock.query.filter_by(item_id=iter_add.item_id.data,
+                                                  store=iter_add.store.data).first()
+                    if stock: #存在就更新数量
+                        stock.qty += float(iter_add.qty.data)
+                        costprice = iter_add.costprice.data
+                    else: #不存在库存表加一条
+                        stock = Stock(
+                            item_id=iter_add.item_id.data,
+                            costprice=iter_add.costprice.data,
+                            qty=iter_add.qty.data,
+                            store=iter_add.store.data,
+                        )
+                    db.session.add(stock)
+                    # 设置主表为发布
+                    porder.status = 1
+                    db.session.add(porder)
+                oplog = Oplog(
+                    user_id=session['user_id'],
+                    ip=request.remote_addr,
+                    reason=u'结算采购单:%s' % porder.id
                 )
-                db.session.add(podetail)
-            oplog = Oplog(
-                user_id=session['user_id'],
-                ip=request.remote_addr,
-                reason=u'暂存采购单:%s' % porder.id
-            )
-            db.session.commit()
-            flash(u'采购单暂存成功', 'ok')
-        return redirect(url_for('home.stock_buy_list'))
+                db.session.add(oplog)
+                db.session.commit()
+                flash(u'采购单结算成功', 'ok')
+            else:#暂存
+                # 删除所有明细
+                # for iter_del in podetails:
+                #     db.session.delete(iter_del)
+                # 更改删除方式直接找到全部删除
+                db.session.query(Podetail).filter(Podetail.porder_id == porder.id).delete()
+                # 判断是否选择仓库
+                for iter_add in form.inputrows:
+                    # 新增明细
+                    podetail = Podetail(
+                        porder_id=porder.id,
+                        item_id=iter_add.item_id.data,
+                        nstore=iter_add.store.data,
+                        qty=iter_add.qty.data,
+                        costprice=iter_add.costprice.data,
+                        rowamount=iter_add.rowamount.data,
+                    )
+                    db.session.add(podetail)
+                oplog = Oplog(
+                    user_id=session['user_id'],
+                    ip=request.remote_addr,
+                    reason=u'暂存采购单:%s' % porder.id
+                )
+                db.session.commit()
+                flash(u'采购单暂存成功', 'ok')
+            return redirect(url_for('home.stock_buy_list'))
+        except Exception as e:
+            db.session.rollback()
+            flash(u'采购单:%s结算/暂存异常,错误码：%s' % (porder.id, e.message), 'err')
+            return redirect(url_for('home.stock_buy_edit', id=porder.id))
+        finally:
+            db.session.close()
     return render_template('home/stock_buy_edit.html', form=form, porder=porder, form_count=form_count)
 
 @home.route('/stock/buy/del/<int:id>', methods=['GET'])
@@ -821,6 +878,7 @@ def stock_out_edit(id=None):
             porder.user_id = int(session['user_id'])
             porder.status = 0
             porder.remarks = form.remarks.data
+            porder.addtime = datetime.now()  # 更新为发布日期
         db.session.add(porder)
         # 主表暂存，需要使用id
         db.session.flush()
@@ -1011,6 +1069,7 @@ def stock_allot_edit(id=None):
             porder.user_id = int(session['user_id'])
             porder.status = 0
             porder.remarks = form.remarks.data
+            porder.addtime = datetime.now()  # 更新为发布日期
         db.session.add(porder)
         # 主表暂存，需要使用id
         db.session.flush()
@@ -1217,6 +1276,7 @@ def stock_loss_edit(id=None):
             porder.user_id = int(session['user_id'])
             porder.status = 0
             porder.remarks = form.remarks.data
+            porder.addtime = datetime.now()  # 更新为发布日期
         db.session.add(porder)
         # 主表暂存，需要使用id
         db.session.flush()
@@ -1428,6 +1488,7 @@ def stock_return_edit(id=None):
             porder.debt = form.debt.data
             porder.status = status
             porder.remarks = form.remarks.data
+            porder.addtime = datetime.now()  # 更新为发布日期
         db.session.add(porder)
         db.session.flush()  # 提交一下获取id,不要使用commit
 
@@ -1562,44 +1623,3 @@ def stock_return_debt(id=None):
         flash(u'结款修改成功', 'ok')
         return redirect(url_for('home.stock_return_list'))
     return render_template('home/stock_return_debt.html', form=form, porder=porder)
-
-
-# 20181008 liuqq 客户-会员卡充值
-@home.route('/customer/cus_vip_deposit/<int:vip_id>', methods=['GET', 'POST'])
-def cus_vip_deposit(vip_id=None):
-    form = CusVipDepositForm()
-    obj_vip = Vip.query.filter_by(id=vip_id).first()
-    if form.validate_on_submit():
-        if form.deposit.data != form.re_deposit.data:
-            flash(u'充值金额与确认充值金额不一致！', 'err')
-            return render_template('home/cus_vip_deposit.html', obj_vip=obj_vip, form=form)
-
-        obj_vip.balance = float(form.sum_deposit.data)
-        obj_oplog_vip = Oplog(
-            user_id=session['user_id'],
-            ip=request.remote_addr,
-            reason=u'充值vip卡:%s 金额:%s' % (obj_vip.id, form.deposit.data)
-        )
-        # 数据提交
-        objects = [obj_vip, obj_oplog_vip]
-        db.session.add_all(objects)
-        db.session.flush()
-
-        # 保存vip明细内容
-        add_time = datetime.now()
-        for iter_add in form.inputrows:
-            interval_day = int(iter_add.interval.data) * 30  # 卡的有效期*30天
-            obj_vip_detail = Vipdetail(
-                vip_id=obj_vip.id,  # 客户会员卡号
-                item_id=iter_add.item_id.data,  # 服务/项目id
-                discountprice=iter_add.discountprice.data,  # 优惠后销售价
-                quantity=iter_add.quantity.data,  # 使用次数
-                addtime=add_time,  # 优惠开始时间
-                endtime=add_time + timedelta(days=interval_day)  # 优惠结束时间 = 优惠开始时间 + 有效期
-            )
-            db.session.add(obj_vip_detail)
-        db.session.commit()
-
-        flash(u'充值成功', 'ok')
-        return redirect(url_for('home.customer_list'))
-    return render_template('home/cus_vip_deposit.html', obj_vip=obj_vip, form=form)
