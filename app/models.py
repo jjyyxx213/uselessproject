@@ -11,7 +11,7 @@ class Kvp(db.Model):
     key = db.Column(db.Integer, primary_key=True, autoincrement=True)
     value = db.Column(db.String(200), nullable=False)
     # 添加时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
     def __repr__(self):
         return "<Kvp %r:%r>" % self.key, self.value
 
@@ -38,7 +38,7 @@ class User(db.Model):
     # 是否冻结(1：冻结；0：解冻)
     frozen = db.Column(db.SmallInteger, default=0, nullable=False)
     # 注册时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
     # 唯一标识符
     uuid = db.Column(db.String(255), unique=True)
     # 所属角色
@@ -69,7 +69,7 @@ class Role(db.Model):
     # 角色权限列表
     auths = db.Column(db.String(600))
     # 添加时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
     #员工关系外键
     users = db.relationship('User', backref='role')
 
@@ -86,7 +86,7 @@ class Auth(db.Model):
     # 地址
     url = db.Column(db.String(255), unique=True)
     # 添加时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
     def __repr__(self):
         return "<Auth %r>" % self.name
@@ -113,7 +113,7 @@ class Userlog(db.Model):
     # 登录ip
     ip = db.Column(db.String(100))
     # 登录时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
     def __repr__(self):
         return '<Userlog %r>' %self.user_id
@@ -136,7 +136,7 @@ class Mscard(db.Model):
     # 卡状态 (1有效；0无效)
     valid = db.Column(db.SmallInteger, default=1)
     # 添加时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
     # 会员卡明细外键
     msdetails = db.relationship('Msdetail', backref='mscard')
@@ -220,7 +220,7 @@ class Customer(db.Model):
     # 会员卡号
     vip_id = db.Column(db.Integer, db.ForeignKey('tb_vip.id'))
     # 注册时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
     # 消费流水外键
     billings = db.relationship('Billing', backref='customer')
@@ -244,7 +244,7 @@ class Billing(db.Model):
     # 销售积分
     score = db.Column(db.Float, default=0)
     # 支付时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
     def __repr__(self):
         return '<Billing %r>' % self.paywith
@@ -265,9 +265,9 @@ class Vip(db.Model):
     # 积分限制提醒(到达额度后，提醒会员升级)
     scorelimit = db.Column(db.Float, default=9999)
     # 办理时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
     # 截止时间
-    endtime = db.Column(db.DateTime,index=True, default=datetime.utcnow)
+    endtime = db.Column(db.DateTime,index=True, default=datetime.now)
 
     # 客户会员卡明细外键
     vipdetails = db.relationship('Vipdetail', backref='vip')
@@ -292,9 +292,9 @@ class Vipdetail(db.Model):
     # 使用次数
     quantity = db.Column(db.Integer, default=9999)
     # 优惠开始时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
     # 优惠结束时间
-    endtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    endtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
     def __repr__(self):
         return '<Vipdetail %r>' % self.name
@@ -311,7 +311,7 @@ class Category(db.Model):
     # 备注
     remarks = db.Column(db.Text)
     # 添加时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
     def __repr__(self):
         return '<Category %r>' % self.name
@@ -342,7 +342,7 @@ class Item(db.Model):
     # 备注
     remarks = db.Column(db.Text)
     # 添加时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
     # 会员卡明细外键
     msdetails = db.relationship('Msdetail', backref='item')
@@ -398,7 +398,7 @@ class Supplier(db.Model):
     # 备注
     remarks = db.Column(db.Text)
     # 添加时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
     # 采购订单外键
     porders = db.relationship('Porder', backref='supplier')
@@ -420,7 +420,7 @@ class Stock(db.Model):
     # 数量
     qty = db.Column(db.Float, default=0)
     # 添加时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
     def __repr__(self):
         return '<Stock %r>' % self.id
@@ -449,7 +449,7 @@ class Porder(db.Model):
     # 备注
     remarks = db.Column(db.String(200))
     # 添加时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
     def __repr__(self):
         return '<Porder %r>' % self.id

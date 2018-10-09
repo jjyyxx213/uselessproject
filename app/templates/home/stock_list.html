@@ -16,15 +16,15 @@
                         <h3 class="box-title"> 库存列表</h3>
                         <div class="box-tools">
                             <div class="btn-group pull-left border-right">
-                                <a href="#" class="btn btn-default btn-sm" role="button">
+                                <a href="{{ url_for('home.stock_buy_edit', id=0) }}" class="btn btn-default btn-sm" role="button">
                                     采购</a>&nbsp;&nbsp;&nbsp;
-                                <a href="#" class="btn btn-default btn-sm" role="button">
+                                <a href="{{ url_for('home.stock_out_edit', id=0) }}" class="btn btn-default btn-sm" role="button">
                                     领料</a>&nbsp;&nbsp;&nbsp;
-                                <a href="#" class="btn btn-default btn-sm" role="button">
+                                <a href="{{ url_for('home.stock_allot_edit', id=0) }}" class="btn btn-default btn-sm" role="button">
                                     调拨</a>&nbsp;&nbsp;&nbsp;
-                                <a href="#" class="btn btn-default btn-sm" role="button">
+                                <a href="{{ url_for('home.stock_loss_edit', id=0) }}" class="btn btn-default btn-sm" role="button">
                                     报损</a>&nbsp;&nbsp;&nbsp;
-                                <a href="#" class="btn btn-default btn-sm" role="button">
+                                <a href="{{ url_for('home.stock_return_edit', id=0) }}" class="btn btn-default btn-sm" role="button">
                                     退货</a>&nbsp;&nbsp;
                             </div>
                             <div class="input-group input-group-sm" style="width: 280px;">
@@ -63,7 +63,7 @@
                                     <td>{{ v.qty }}</td>
                                     <td>
                                         <a href="#" name="btn-unfrozen"
-                                           class="label label-success">查看todo</a>
+                                           class="label label-success">查看历史</a>
                                     </td>
                                 </tr>
                             {% endfor %}
