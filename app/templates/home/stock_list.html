@@ -62,7 +62,7 @@
                                     <td>{{ v.item.standard }}</td>
                                     <td>{{ v.qty }}</td>
                                     <td>
-                                        <a href="#" name="btn-unfrozen"
+                                        <a href="{{ url_for('home.stock_list_history', id=v.id) }}" name="btn-unfrozen"
                                            class="label label-success">查看历史</a>
                                     </td>
                                 </tr>

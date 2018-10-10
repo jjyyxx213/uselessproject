@@ -1660,3 +1660,27 @@ def stock_return_debt(id=None):
         flash(u'结款修改成功', 'ok')
         return redirect(url_for('home.stock_return_list'))
     return render_template('home/stock_return_debt.html', form=form, porder=porder)
+
+@home.route('/stock/list/history/<int:id>', methods=['GET'])
+def stock_list_history(id=None):
+    # 历史
+    key = request.args.get('key', '')
+    page = request.args.get('page', 1, type=int)
+    pagination = db.session.query(Porder, Podetail).filter(
+        Porder.id == Podetail.porder_id,
+        Porder.status == 1,
+        Podetail.item_id == id,
+    )
+    # 条件查询
+    if key:
+        # 单号/备注
+        pagination = pagination.filter(
+            or_(Porder.remarks.ilike('%' + key + '%'),
+                Porder.addtime.ilike('%' + key + '%'))
+        )
+    pagination = pagination.order_by(
+        Porder.addtime.desc()
+    ).paginate(page=page,
+               per_page=current_app.config['POSTS_PER_PAGE'],
+               error_out=False)
+    return render_template('home/stock_list_history.html', pagination=pagination, key=key, id=id)
