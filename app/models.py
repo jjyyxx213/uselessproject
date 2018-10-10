@@ -188,67 +188,6 @@ class Msdetail(db.Model):
                     }
         return str_json
 
-# 客户
-class Customer(db.Model):
-    __tablename__ = 'tb_customer'
-    # 编号
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    # 姓名
-    name = db.Column(db.String(100), nullable=False)
-    # 微信昵称
-    name_wechat = db.Column(db.String(100))
-    # 性别
-    sex = db.Column(db.String(10))
-    # 手机号
-    phone = db.Column(db.String(11), unique=True)
-    # 车牌号
-    pnumber = db.Column(db.String(20), unique=True)
-    # 车架号
-    vin = db.Column(db.String(50))
-    # 品牌类型
-    brand = db.Column(db.String(100))
-    # 邮箱
-    email = db.Column(db.String(100))
-    # 身份证
-    id_card = db.Column(db.String(18))
-    # 所属客户经理
-    user_id = db.Column(db.Integer, db.ForeignKey('tb_user.id'))
-    # 到店次数
-    freq = db.Column(db.Integer, default=1)
-    # 累计消费
-    summary = db.Column(db.Float, default=0)
-    # 会员卡号
-    vip_id = db.Column(db.Integer, db.ForeignKey('tb_vip.id'))
-    # 注册时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
-
-    # 消费流水外键
-    billings = db.relationship('Billing', backref='customer')
-
-    def __repr__(self):
-        return '<Customer %r>' % self.name
-
-# 客户消费流水
-class Billing(db.Model):
-    __tablename__ = 'tb_billing'
-    # 编号
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    # 客户id
-    cust_id = db.Column(db.Integer, db.ForeignKey('tb_customer.id'), nullable=False)
-    # 支付方式
-    paywith = db.Column(db.String(100), nullable=False)
-    # 订单id
-    order_id = db.Column(db.Integer, db.ForeignKey('tb_order.id'), unique=True)
-    # 销售金额
-    price = db.Column(db.Float, default=0)
-    # 销售积分
-    score = db.Column(db.Float, default=0)
-    # 支付时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
-
-    def __repr__(self):
-        return '<Billing %r>' % self.paywith
-
 # 客户会员卡
 class Vip(db.Model):
     __tablename__ = 'tb_vip'
@@ -362,20 +301,6 @@ class Item(db.Model):
             del dict['_sa_instance_state']
         return dict
 
-# 销售订单主表 todo
-class Order(db.Model):
-    __tablename__ = 'tb_order'
-    # 编号
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    # 名称
-    name = db.Column(db.String(100), nullable=False)
-
-    # 客户消费流水外键
-    billings = db.relationship('Billing', backref='order')
-
-    def __repr__(self):
-        return '<Order %r>' % self.name
-
 # 供应商表
 class Supplier(db.Model):
     __tablename__ = 'tb_supplier'
@@ -477,5 +402,78 @@ class Podetail(db.Model):
     def __repr__(self):
         return '<Podetail %r>' % self.id
 
+# 客户
+class Customer(db.Model):
+    __tablename__ = 'tb_customer'
+    # 编号
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    # 姓名
+    name = db.Column(db.String(100), nullable=False)
+    # 微信昵称
+    name_wechat = db.Column(db.String(100))
+    # 性别
+    sex = db.Column(db.String(10))
+    # 手机号
+    phone = db.Column(db.String(11), unique=True)
+    # 车牌号
+    pnumber = db.Column(db.String(20), unique=True)
+    # 车架号
+    vin = db.Column(db.String(50))
+    # 品牌类型
+    brand = db.Column(db.String(100))
+    # 邮箱
+    email = db.Column(db.String(100))
+    # 身份证
+    id_card = db.Column(db.String(18))
+    # 所属客户经理
+    user_id = db.Column(db.Integer, db.ForeignKey('tb_user.id'))
+    # 到店次数
+    freq = db.Column(db.Integer, default=1)
+    # 累计消费
+    summary = db.Column(db.Float, default=0)
+    # 会员卡号
+    vip_id = db.Column(db.Integer, db.ForeignKey('tb_vip.id'))
+    # 注册时间
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
+    # 消费流水外键
+    billings = db.relationship('Billing', backref='customer')
+
+    def __repr__(self):
+        return '<Customer %r>' % self.name
+
+# 客户消费流水
+class Billing(db.Model):
+    __tablename__ = 'tb_billing'
+    # 编号
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    # 客户id
+    cust_id = db.Column(db.Integer, db.ForeignKey('tb_customer.id'), nullable=False)
+    # 支付方式
+    paywith = db.Column(db.String(100), nullable=False)
+    # 订单id
+    order_id = db.Column(db.Integer, db.ForeignKey('tb_order.id'), unique=True)
+    # 销售金额
+    price = db.Column(db.Float, default=0)
+    # 销售积分
+    score = db.Column(db.Float, default=0)
+    # 支付时间
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
+
+    def __repr__(self):
+        return '<Billing %r>' % self.paywith
+
+# 销售订单主表 todo
+class Order(db.Model):
+    __tablename__ = 'tb_order'
+    # 编号
+    id = db.Column(db.String(20), primary_key=True)
+    # 名称
+    name = db.Column(db.String(100), nullable=False)
+
+    # 客户消费流水外键
+    billings = db.relationship('Billing', backref='order')
+
+    def __repr__(self):
+        return '<Order %r>' % self.name
 
