@@ -11,7 +11,7 @@ class Kvp(db.Model):
     key = db.Column(db.Integer, primary_key=True, autoincrement=True)
     value = db.Column(db.String(200), nullable=False)
     # 添加时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
     def __repr__(self):
         return "<Kvp %r:%r>" % self.key, self.value
 
@@ -38,7 +38,7 @@ class User(db.Model):
     # 是否冻结(1：冻结；0：解冻)
     frozen = db.Column(db.SmallInteger, default=0, nullable=False)
     # 注册时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
     # 唯一标识符
     uuid = db.Column(db.String(255), unique=True)
     # 所属角色
@@ -52,6 +52,8 @@ class User(db.Model):
     customers = db.relationship('Customer', backref='user')
     # 库存单外键关联
     porders = db.relationship('Porder', backref='user')
+    # 订单外键关联
+    orders = db.relationship('Order', backref='user')
 
     def __repr__(self):
         return "<User %r>" % self.name
@@ -69,7 +71,7 @@ class Role(db.Model):
     # 角色权限列表
     auths = db.Column(db.String(600))
     # 添加时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
     #员工关系外键
     users = db.relationship('User', backref='role')
 
@@ -86,7 +88,7 @@ class Auth(db.Model):
     # 地址
     url = db.Column(db.String(255), unique=True)
     # 添加时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
     def __repr__(self):
         return "<Auth %r>" % self.name
@@ -113,7 +115,7 @@ class Userlog(db.Model):
     # 登录ip
     ip = db.Column(db.String(100))
     # 登录时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
     def __repr__(self):
         return '<Userlog %r>' %self.user_id
@@ -136,7 +138,7 @@ class Mscard(db.Model):
     # 卡状态 (1有效；0无效)
     valid = db.Column(db.SmallInteger, default=1)
     # 添加时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
     # 会员卡明细外键
     msdetails = db.relationship('Msdetail', backref='mscard')
@@ -188,67 +190,6 @@ class Msdetail(db.Model):
                     }
         return str_json
 
-# 客户
-class Customer(db.Model):
-    __tablename__ = 'tb_customer'
-    # 编号
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    # 姓名
-    name = db.Column(db.String(100), nullable=False)
-    # 微信昵称
-    name_wechat = db.Column(db.String(100))
-    # 性别
-    sex = db.Column(db.String(10))
-    # 手机号
-    phone = db.Column(db.String(11), unique=True)
-    # 车牌号
-    pnumber = db.Column(db.String(20), unique=True)
-    # 车架号
-    vin = db.Column(db.String(50))
-    # 品牌类型
-    brand = db.Column(db.String(100))
-    # 邮箱
-    email = db.Column(db.String(100))
-    # 身份证
-    id_card = db.Column(db.String(18))
-    # 所属客户经理
-    user_id = db.Column(db.Integer, db.ForeignKey('tb_user.id'))
-    # 到店次数
-    freq = db.Column(db.Integer, default=1)
-    # 累计消费
-    summary = db.Column(db.Float, default=0)
-    # 会员卡号
-    vip_id = db.Column(db.Integer, db.ForeignKey('tb_vip.id'))
-    # 注册时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-
-    # 消费流水外键
-    billings = db.relationship('Billing', backref='customer')
-
-    def __repr__(self):
-        return '<Customer %r>' % self.name
-
-# 客户消费流水
-class Billing(db.Model):
-    __tablename__ = 'tb_billing'
-    # 编号
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    # 客户id
-    cust_id = db.Column(db.Integer, db.ForeignKey('tb_customer.id'), nullable=False)
-    # 支付方式
-    paywith = db.Column(db.String(100), nullable=False)
-    # 订单id
-    order_id = db.Column(db.Integer, db.ForeignKey('tb_order.id'), unique=True)
-    # 销售金额
-    price = db.Column(db.Float, default=0)
-    # 销售积分
-    score = db.Column(db.Float, default=0)
-    # 支付时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-
-    def __repr__(self):
-        return '<Billing %r>' % self.paywith
-
 # 客户会员卡
 class Vip(db.Model):
     __tablename__ = 'tb_vip'
@@ -265,9 +206,9 @@ class Vip(db.Model):
     # 积分限制提醒(到达额度后，提醒会员升级)
     scorelimit = db.Column(db.Float, default=9999)
     # 办理时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
     # 截止时间
-    endtime = db.Column(db.DateTime,index=True, default=datetime.utcnow)
+    endtime = db.Column(db.DateTime,index=True, default=datetime.now)
 
     # 客户会员卡明细外键
     vipdetails = db.relationship('Vipdetail', backref='vip')
@@ -292,9 +233,9 @@ class Vipdetail(db.Model):
     # 使用次数
     quantity = db.Column(db.Integer, default=9999)
     # 优惠开始时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
     # 优惠结束时间
-    endtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    endtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
     def __repr__(self):
         return '<Vipdetail %r>' % self.name
@@ -311,7 +252,7 @@ class Category(db.Model):
     # 备注
     remarks = db.Column(db.Text)
     # 添加时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
     def __repr__(self):
         return '<Category %r>' % self.name
@@ -342,7 +283,7 @@ class Item(db.Model):
     # 备注
     remarks = db.Column(db.Text)
     # 添加时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
     # 会员卡明细外键
     msdetails = db.relationship('Msdetail', backref='item')
@@ -361,20 +302,6 @@ class Item(db.Model):
         if '_sa_instance_state' in dict:
             del dict['_sa_instance_state']
         return dict
-
-# 销售订单主表 todo
-class Order(db.Model):
-    __tablename__ = 'tb_order'
-    # 编号
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    # 名称
-    name = db.Column(db.String(100), nullable=False)
-
-    # 客户消费流水外键
-    billings = db.relationship('Billing', backref='order')
-
-    def __repr__(self):
-        return '<Order %r>' % self.name
 
 # 供应商表
 class Supplier(db.Model):
@@ -398,7 +325,7 @@ class Supplier(db.Model):
     # 备注
     remarks = db.Column(db.Text)
     # 添加时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
     # 采购订单外键
     porders = db.relationship('Porder', backref='supplier')
@@ -420,7 +347,7 @@ class Stock(db.Model):
     # 数量
     qty = db.Column(db.Float, default=0)
     # 添加时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
     def __repr__(self):
         return '<Stock %r>' % self.id
@@ -449,7 +376,7 @@ class Porder(db.Model):
     # 备注
     remarks = db.Column(db.String(200))
     # 添加时间
-    addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
     def __repr__(self):
         return '<Porder %r>' % self.id
@@ -477,5 +404,126 @@ class Podetail(db.Model):
     def __repr__(self):
         return '<Podetail %r>' % self.id
 
+# 客户
+class Customer(db.Model):
+    __tablename__ = 'tb_customer'
+    # 编号
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    # 姓名
+    name = db.Column(db.String(100), nullable=False)
+    # 微信昵称
+    name_wechat = db.Column(db.String(100))
+    # 性别
+    sex = db.Column(db.String(10))
+    # 手机号
+    phone = db.Column(db.String(11), unique=True)
+    # 车牌号
+    pnumber = db.Column(db.String(20), unique=True)
+    # 车架号
+    vin = db.Column(db.String(50))
+    # 品牌类型
+    brand = db.Column(db.String(100))
+    # 邮箱
+    email = db.Column(db.String(100))
+    # 身份证
+    id_card = db.Column(db.String(18))
+    # 所属客户经理
+    user_id = db.Column(db.Integer, db.ForeignKey('tb_user.id'))
+    # 到店次数
+    freq = db.Column(db.Integer, default=1)
+    # 累计消费
+    summary = db.Column(db.Float, default=0)
+    # 欠款 20181011 增加
+    debt = db.Column(db.Float, default=0)
+    # 会员卡号
+    vip_id = db.Column(db.Integer, db.ForeignKey('tb_vip.id'))
+    # 注册时间
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
+    # 消费流水外键
+    billings = db.relationship('Billing', backref='customer')
+    # 订单外键关联
+    orders = db.relationship('Order', backref='customer')
+
+    def __repr__(self):
+        return '<Customer %r>' % self.name
+
+# 客户消费流水
+class Billing(db.Model):
+    __tablename__ = 'tb_billing'
+    # 编号
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    # 客户id
+    cust_id = db.Column(db.Integer, db.ForeignKey('tb_customer.id'), nullable=False)
+    # 支付方式
+    paywith = db.Column(db.String(100), nullable=False)
+    # 订单id
+    order_id = db.Column(db.Integer, db.ForeignKey('tb_order.id'), unique=True)
+    # 销售金额
+    price = db.Column(db.Float, default=0)
+    # 销售积分
+    score = db.Column(db.Float, default=0)
+    # 支付时间
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
+
+    def __repr__(self):
+        return '<Billing %r>' % self.paywith
+
+# 销售订单主表
+class Order(db.Model):
+    __tablename__ = 'tb_order'
+    # 编号
+    id = db.Column(db.String(20), primary_key=True)
+    # 单据类型 0:快速开单
+    type = db.Column(db.SmallInteger, default=0)
+    # 开单人id
+    user_id = db.Column(db.Integer, db.ForeignKey('tb_user.id'))
+    # 客户id
+    customer_id = db.Column(db.Integer, db.ForeignKey('tb_customer.id'))
+    # 应收金额
+    amount = db.Column(db.Float, default=0)
+    # 优惠后应收金额
+    discount = db.Column(db.Float, default=0)
+    # 实际收款金额
+    payment = db.Column(db.Float, default=0)
+    # 欠款
+    debt = db.Column(db.Float, default=0)
+    # 单据状态 0:暂存 1:生效
+    status = db.Column(db.SmallInteger, default=0)
+    # 备注
+    remarks = db.Column(db.String(200))
+    # 添加时间
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
+
+    # 客户消费流水外键
+    billings = db.relationship('Billing', backref='order')
+
+    def __repr__(self):
+        return '<Order %r>' % self.name
+
+
+# 销售订单明细表
+class Odetail(db.Model):
+    __tablename__ = 'tb_odetail'
+    # 编号
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    # 销售订单号
+    order_id = db.Column(db.String(20), db.ForeignKey('tb_order.id'), nullable=False)
+    # 项目/商品ID
+    item_id = db.Column(db.Integer, db.ForeignKey('tb_item.id'), nullable=True)
+    # 仓库
+    store = db.Column(db.String(40))
+    # 数量
+    qty = db.Column(db.Float, default=0)
+    # 销售单价
+    salesprice = db.Column(db.Float, default=0)
+    # 折扣价
+    discount = db.Column(db.Float, default=0)
+    # 单行合计
+    rowamount = db.Column(db.Float, default=0)
+    # 施工/销售人员 用于计算提成
+    users = db.Column(db.String(100), nullable=False)
+
+    def __repr__(self):
+        return '<Odetail %r>' % self.id
 

@@ -625,7 +625,13 @@
         // select2为已有的仓库设置初值
         function setStoreValue(select_id) {
             let select = $("#" + select_id);
-            let store = select.attr('v') == 'None' ? '' : select.attr('v');
+            let store = '';
+            if (select.attr('v') == 'None') {
+                store = '';
+                select.attr('v', '');
+            } else {
+                store = select.attr('v');
+            }
             select.append(new Option(store, store, false, true));
         }
 
