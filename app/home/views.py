@@ -1,9 +1,10 @@
 # -*- coding:utf-8 -*-
 from . import home
 from flask import render_template, session, redirect, request, url_for, flash, current_app
-from forms import LoginForm, PwdForm, CustomerForm, CusVipForm, StockBuyForm, StockBuyListForm, StockBuyDebtForm, \
-    StockOutListForm, StockOutForm, StockAllotListForm, StockAllotForm, StockLossListForm, StockLossForm, StockReturnListForm, StockReturnForm, StockReturnDebtForm, CusVipDepositForm
-from app.models import User, Userlog, Oplog, Item, Supplier, Customer, Stock, Porder, Podetail, Kvp, Mscard, Msdetail, Vip, Vipdetail
+from forms import LoginForm, PwdForm, CustomerForm, CusVipForm, CusVipDepositForm, StockBuyForm, StockBuyListForm, StockBuyDebtForm, \
+    StockOutListForm, StockOutForm, StockAllotListForm, StockAllotForm, StockLossListForm, StockLossForm, StockReturnListForm, \
+    StockReturnForm, StockReturnDebtForm
+from app.models import User, Userlog, Oplog, Item, Supplier, Customer, Stock, Porder, Podetail, Kvp, Mscard, Msdetail, Vip, Vipdetail, Order, Odetail
 from app import db
 from werkzeug.security import generate_password_hash
 from sqlalchemy import or_, and_, func, text
@@ -1690,3 +1691,38 @@ def stock_list_history(id=None):
                per_page=current_app.config['POSTS_PER_PAGE'],
                error_out=False)
     return render_template('home/stock_list_history.html', pagination=pagination, key=key, id=id)
+
+@home.route('/order/list', methods=['GET'])
+def order_list():
+    # 收银单列表
+    key = request.args.get('key', '')
+    # 收银单状态 true 临时;false 全部
+    status = request.args.get('status', 'false')
+    # 是否欠款 true 欠;false 否
+    debt = request.args.get('debt', 'false')
+    page = request.args.get('page', 1, type=int)
+    pagination = Order.query.join(Customer).filter(
+        Order.type == 0,
+        Order.customer_id == Customer.id,
+    )
+    # 条件查询
+    if key:
+        # 单号/车牌/姓名/手机/备注/日期
+        pagination = pagination.filter(
+            or_(Order.id.ilike('%' + key + '%'),
+                Customer.name.ilike('%' + key + '%'),
+                Customer.pnumber.ilike('%' + key + '%'),
+                Customer.phone.ilike('%' + key + '%'),
+                Order.remarks.ilike('%' + key + '%'),
+                Order.addtime.ilike('%' + key + '%'))
+        )
+    if status == 'true':
+        pagination = pagination.filter(Order.status == 0)
+    if debt == 'true':
+        pagination = pagination.filter(Order.debt > 0)
+    pagination = pagination.order_by(
+        Order.addtime.desc()
+    ).paginate(page=page,
+               per_page=current_app.config['POSTS_PER_PAGE'],
+               error_out=False)
+    return render_template('home/order_list.html', pagination=pagination, key=key, status=status, debt=debt)
