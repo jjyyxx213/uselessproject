@@ -990,6 +990,10 @@ def item_improt_get(type=0):
 
         #file.save(os.path.join('.\\app\\static', filename))
         #ex_table = excel_table_byindex(file='.\\app\\static\\' + filename)
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
+            os.chmod(file_path, stat.S_IRWXU)
+
         file.save(os.path.join(file_path, filename))
         ex_table = excel_table_byindex(file=file_path + filename)
 
