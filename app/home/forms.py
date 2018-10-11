@@ -1461,6 +1461,9 @@ class OrderListForm(FlaskForm):
         self.users.choices = [(v.id, v.name) for v in User.query.order_by(User.name).all()]
 
 class OrderForm(FlaskForm):
+    inputrows = FieldList(
+        FormField(OrderListForm), min_entries=1
+    )
     # 客户id
     customer_id = HiddenField(
         label=u'客户ID',
