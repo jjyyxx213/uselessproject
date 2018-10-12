@@ -7,9 +7,9 @@
             <li><a href="#"><i class="fa fa-dashboard"></i> 设置</a></li>
             <li class="active">
                 {% if type == 0 %}
-                商品列表
+                    商品列表
                 {% else %}
-                服务项目列表
+                    服务项目列表
                 {% endif %}
             </li>
         </ol>
@@ -20,17 +20,20 @@
                 <div class="box box-primary">
                     <div class="box-header">
                         <h3 class="box-title">
-                        {% if type == 0 %}
-                         商品列表
-                        {% else %}
-                         服务项目列表
-                        {% endif %}
+                            {% if type == 0 %}
+                                商品列表
+                            {% else %}
+                                服务项目列表
+                            {% endif %}
                         </h3>
                         <div class="box-tools">
                             <div class="pull-left border-right">
                                 <a href="{{ url_for('admin.item_add', type=type) }}" class="btn btn-primary btn-sm" role="button">
                                     添加
                                 </a>&nbsp;&nbsp;&nbsp;
+                                <a href="{{ url_for('admin.item_import', type=type) }}" class="btn btn-primary btn-sm" role="button">
+                                    导入
+                                </a>
                             </div>
                             <div class="input-group input-group-sm" style="width: 250px;">
                                 <input type="text" name="table_search" class="form-control pull-right"
@@ -69,9 +72,9 @@
                                     <td>{{ v.unit }}</td>
                                     <td>{{ v.standard }}</td>
                                     {% if v.valid == 1 %}
-                                    <td id="{{ v.id }}"> 有效</td>
+                                        <td id="{{ v.id }}"> 有效</td>
                                     {% else %}
-                                    <td id="{{ v.id }}" style="color: red"> 无效</td>
+                                        <td id="{{ v.id }}" style="color: red"> 无效</td>
                                     {% endif %}
                                     <td>{{ v.remarks }}</td>
                                     <td>

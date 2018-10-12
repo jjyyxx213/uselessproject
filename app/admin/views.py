@@ -2,13 +2,14 @@
 from . import admin
 from flask import render_template, url_for, redirect, flash, session, request, current_app, abort
 from forms import UserForm, AuthForm, RoleForm, MscardForm, MsdetailForm, MsdetailListForm, CategoryForm, ItemForm, SupplierForm
-from app.models import User, Auth, Role, Oplog, Userlog, Mscard, Msdetail, Item, Customer, Category, Supplier
+from app.models import User, Auth, Role, Oplog, Userlog, Mscard, Msdetail, Item, Customer, Category, Supplier, Kvp
 from werkzeug.security import generate_password_hash
 from app import db
-import os, stat, uuid
+import os, stat, uuid, xlrd, xlwt
 from datetime import datetime
 from json import dumps
 from sqlalchemy import or_
+from xlrd import open_workbook
 
 # 上下文处理器获取用户信息
 @admin.app_context_processor
@@ -902,3 +903,173 @@ def supplier_block():
     db.session.commit()
     data = {"valid": 0}
     return dumps(data)
+
+
+# liuqq Excel打开
+def open_excel(file='file.xls'):
+    try:
+        data = xlrd.open_workbook(file)
+        return data
+    except Exception as e:
+        print (str(e))
+
+
+# liuqq 根据索引获取Excel表格中的数据   参数:file：Excel文件路径 colnameindex：表头列名所在行的索引，by_index：页夹的索引
+def excel_table_byindex(file='file.xls', colnameindex=0, by_index=0):
+    data = open_excel(file)
+    table = data.sheets()[by_index]
+    nrows = table.nrows #行数
+    ncols = table.ncols #列数
+    colnames =  table.row_values(colnameindex) #某一行数据,默认为第一行
+    list =[];
+    for rownum in range(1, nrows):
+        row = table.row_values(rownum)
+        if row:
+            list.append(row)
+    return colnames, list
+
+# liuqq
+@admin.route('/download/<path:filename>', methods=['GET'])
+def file_download(filename):
+    pass
+    #return send_from_directory(dirpath, '1.jpg', as_attachment=True)  # as_attachment=True 一定要写，不然会变成打开，而不是下载
+
+
+# liuqq 保存导入数据
+@admin.route('/item/import/<int:type>', methods=['GET', 'POST'])
+def item_import(type=0):
+    if request.method == 'GET':
+        return render_template('admin/item_import.html', type=type)
+    if request.method == 'POST':
+        datas = request.get_json()
+        try:
+            for data in datas:
+                item = Item(
+                    name=data.get('name'),
+                    cate=data.get('cate'),
+                    type=type,
+                    salesprice=float(data.get('salesprice')),
+                    rewardprice=float(data.get('rewardprice')),
+                    costprice=float(data.get('costprice')),
+                    unit=data.get('unit'),
+                    standard=data.get('standard'),
+                    valid=1,
+                    remarks=data.get('remarks')
+                )
+                oplog = Oplog(
+                    user_id=session['user_id'],
+                    ip=request.remote_addr,
+                    reason=u'添加商品/服务项目:%s' % data.get('name')
+                )
+                objects = [item, oplog]
+                db.session.add_all(objects)
+            db.session.commit()
+            res = {
+                "success": True,
+            }
+            flash(u'导入成功', 'ok')
+            return (dumps(res))
+        except Exception, e:
+            res = {
+                "success": False,
+            }
+            return (dumps(res))
+
+
+# 20181010 liuqq 商品导入
+@admin.route('/item/import_get/<int:type>', methods=['GET', 'POST'])
+def item_improt_get(type=0):
+    # 获取产品分页清单
+    if request.method == 'POST':
+        file_path = current_app.config['UPLOAD_DIR']
+        re_success = True
+        re_messgae = ''
+        file = request.files['excelFile']
+        fileinfo = file.filename
+        filename = datetime.now().strftime('%Y%m%d%H%M%S') + str(uuid.uuid4().hex) + fileinfo[-1]
+
+        #file.save(os.path.join('.\\app\\static', filename))
+        #ex_table = excel_table_byindex(file='.\\app\\static\\' + filename)
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
+            os.chmod(file_path, stat.S_IRWXU)
+
+        file.save(os.path.join(file_path, filename))
+        ex_table = excel_table_byindex(file=file_path + filename)
+
+        ex_header = ex_table[0]
+        ex_content = ex_table[1]
+
+        # 判断表头是否正确
+        if u'名称' not in ex_header or \
+                u'商品类别' not in ex_header or \
+                u'销售价' not in ex_header or \
+                u'成本价' not in ex_header or \
+                u'提成' not in ex_header or \
+                u'单位' not in ex_header or \
+                u'规格' not in ex_header or \
+                u'备注' not in ex_header:
+            re_success = False
+            re_messgae = u'(Excel表格式不正确)'
+            res = {
+                "success": re_success,
+                "message": re_messgae
+            }
+            return (dumps(res))
+
+        s_json = [];
+        for row in ex_content:
+            err = ''
+            if row[0] == '':
+                err = err + u'#名称不能为空.'
+            if row[1] == '':
+                err = err + u'#商品类别不能为空.'
+            else:
+                item = Category.query.filter_by(name=row[1], type=type).first()
+                if item is None:
+                    err = err + u'#商品类别不存在.'
+            if row[2] == '':
+                err = err + u'#销售价不能为空.'
+            else:
+                if not isinstance(row[2], float):
+                    err = err + u'#销售价必须为数字.'
+            if row[3] == '':
+                err = err + u'#成本价不能为空.'
+            else:
+                if not isinstance(row[3], float):
+                    err = err + u'#成本价必须为数字.'
+            if row[4] == '':
+                err = err + u'#提成不能为空.'
+            else:
+                if not isinstance(row[4], float):
+                    err = err + u'#提成必须为数字.'
+            if row[5] == '':
+                err = err + u'#单位不能为空.'
+            else:
+                unit = Kvp.query.filter_by(value=row[5], type='unit').first()
+                if unit is None:
+                    err = err + u'#单位不存在.'
+
+            if err != '':
+                re_success = False
+                re_messgae = u'存在错误信息'
+
+            str_json = {'err': err,
+                        'name': row[0],
+                        'cate': row[1],
+                        'salesprice': row[2],
+                        'costprice': row[3],
+                        'rewardprice': row[4],
+                        'unit': row[5],
+                        'standard': row[6],
+                        'remarks': row[7]
+                        }
+            s_json.append(str_json)
+
+        res = {
+            "success": re_success,
+            "content": s_json,
+            "message": re_messgae
+        }
+
+        return (dumps(res))
