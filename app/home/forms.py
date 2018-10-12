@@ -1410,8 +1410,8 @@ class OrderListForm(FlaskForm):
     )
     # 折扣价
     discount = StringField(
-        label=u'售价',
-        description=u'售价',
+        label=u'折扣价',
+        description=u'折扣价',
         render_kw={
             'class': 'form-control',
             'readonly': 'true',
@@ -1481,7 +1481,6 @@ class OrderForm(FlaskForm):
         description=u'客户姓名',
         render_kw={
             'class': 'form-control',
-            'placeholder': u'客户姓名',
             'readonly': 'true',
         }
     )
@@ -1491,7 +1490,6 @@ class OrderForm(FlaskForm):
         description=u'手机',
         render_kw={
             'class': 'form-control',
-            'placeholder': u'手机',
             'readonly': 'true',
         }
     )
@@ -1501,7 +1499,6 @@ class OrderForm(FlaskForm):
         description=u'车牌',
         render_kw={
             'class': 'form-control',
-            'placeholder': u'车牌',
             'readonly': 'true',
         }
     )
@@ -1511,7 +1508,6 @@ class OrderForm(FlaskForm):
         description=u'车型',
         render_kw={
             'class': 'form-control',
-            'placeholder': u'车型',
             'readonly': 'true',
         }
     )
@@ -1521,7 +1517,6 @@ class OrderForm(FlaskForm):
         description=u'会员卡',
         render_kw={
             'class': 'form-control',
-            'placeholder': u'会员卡',
             'readonly': 'true',
         }
     )
@@ -1531,7 +1526,6 @@ class OrderForm(FlaskForm):
         description=u'卡型',
         render_kw={
             'class': 'form-control',
-            'placeholder': u'卡型',
             'readonly': 'true',
         }
     )
@@ -1541,7 +1535,6 @@ class OrderForm(FlaskForm):
         description=u'余额',
         render_kw={
             'class': 'form-control',
-            'placeholder': u'余额',
             'readonly': 'true',
         }
     )
@@ -1551,7 +1544,6 @@ class OrderForm(FlaskForm):
         description=u'积分',
         render_kw={
             'class': 'form-control',
-            'placeholder': u'积分',
             'readonly': 'true',
         }
     )

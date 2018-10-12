@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
 {% block css %}
     <style>
+        .first-padding-defined {
+            padding-left: 10px;
+            padding-right: 0px;
+        }
+
         .padding-defined {
             padding-left: 10px;
             padding-right: 0px;
@@ -16,8 +21,8 @@
     <section class="content-header">
         <h1> 门店管理系统</h1>
         <ol class="breadcrumb">
-            <li><a href="#"><i class="fa fa-dashboard"></i> 库存管理</a></li>
-            <li><a href="{{ url_for('home.stock_return_list') }}"> 退货单列表</a></li>
+            <li><a href="#"><i class="fa fa-dashboard"></i> 收银管理</a></li>
+            <li><a href="{{ url_for('home.order_list') }}"> 收银单列表</a></li>
             <li class="active"> 维护</li>
         </ol>
     </section>
@@ -29,42 +34,115 @@
                         <!--启动CSRF-->
                         {{ form.hidden_tag() }}
                         <div class="box-header with-border">
-                            <h3 class="box-title"> 采购退货 {% if porder %}- {{ porder.id }} {% endif %}</h3>
+                            <h3 class="box-title"> 收银单 {% if porder %}- {{ porder.id }} {% endif %}</h3>
                             <div class="pull-right">总行数：<strong id="cnt">{{ form_count }}</strong>/<strong>20</strong></div>
-                            <div class="row">
-                                <div class="input-group col-md-3 pull-left margin-defined">
-                                    <span class="input-group-btn">
-                                        <button class="btn btn-default" type="button"> 供应商</button>
-                                    </span>
-                                    {{ form.supplier_id }}
+                            <div class="row" style="margin-top: 5px; margin-bottom: 5px;">
+                                <div class="col-md-2 first-padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">客户</span>
+                                        {{ form.customer_id }}
+                                        {{ form.customer_name }}
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="button" name="customer_choice" style="border-radius: 0">
+                                                ...
+                                            </button>
+                                        </span>
+                                    </div>
+                                    {% for err in form.customer_name.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                    {% endfor %}
                                 </div>
-                                <div class="input-group col-md-3 pull-left margin-defined">
-                                    <span class="input-group-btn">
-                                        <button class="btn btn-default" type="button"> 退货员</button>
-                                    </span>
-                                    {{ form.user_name }}
+                                <div class="col-md-2 padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">手机</span>
+                                        {{ form.customer_phone }}
+                                    </div>
+                                    {% for err in form.customer_phone.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
                                 </div>
-                                <div class="col-md-4 input-group padding-defined pull-left margin-defined">
-                                    <span class="input-group-btn">
-                                        <button class="btn btn-default" type="button"> 备注</button>
-                                    </span>
-                                    {{ form.remarks }}
+                                <div class="col-md-2 padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">车牌</span>
+                                        {{ form.customer_pnumber }}
+                                    </div>
+                                    {% for err in form.customer_pnumber.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-5 padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">车型</span>
+                                    {{ form.customer_brand }}
+                                    </div>
+                                    {% for err in form.customer_brand.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="input-group col-md-3 pull-left margin-defined">
-                                {% for err in form.supplier_id.errors %}
-                                    <div class="col-md-12">
-                                        <p style="color: red" class="small">{{ err }}</p>
+                            <div class="row" style="margin-bottom: 5px">
+                                <div class="col-md-2 padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">会员</span>
+                                        {{ form.vip_id }}
                                     </div>
-                                {% endfor %}
+                                    {% for err in form.vip_id.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                    {% endfor %}
                                 </div>
-                                <div class="input-group col-md-3 pull-left margin-defined">
-                                {% for err in form.user_name.errors %}
-                                    <div class="col-md-12">
-                                        <p style="color: red" class="small">{{ err }}</p>
+                                <div class="col-md-2 padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">卡型</span>
+                                    {{ form.vip_name }}
                                     </div>
-                                {% endfor %}
+                                    {% for err in form.vip_name.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-2 padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">余额</span>
+                                    {{ form.vip_balance }}
+                                    </div>
+                                    {% for err in form.vip_balance.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-2 padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">积分</span>
+                                        {{ form.vip_score }}
+                                    </div>
+                                    {% for err in form.vip_score.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-3 padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">备注</span>
+                                    {{ form.remarks }}
+                                    </div>
+                                    {% for err in form.remarks.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
                                 </div>
                             </div>
                         </div>
@@ -72,28 +150,22 @@
                             <div class="row" style="margin-bottom: 5px">
                                 <div class="col-md-2 padding-defined">
                                     <label style="color: red">*</label>
-                                    <label class="small"> 商品</label>
-                                </div>
-                                <div class="col-md-2 padding-defined">
-                                    <label class="small"> 规格</label>
+                                    <label class="small"> 商品/服务</label>
                                 </div>
                                 <div class="col-md-1 padding-defined">
                                     <label class="small"> 单位</label>
                                 </div>
+                                <div class="col-md-1 padding-defined">
+                                    <label class="small"> 售价</label>
+                                </div>
+                                <div class="col-md-1 padding-defined">
+                                    <label class="small"> 折扣价</label>
+                                </div>
+                                <div class="col-md-1 padding-defined">
+                                    <label class="small"> 数量</label>
+                                </div>
                                 <div class="col-md-2 padding-defined">
-                                    <label style="color: red">*</label>
-                                    <label class="small"> 仓库</label>
-                                </div>
-                                <div class="col-md-1 padding-defined">
-                                    <label class="small"> 库存数量</label>
-                                    <label class="badge bg-green" data-toggle="tooltip"
-                                       title="库存数量以结算时为准">?</label>
-                                </div>
-                                <div class="col-md-1 padding-defined">
-                                    <label class="small"> 退货数量</label>
-                                </div>
-                                <div class="col-md-1 padding-defined">
-                                    <label class="small"> 单价</label>
+                                    <label class="small"> 工作人员</label>
                                 </div>
                                 <div class="col-md-1 padding-defined">
                                     <label class="small"> 合计</label>
@@ -112,6 +184,12 @@
                                                 <input id="inputrows-{{ loop.index0 }}-item_id"
                                                        name="inputrows-{{ loop.index0 }}-item_id" type="hidden"
                                                        value="{{ v.data.item_id or '' }}">
+                                                <input id="inputrows-{{ loop.index0 }}-item_type"
+                                                       name="inputrows-{{ loop.index0 }}-item_type" type="hidden"
+                                                       value="{{ v.data.item_type or '' }}">
+                                                <input id="inputrows-{{ loop.index0 }}-store"
+                                                       name="inputrows-{{ loop.index0 }}-store" type="hidden"
+                                                       value="{{ v.data.store or '' }}">
                                                 <input id="inputrows-{{ loop.index0 }}-item_name" readonly
                                                        name="inputrows-{{ loop.index0 }}-item_name" class="form-control"
                                                        placeholder="请选择商品" type="text"
@@ -119,24 +197,9 @@
                                                 <span class="input-group-btn">
                                                 <button class="btn btn-default" type="button"
                                                         loop_index="{{ loop.index0 }}" name="stock_choice"> ...</button>
-                                                </span>
+                                            </span>
                                             </div>
                                             {% for err in v.item_name.errors %}
-                                                <div class="col-md-12">
-                                                    <p style="color: red" class="small">{{ err }}</p>
-                                                </div>
-                                            {% endfor %}
-                                        </div>
-                                        <div class="col-md-2 padding-defined">
-                                            <div class="form-group">
-                                                <input id="inputrows-{{ loop.index0 }}-item_standard"
-                                                       name="inputrows-{{ loop.index0 }}-item_standard"
-                                                       class="form-control"
-                                                       placeholder="规格" type="text"
-                                                       value="{{ v.data.item_standard or '' }}"
-                                                       readonly>
-                                            </div>
-                                            {% for err in v.item_standard.errors %}
                                                 <div class="col-md-12">
                                                     <p style="color: red" class="small">{{ err }}</p>
                                                 </div>
@@ -157,16 +220,16 @@
                                                 </div>
                                             {% endfor %}
                                         </div>
-                                        <div class="col-md-2 padding-defined">
+                                        <div class="col-md-1 padding-defined">
                                             <div class="form-group">
-                                                <input id="inputrows-{{ loop.index0 }}-ostore"
-                                                       name="inputrows-{{ loop.index0 }}-ostore"
+                                                <input id="inputrows-{{ loop.index0 }}-item_salesprice"
+                                                       name="inputrows-{{ loop.index0 }}-item_salesprice"
                                                        class="form-control"
-                                                       placeholder="仓库" type="text"
-                                                       value="{{ v.data.ostore or '' }}"
+                                                       placeholder="售价" type="text"
+                                                       value="{{ v.data.item_salesprice or '' }}"
                                                        readonly>
                                             </div>
-                                            {% for err in v.ostore.errors %}
+                                            {% for err in v.item_salesprice.errors %}
                                                 <div class="col-md-12">
                                                     <p style="color: red" class="small">{{ err }}</p>
                                                 </div>
@@ -174,11 +237,13 @@
                                         </div>
                                         <div class="col-md-1 padding-defined">
                                             <div class="form-group">
-                                                <input id="inputrows-{{ loop.index0 }}-stock_qty" readonly
-                                                       name="inputrows-{{ loop.index0 }}-stock_qty" class="form-control"
-                                                       placeholder="库存数量" type="text" value="{{ v.data.stock_qty or '' }}">
+                                                <input id="inputrows-{{ loop.index0 }}-discount"
+                                                       name="inputrows-{{ loop.index0 }}-discount"
+                                                       class="form-control costprice"
+                                                       placeholder="折扣价" type="text"
+                                                       value="{{ v.data.costprice or '' }}">
                                             </div>
-                                            {% for err in v.stock_qty.errors %}
+                                            {% for err in v.discount.errors %}
                                                 <div class="col-md-12">
                                                     <p style="color: red" class="small">{{ err }}</p>
                                                 </div>
@@ -196,15 +261,15 @@
                                                 </div>
                                             {% endfor %}
                                         </div>
-                                        <div class="col-md-1 padding-defined">
-                                            <div class="form-group">
-                                                <input id="inputrows-{{ loop.index0 }}-costprice"
-                                                       name="inputrows-{{ loop.index0 }}-costprice"
-                                                       class="form-control costprice"
-                                                       placeholder="单价" type="text"
-                                                       value="{{ v.data.costprice or '' }}">
-                                            </div>
-                                            {% for err in v.costprice.errors %}
+                                        <div class="col-md-2 padding-defined">
+                                            <select class="form-control select2 users-choice"
+                                                    id="inputrows-{{ loop.index0 }}-users"
+                                                    name="inputrows-{{ loop.index0 }}-users"
+                                                    multiple
+                                                    data-placeholder="请选择工作人员(多选)"
+                                                    v="{{ v.data.users or '' }}">
+                                            </select>
+                                            {% for err in v.users.errors %}
                                                 <div class="col-md-12">
                                                     <p style="color: red" class="small">{{ err }}</p>
                                                 </div>
@@ -237,7 +302,7 @@
                                 <div class="col-md-7 padding-defined pull-left">
                                     <div class="input-group">
                                         <span class="input-group-btn">
-                                                <button class="btn btn-default" type="button"> 应退金额</button>
+                                                <button class="btn btn-default" type="button"> 应付金额</button>
                                         </span>
                                         {{ form.amount }}
                                         <span class="input-group-btn">
@@ -245,7 +310,7 @@
                                         </span>
                                         {{ form.discount }}
                                         <span class="input-group-btn">
-                                            <button class="btn btn-default" type="button"> 本次退款</button>
+                                            <button class="btn btn-default" type="button"> 本次付款</button>
                                         </span>
                                         {{ form.payment }}
                                         <span class="input-group-btn">
@@ -270,7 +335,7 @@
                                 {{ form.submit }}
                                 {{ form.type_switch }}
                                 <input name="switch" id="switch" type="checkbox" data-size="small">
-                                <a href="{{ url_for('home.stock_return_list') }}" class="btn btn-default pull-right"
+                                <a href="{{ url_for('home.order_list') }}" class="btn btn-default pull-right"
                                    role="button"> 返回</a>
                             </div>
                         </div>
@@ -334,8 +399,8 @@
 {% block js %}
     <script>
         $(document).ready(function () {
-            $("#g-stock").addClass("active");
-            $("#g-stock-return-list").addClass("active");
+            $("#g-order").addClass("active");
+            $("#g-order-list").addClass("active");
             // 弹出提示初始化
             $(function () {
                 $('[data-toggle="tooltip"]').tooltip()
@@ -368,12 +433,6 @@
                     allowClear: true,
                 }
             );
-
-            // 供应商/采购员初始化空处理
-            supplier_id = {{ porder.supplier_id or 0 }};
-            if (supplier_id == 0) {
-                $('#supplier_id').val('').trigger('change');
-            }
 
             // 动态加载inputrows
             let MaxInputs = 20; //maximum input boxes allowed
