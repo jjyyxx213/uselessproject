@@ -164,7 +164,7 @@
                                 <div class="col-md-1 padding-defined">
                                     <label class="small"> 数量</label>
                                 </div>
-                                <div class="col-md-2 padding-defined">
+                                <div class="col-md-3 padding-defined">
                                     <label class="small"> 工作人员</label>
                                 </div>
                                 <div class="col-md-1 padding-defined">
@@ -196,8 +196,8 @@
                                                        value="{{ v.data.item_name or '' }}">
                                                 <span class="input-group-btn">
                                                 <button class="btn btn-default" type="button"
-                                                        loop_index="{{ loop.index0 }}" name="stock_choice"> ...</button>
-                                            </span>
+                                                        loop_index="{{ loop.index0 }}" name="item_choice"> ...</button>
+                                                </span>
                                             </div>
                                             {% for err in v.item_name.errors %}
                                                 <div class="col-md-12">
@@ -261,7 +261,7 @@
                                                 </div>
                                             {% endfor %}
                                         </div>
-                                        <div class="col-md-2 padding-defined">
+                                        <div class="col-md-3 padding-defined">
                                             <select class="form-control select2 users-choice"
                                                     id="inputrows-{{ loop.index0 }}-users"
                                                     name="inputrows-{{ loop.index0 }}-users"
@@ -408,7 +408,7 @@
             // switch
             $('#switch').bootstrapSwitch(
                 {
-                    onText: "退货",
+                    onText: "结算",
                     offText: "暂存",
                     onColor: "success",
                     offColor: "warning",
@@ -425,12 +425,27 @@
             // 默认为保存
             $('#switch').bootstrapSwitch('state',true);
 
-
             // 下拉框设置
             $('.select2').select2(
                 {
                     language: "zh-CN",
                     allowClear: true,
+                    ajax: {
+                        url: "{{ url_for('home.select_user') }}",
+                        dataType: 'json',
+                        delay: 250,
+                        data: function (params) {
+                          return {
+                            q: params.term,
+                          };
+                        },
+                        processResults: function (data) {
+                          return {
+                            results: data
+                          };
+                        },
+                        cache: true
+                      },
                 }
             );
 
@@ -450,19 +465,16 @@
                         '                                        <div class="input-group">\n' +
                         '                                            <input id="inputrows-' + id_ins + '-item_id"\n' +
                         '                                                   name="inputrows-' + id_ins + '-item_id" type="hidden">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-item_type"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-item_type" type="hidden">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-store"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-store" type="hidden">\n' +
                         '                                            <input id="inputrows-' + id_ins + '-item_name"\n' +
                         '                                                   name="inputrows-' + id_ins + '-item_name" class="form-control" ' +
                         '                                                   placeholder="请选择商品" type="text" readonly>' +
                         '                                            <span class="input-group-btn">\n' +
-                        '                                                <button class="btn btn-default" type="button" loop_index="' + id_ins + '" name="stock_choice"> ...</button>\n' +
+                        '                                                <button class="btn btn-default" type="button" loop_index="' + id_ins + '" name="is_choice"> ...</button>\n' +
                         '                                            </span>\n' +
-                        '                                        </div>\n' +
-                        '                                    </div>\n' +
-                        '                                    <div class="col-md-2 padding-defined">\n' +
-                        '                                        <div class="form-group">\n' +
-                        '                                            <input id="inputrows-' + id_ins + '-item_standard"\n' +
-                        '                                                   name="inputrows-' + id_ins + '-item_standard" class="form-control"\n' +
-                        '                                                   placeholder="规格" type="text" readonly>' +
                         '                                        </div>\n' +
                         '                                    </div>\n' +
                         '                                    <div class="col-md-1 padding-defined">\n' +
@@ -473,21 +485,19 @@
                         '                                                   placeholder="单位" type="text"\n' +
                         '                                                   readonly>\n' +
                         '                                        </div>\n' +
-                        '                                     </div>\n' +
-                        '                                    <div class="col-md-2 padding-defined">\n' +
+                        '                                    </div>\n' +
+                        '                                    <div class="col-md-1 padding-defined">\n' +
                         '                                        <div class="form-group">\n' +
-                        '                                            <input id="inputrows-' + id_ins + '-ostore"\n' +
-                        '                                                   name="inputrows-' + id_ins + '-ostore"\n' +
-                        '                                                   class="form-control" readonly\n' +
-                        '                                                   placeholder="仓库" type="text">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-item_salesprice"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-item_salesprice" class="form-control"\n' +
+                        '                                                   placeholder="售价" type="text" readonly>' +
                         '                                        </div>\n' +
                         '                                    </div>\n' +
                         '                                    <div class="col-md-1 padding-defined">\n' +
                         '                                        <div class="form-group">\n' +
-                        '                                            <input id="inputrows-' + id_ins + '-stock_qty"\n' +
-                        '                                                   name="inputrows-' + id_ins + '-stock_qty"\n' +
-                        '                                                   class="form-control" readonly\n' +
-                        '                                                   placeholder="库存数量" type="text">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-discount"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-discount" class="form-control"\n' +
+                        '                                                   placeholder="折扣价" type="text" readonly>' +
                         '                                        </div>\n' +
                         '                                    </div>\n' +
                         '                                    <div class="col-md-1 padding-defined">\n' +
@@ -497,12 +507,13 @@
                         '                                                   placeholder="数量" type="text">\n' +
                         '                                        </div>\n' +
                         '                                    </div>\n' +
-                        '                                    <div class="col-md-1 padding-defined">\n' +
+                        '                                    <div class="col-md-3 padding-defined">\n' +
                         '                                        <div class="form-group">\n' +
-                        '                                            <input id="inputrows-' + id_ins + '-costprice"\n' +
-                        '                                                   name="inputrows-' + id_ins + '-costprice"\n' +
-                        '                                                   class="form-control costprice"\n' +
-                        '                                                   placeholder="单价" type="text">\n' +
+                                '                                    <select class="form-control select2 users-choice"\n' +
+                                '                                            id="inputrows-' + id_ins + '-users"\n' +
+                                '                                            name="inputrows-' + id_ins + '-users"\n' +
+                                '                                            multiple data-placeholder="请选择工作人员(多选)">\n' +
+                                '                                    </select>\n' +
                         '                                        </div>\n' +
                         '                                    </div>\n' +
                         '                                    <div class="col-md-1 padding-defined">\n' +
@@ -520,7 +531,27 @@
                         '                                        </button>\n' +
                         '                                    </div>\n' +
                         '                                </div>');
-
+                    // 动态添加行后，要处理select2下拉框初始化
+                    $("#" + "inputrows-" + id_ins + "-users").select2({
+                            language: "zh-CN",
+                            allowClear: true,
+                            ajax: {
+                                url: "{{ url_for('home.select_user') }}",
+                                dataType: 'json',
+                                delay: 250,
+                                data: function (params) {
+                                  return {
+                                    q: params.term,
+                                  };
+                                },
+                                processResults: function (data) {
+                                  return {
+                                    results: data
+                                  };
+                                },
+                                cache: true
+                              },
+                    });
                     id_ins++; //这个要放到select2监听后面，否则id错误
                     row_ins++;
                     $("#cnt").text(row_ins)//显示总行数

@@ -490,6 +490,19 @@ def store_get():
         }
     return dumps(res)
 
+@home.route('/select/user', methods=["GET"])
+def select_user():
+    # 加载员工
+    users = []
+    for v in User.query.order_by(User.name).all():
+        users.append(
+            {
+                "id": v.id,
+                "text": v.name,
+            }
+        )
+    return dumps(users)
+
 @home.route('/stock/list', methods=['GET'])
 def stock_list():
     # 库存列表

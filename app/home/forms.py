@@ -1458,7 +1458,6 @@ class OrderListForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         kwargs['csrf_enabled'] = False
         FlaskForm.__init__(self, *args, **kwargs)
-        self.users.choices = [(v.id, v.name) for v in User.query.order_by(User.name).all()]
 
 class OrderForm(FlaskForm):
     inputrows = FieldList(
