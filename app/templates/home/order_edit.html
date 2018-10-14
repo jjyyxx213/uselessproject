@@ -148,7 +148,7 @@
                         </div>
                         <div class="box-body">
                             <div class="row" style="margin-bottom: 5px">
-                                <div class="col-md-2 padding-defined">
+                                <div class="col-md-3 padding-defined">
                                     <label style="color: red">*</label>
                                     <label class="small"> 商品/服务</label>
                                 </div>
@@ -179,7 +179,7 @@
                             <div id="inputs">
                                 {% for v in form.inputrows %}
                                     <div class="row" style="margin-bottom: 0px">
-                                        <div class="col-md-2 padding-defined">
+                                        <div class="col-md-3 padding-defined">
                                             <div class="input-group">
                                                 <input id="inputrows-{{ loop.index0 }}-item_id"
                                                        name="inputrows-{{ loop.index0 }}-item_id" type="hidden"
@@ -196,7 +196,11 @@
                                                        value="{{ v.data.item_name or '' }}">
                                                 <span class="input-group-btn">
                                                 <button class="btn btn-default" type="button"
-                                                        loop_index="{{ loop.index0 }}" name="item_choice"> ...</button>
+                                                        loop_index="{{ loop.index0 }}" name="stock_choice"> 物</button>
+                                                </span>
+                                                <span class="input-group-btn">
+                                                <button class="btn btn-default" type="button"
+                                                        loop_index="{{ loop.index0 }}" name="service_choice"> 服</button>
                                                 </span>
                                             </div>
                                             {% for err in v.item_name.errors %}
@@ -240,7 +244,7 @@
                                                 <input id="inputrows-{{ loop.index0 }}-discount"
                                                        name="inputrows-{{ loop.index0 }}-discount"
                                                        class="form-control costprice"
-                                                       placeholder="折扣价" type="text"
+                                                       placeholder="折扣价" type="text" readonly
                                                        value="{{ v.data.costprice or '' }}">
                                             </div>
                                             {% for err in v.discount.errors %}
@@ -352,7 +356,7 @@
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">×</span>
                         </button>
-                        <h4 class="modal-title" id="stockModalLabel"> 库存选择</h4>
+                        <h4 class="modal-title" id="stockModalLabel"> 商品选择</h4>
                     </div>
                     <div class="modal-body">
                         <div class="row">
@@ -371,17 +375,62 @@
                                 <thead>
                                 <tr>
                                     <th> 编号</th>
-                                    <th> 商品名称</th>
+                                    <th> 名称</th>
                                     <th> 规格</th>
                                     <th> 单位</th>
-                                    <th> 成本价</th>
-                                    <th> 上次进价</th>
+                                    <th> 售价</th>
                                     <th> 仓库</th>
                                     <th> 库存数量</th>
                                     <th> 商品类型</th>
                                 </tr>
                                 </thead>
                                 <tbody id="stocks">
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal"> 关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 服务选择模态框!-->
+        <div class="modal fade" id="serviceModal" tabindex="-1" role="dialog" aria-labelledby="serviceModalLabel">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                        <h4 class="modal-title" id="serviceModalLabel"> 服务选择</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="input-group input-group-sm pull-right" style="width: 300px;">
+                                <input type="text" name="table_search" class="form-control pull-right"
+                                       placeholder="请输入关键字...  (名称/规格)" id="service_search">
+                                <div class="input-group-btn">
+                                    <button type="submit" class="btn btn-default" id="do_service_search">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                <tr>
+                                    <th> 编号</th>
+                                    <th> 名称</th>
+                                    <th> 规格</th>
+                                    <th> 单位</th>
+                                    <th> 售价</th>
+                                    <th> 服务类型</th>
+                                </tr>
+                                </thead>
+                                <tbody id="services">
 
                                 </tbody>
                             </table>
@@ -426,7 +475,7 @@
             $('#switch').bootstrapSwitch('state',true);
 
             // 下拉框设置
-            $('.select2').select2(
+            $('.users-choice').select2(
                 {
                     language: "zh-CN",
                     allowClear: true,
@@ -461,7 +510,7 @@
                 {
                     InputsWrapper.append('' +
                         '<div class="row" style="margin-bottom: 0px">\n' +
-                        '                                    <div class="col-md-2 padding-defined">\n' +
+                        '                                    <div class="col-md-3 padding-defined">\n' +
                         '                                        <div class="input-group">\n' +
                         '                                            <input id="inputrows-' + id_ins + '-item_id"\n' +
                         '                                                   name="inputrows-' + id_ins + '-item_id" type="hidden">\n' +
@@ -473,7 +522,10 @@
                         '                                                   name="inputrows-' + id_ins + '-item_name" class="form-control" ' +
                         '                                                   placeholder="请选择商品" type="text" readonly>' +
                         '                                            <span class="input-group-btn">\n' +
-                        '                                                <button class="btn btn-default" type="button" loop_index="' + id_ins + '" name="is_choice"> ...</button>\n' +
+                        '                                                <button class="btn btn-default" type="button" loop_index="' + id_ins + '" name="stock_choice"> 物</button>\n' +
+                        '                                            </span>\n' +
+                        '                                            <span class="input-group-btn">\n' +
+                        '                                                <button class="btn btn-default" type="button" loop_index="' + id_ins + '" name="service_choice"> 服</button>\n' +
                         '                                            </span>\n' +
                         '                                        </div>\n' +
                         '                                    </div>\n' +
@@ -570,12 +622,12 @@
 
             //定义loop_index,获取所选行数据
             let loop_index;
-            //弹出模态框选择物料
+            //库存弹出模态框选择物料
             $("#inputs").on("click", "button[name='stock_choice']", function () {
                 let appendId = $('#stocks');
                 let url = "{{ url_for('home.modal_stock') }}";
                 let key = $("#stock_search").val();
-                modal_stock(appendId, url, key);
+                order_modal_stock(appendId, url, key);
                 //显示modal
                 $('#stockModal').modal();
                 // 获取loop_index
@@ -586,7 +638,7 @@
                 let appendId = $('#stocks');
                 let url = "{{ url_for('home.modal_stock') }}";
                 let key = $("#stock_search").val();
-                modal_stock(appendId, url, key);
+                order_modal_stock(appendId, url, key);
             });
             $("#stock_search").bind("keyup", function (event) {
                 if (event.keyCode == "13") {
@@ -594,9 +646,111 @@
                     let appendId = $('#stocks');
                     let url = "{{ url_for('home.modal_stock') }}";
                     let key = $("#stock_search").val();
-                    modal_stock(appendId, url, key);
+                    order_modal_stock(appendId, url, key);
                 }
             });
+
+            //modal_stock高亮事件
+            $("#stocks").on("mouseenter", "tr", function () {
+                $(this).addClass("danger");
+            });
+            //modal_stock高亮事件
+            $("#stocks").on("mouseleave", "tr", function () {
+                $(this).removeClass("danger");
+            });
+            //modal_stock点击事件
+            $("#stocks").on("dblclick", "tr", function () {
+                // item_id 放到stock_id 的v里面
+                let item_id = $(this).find("td:first").attr("v");
+                let item_name = $(this).find("td:eq(1)").text();
+                let item_standard = $(this).find("td:eq(2)").text();
+                let item_unit = $(this).find("td:eq(3)").text();
+                let item_salesprice = $(this).find("td:eq(4)").text();
+                let store = $(this).find("td:eq(5)").text();
+
+                $("#stockModal").modal("hide");
+                // 给输入框赋值
+                let input_item_id = $("#" + 'inputrows-' + loop_index + '-item_id');
+                input_item_id.val(item_id);
+                let input_item_name = $("#" + 'inputrows-' + loop_index + '-item_name');
+                input_item_name.val(item_name);
+                let input_item_standard = $("#" + 'inputrows-' + loop_index + '-item_standard');
+                input_item_standard.val(item_standard);
+                let input_item_unit = $("#" + 'inputrows-' + loop_index + '-item_unit');
+                input_item_unit.val(item_unit);
+                let input_item_salesprice = $("#" + 'inputrows-' + loop_index + '-item_salesprice');
+                input_item_salesprice.val(item_salesprice);
+                //还有类型和仓库两个hidden需要赋值
+                let input_item_type = $("#" + 'inputrows-' + loop_index + '-item_type');
+                input_item_type.val('0');
+                let input_store = $("#" + 'inputrows-' + loop_index + '-store');
+                input_store.val(store);
+            });
+
+            /////////////////////////////分割两个模态框
+
+            $("#inputs").on("click", "button[name='service_choice']", function () {
+                let appendId = $('#services');
+                let url = "{{ url_for('home.modal_service') }}";
+                let key = $("#service_search").val();
+                order_model_service(appendId, url, key);
+                //显示modal
+                $('#serviceModal').modal();
+                // 获取loop_index
+                loop_index = $(this).attr('loop_index');
+            });
+            //模态框模糊查询
+            $("#do_service_search").click(function () {
+                let appendId = $('#services');
+                let url = "{{ url_for('home.modal_service') }}";
+                let key = $("#service_search").val();
+                order_model_service(appendId, url, key);
+            });
+            $("#stock_search").bind("keyup", function (event) {
+                if (event.keyCode == "13") {
+                    //回车执行查询
+                    let appendId = $('#services');
+                    let url = "{{ url_for('home.modal_service') }}";
+                    let key = $("#service_search").val();
+                    order_model_service(appendId, url, key);
+                }
+            });
+
+            //modal_stock高亮事件
+            $("#services").on("mouseenter", "tr", function () {
+                $(this).addClass("danger");
+            });
+            //modal_stock高亮事件
+            $("#services").on("mouseleave", "tr", function () {
+                $(this).removeClass("danger");
+            });
+            //modal_stock点击事件
+            $("#services").on("dblclick", "tr", function () {
+                // item_id 放到stock_id 的v里面
+                let item_id = $(this).find("td:eq(0)").text();
+                let item_name = $(this).find("td:eq(1)").text();
+                let item_standard = $(this).find("td:eq(2)").text();
+                let item_unit = $(this).find("td:eq(3)").text();
+                let item_salesprice = $(this).find("td:eq(4)").text();
+
+                $("#serviceModal").modal("hide");
+                // 给输入框赋值
+                let input_item_id = $("#" + 'inputrows-' + loop_index + '-item_id');
+                input_item_id.val(item_id);
+                let input_item_name = $("#" + 'inputrows-' + loop_index + '-item_name');
+                input_item_name.val(item_name);
+                let input_item_standard = $("#" + 'inputrows-' + loop_index + '-item_standard');
+                input_item_standard.val(item_standard);
+                let input_item_unit = $("#" + 'inputrows-' + loop_index + '-item_unit');
+                input_item_unit.val(item_unit);
+                let input_item_salesprice = $("#" + 'inputrows-' + loop_index + '-item_salesprice');
+                input_item_salesprice.val(item_salesprice);
+                //还有类型hidden需要赋值
+                let input_item_type = $("#" + 'inputrows-' + loop_index + '-item_type');
+                input_item_type.val('1');
+            });
+
+
 
             //数量监听事件
             $("#inputs").on("change", ".qty", function () {
@@ -639,43 +793,6 @@
                 if ($("#discount").val() != "" && $("#payment").val() != "") {
                     $("#debt").val(calcDebt());
                 }
-            });
-
-            //modal_stock高亮事件
-            $("#stocks").on("mouseenter", "tr", function () {
-                $(this).addClass("danger");
-            });
-            //modal_stock高亮事件
-            $("#stocks").on("mouseleave", "tr", function () {
-                $(this).removeClass("danger");
-            });
-            //modal_stock点击事件
-            $("#stocks").on("dblclick", "tr", function () {
-                // item_id 放到stock_id 的v里面
-                let item_id = $(this).find("td:first").attr("v");
-                let item_name = $(this).find("td:eq(1)").text();
-                let item_standard = $(this).find("td:eq(2)").text();
-                let item_unit = $(this).find("td:eq(3)").text();
-                let costprice = $(this).find("td:eq(4)").text();
-                let ostore = $(this).find("td:eq(6)").text();
-                let stock_qty = $(this).find("td:eq(7)").text();
-
-                $("#stockModal").modal("hide");
-                // 给输入框赋值
-                let input_item_id = $("#" + 'inputrows-' + loop_index + '-item_id');
-                input_item_id.val(item_id);
-                let input_item_name = $("#" + 'inputrows-' + loop_index + '-item_name');
-                input_item_name.val(item_name);
-                let input_item_standard = $("#" + 'inputrows-' + loop_index + '-item_standard');
-                input_item_standard.val(item_standard);
-                let input_item_unit = $("#" + 'inputrows-' + loop_index + '-item_unit');
-                input_item_unit.val(item_unit);
-                let input_costprice = $("#" + 'inputrows-' + loop_index + '-costprice');
-                input_costprice.val(costprice);
-                let input_ostore = $("#" + 'inputrows-' + loop_index + '-ostore');
-                input_ostore.val(ostore);
-                let input_stock_qty = $("#" + 'inputrows-' + loop_index + '-stock_qty');
-                input_stock_qty.val(stock_qty);
             });
 
             {#Prefilters是一个预过滤器，在每个请求之前被发送和$.ajax()处理它们前处理。#}
