@@ -20,8 +20,12 @@ function modal_customer(appendId, url, key) {
                     '<td>' + data[i].pnumber + '</td>' +
                     '<td>' + data[i].brand + '</td>' +
                     '<td>' + data[i].email + '</td>' +
+                    '<td>' + data[i].vip_name + '</td>' +
                     '<td>' + data[i].freq + '</td>' +
-                    '<td>' + data[i].summary + '</td></tr>'
+                    '<td>' + data[i].summary + '</td>' +
+                    '<td class="hide">' + data[i].vip_id + '</td>' +
+                    '<td class="hide">' + data[i].vip_balance + '</td>' +
+                    '<td class="hide">' + data[i].vip_score + '</td></tr>'
                 );
             }
         },

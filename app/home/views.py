@@ -400,7 +400,9 @@ def cus_vip_deposit(vip_id=None):
 def modal_customer():
     # 获取客户弹出框数据
     key = request.args.get('key', '')
-    customers = Customer.query
+    customers = Customer.query.outerjoin(
+        Vip, Customer.vip_id == Vip.id
+    )
     # 条件查询
     if key:
         # 姓名/手机/车牌/邮箱
@@ -422,6 +424,15 @@ def modal_customer():
     # }
     data = []
     for v in customers:
+        vip_id = ''
+        vip_name = ''
+        vip_balance = ''
+        vip_score = ''
+        if v.vip:
+            vip_id = v.vip_id
+            vip_name = v.vip.name
+            vip_balance = v.vip.balance
+            vip_score = v.vip.score
         data.append(
             {
                 "id": v.id,
@@ -432,6 +443,10 @@ def modal_customer():
                 "email": v.email,
                 "freq": v.freq,
                 "summary": v.freq,
+                "vip_id": vip_id,
+                "vip_name": vip_name,
+                "vip_balance": vip_balance,
+                "vip_score": vip_score,
             }
         )
     res = {

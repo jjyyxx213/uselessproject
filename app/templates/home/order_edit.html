@@ -378,6 +378,7 @@
                                     <th> 车牌</th>
                                     <th> 车型</th>
                                     <th> 邮箱</th>
+                                    <th> 会员卡</th>
                                     <th> 到店次数</th>
                                     <th> 累计消费</th>
                                 </tr>
@@ -702,32 +703,34 @@
             });
             //modal_stock点击事件
             $("#customers").on("dblclick", "tr", function () {
-                // todo 会员选择还要优化
-                let id = $(this).find("td:first").attr("v");
+                // 填充输入框
+                let id = $(this).find("td:first").text();
                 let name = $(this).find("td:eq(1)").text();
-                let item_standard = $(this).find("td:eq(2)").text();
-                let item_unit = $(this).find("td:eq(3)").text();
-                let item_salesprice = $(this).find("td:eq(4)").text();
-                let store = $(this).find("td:eq(5)").text();
+                let phone = $(this).find("td:eq(2)").text();
+                let pnumber = $(this).find("td:eq(3)").text();
+                let brand = $(this).find("td:eq(4)").text();
+                let email = $(this).find("td:eq(5)").text();
+                let vip_name = $(this).find("td:eq(6)").text();
+                let freq = $(this).find("td:eq(7)").text();
+                let summary = $(this).find("td:eq(8)").text();
+                let vip_id = $(this).find("td:eq(9)").text();
+                let vip_balance = $(this).find("td:eq(10)").text();
+                let vip_score = $(this).find("td:eq(11)").text();
 
-                $("#stockModal").modal("hide");
+                $("#customerModal").modal("hide");
                 // 给输入框赋值
-                let input_item_id = $("#" + 'inputrows-' + loop_index + '-item_id');
-                input_item_id.val(item_id);
-                let input_item_name = $("#" + 'inputrows-' + loop_index + '-item_name');
-                input_item_name.val(item_name);
-                let input_item_standard = $("#" + 'inputrows-' + loop_index + '-item_standard');
-                input_item_standard.val(item_standard);
-                let input_item_unit = $("#" + 'inputrows-' + loop_index + '-item_unit');
-                input_item_unit.val(item_unit);
-                let input_item_salesprice = $("#" + 'inputrows-' + loop_index + '-item_salesprice');
-                input_item_salesprice.val(item_salesprice);
-                //还有类型和仓库两个hidden需要赋值
-                let input_item_type = $("#" + 'inputrows-' + loop_index + '-item_type');
-                input_item_type.val('0');
-                let input_store = $("#" + 'inputrows-' + loop_index + '-store');
-                input_store.val(store);
+                $("#" + 'customer_id').val(id);
+                $("#" + 'customer_name').val(name);
+                $("#" + 'customer_phone').val(phone);
+                $("#" + 'customer_pnumber').val(pnumber);
+                $("#" + 'customer_brand').val(brand);
+                $("#" + 'vip_id').val(vip_id);
+                $("#" + 'vip_name').val(vip_name);
+                $("#" + 'vip_balance').val(vip_balance);
+                $("#" + 'vip_score').val(vip_score);
             });
+
+            /////////////////////////////分割两个模态框
 
             //定义loop_index,获取所选行数据
             let loop_index;
