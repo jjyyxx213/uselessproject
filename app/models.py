@@ -430,7 +430,7 @@ class Customer(db.Model):
     # 所属客户经理
     user_id = db.Column(db.Integer, db.ForeignKey('tb_user.id'))
     # 到店次数
-    freq = db.Column(db.Integer, default=1)
+    freq = db.Column(db.Integer, default=0)
     # 累计消费
     summary = db.Column(db.Float, default=0)
     # 欠款 20181011 增加

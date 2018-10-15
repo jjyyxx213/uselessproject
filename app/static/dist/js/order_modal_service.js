@@ -2,7 +2,7 @@
 * 订单库存选择模态框
 * appendId: 表格ID
 * */
-function order_model_service(appendId, url, key) {
+function order_modal_service(appendId, url, key) {
     $.ajax({
         url: url,
         type: "GET",

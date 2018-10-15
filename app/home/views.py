@@ -396,6 +396,50 @@ def cus_vip_deposit(vip_id=None):
         return redirect(url_for('home.customer_list'))
     return render_template('home/cus_vip_deposit.html', obj_vip=obj_vip, form=form)
 
+@home.route('/modal/customer', methods=['GET'])
+def modal_customer():
+    # 获取客户弹出框数据
+    key = request.args.get('key', '')
+    customers = Customer.query
+    # 条件查询
+    if key:
+        # 姓名/手机/车牌/邮箱
+        customers = customers.filter(
+            or_(Customer.name.ilike('%' + key + '%'),
+                Customer.phone.ilike('%' + key + '%'),
+                Customer.pnumber.ilike('%' + key + '%'),
+                Customer.email.ilike('%' + key + '%'),
+                )
+        )
+    customers = customers.order_by(Customer.name.asc()).limit(current_app.config['POSTS_PER_PAGE']).all()
+    # 返回的数据格式为
+    # {
+    # "pages": 1,
+    # "data": [
+    #         {"id": "1",
+    #         "name": "xx"}
+    #         ]
+    # }
+    data = []
+    for v in customers:
+        data.append(
+            {
+                "id": v.id,
+                "name": v.name,
+                "phone": v.phone,
+                "pnumber": v.pnumber,
+                "brand": v.brand,
+                "email": v.email,
+                "freq": v.freq,
+                "summary": v.freq,
+            }
+        )
+    res = {
+        "key": key,
+        "data": data,
+    }
+    return dumps(res)
+
 @home.route('/modal/item', methods=['GET'])
 def modal_item():
     # 获取商品弹出框数据
