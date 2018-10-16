@@ -1,0 +1,965 @@
+{% extends 'base.html' %}
+{% block css %}
+    <style>
+        .first-padding-defined {
+            padding-left: 10px;
+            padding-right: 0px;
+        }
+
+        .padding-defined {
+            padding-left: 10px;
+            padding-right: 0px;
+        }
+
+        .margin-defined {
+            margin-top: 10px;
+            margin-left: 10px;
+        }
+    </style>
+{% endblock %}
+{% block page_content %}
+    <section class="content-header">
+        <h1> 门店管理系统</h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> 收银管理</a></li>
+            <li><a href="{{ url_for('home.order_list') }}"> 收银单列表</a></li>
+            <li class="active"> 维护</li>
+        </ol>
+    </section>
+    <section class="content" id="showcontent">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <form role="form" method="post">
+                        <!--启动CSRF-->
+                        {{ form.hidden_tag() }}
+                        <div class="box-header with-border">
+                            <h3 class="box-title"> 收银单 {% if porder %}- {{ porder.id }} {% endif %}</h3>
+                            <div class="pull-right">总行数：<strong id="cnt">{{ form_count }}</strong>/<strong>20</strong></div>
+                            <div class="row" style="margin-top: 5px; margin-bottom: 5px;">
+                                <div class="col-md-2 first-padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">客户</span>
+                                        {{ form.customer_id }}
+                                        {{ form.customer_name }}
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="button" name="customer_choice" style="border-radius: 0">
+                                                ...
+                                            </button>
+                                        </span>
+                                    </div>
+                                    {% for err in form.customer_name.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-2 padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">手机</span>
+                                        {{ form.customer_phone }}
+                                    </div>
+                                    {% for err in form.customer_phone.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-2 padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">车牌</span>
+                                        {{ form.customer_pnumber }}
+                                    </div>
+                                    {% for err in form.customer_pnumber.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-5 padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">车型</span>
+                                    {{ form.customer_brand }}
+                                    </div>
+                                    {% for err in form.customer_brand.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="row" style="margin-bottom: 5px">
+                                <div class="col-md-2 padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">会员</span>
+                                        {{ form.vip_id }}
+                                    </div>
+                                    {% for err in form.vip_id.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-2 padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">卡型</span>
+                                    {{ form.vip_name }}
+                                    </div>
+                                    {% for err in form.vip_name.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-2 padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">余额</span>
+                                    {{ form.vip_balance }}
+                                    </div>
+                                    {% for err in form.vip_balance.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-2 padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">积分</span>
+                                        {{ form.vip_score }}
+                                    </div>
+                                    {% for err in form.vip_score.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-3 padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">备注</span>
+                                    {{ form.remarks }}
+                                    </div>
+                                    {% for err in form.remarks.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div class="row" style="margin-bottom: 5px">
+                                <div class="col-md-3 padding-defined">
+                                    <label style="color: red">*</label>
+                                    <label class="small"> 商品/服务</label>
+                                </div>
+                                <div class="col-md-1 padding-defined">
+                                    <label class="small"> 单位</label>
+                                </div>
+                                <div class="col-md-1 padding-defined">
+                                    <label class="small"> 售价</label>
+                                </div>
+                                <div class="col-md-1 padding-defined">
+                                    <label class="small"> 折扣价</label>
+                                </div>
+                                <div class="col-md-1 padding-defined">
+                                    <label class="small"> 数量</label>
+                                </div>
+                                <div class="col-md-3 padding-defined">
+                                    <label class="small"> 工作人员</label>
+                                </div>
+                                <div class="col-md-1 padding-defined">
+                                    <label class="small"> 合计</label>
+                                </div>
+                                <div class="col-md-1" style="padding-left: 5px">
+                                    <button type="button" class="btn btn-box-tool" data-widget="collapse" id="row-plus">
+                                        <i class="fa fa-plus-square fa-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="inputs">
+                                {% for v in form.inputrows %}
+                                    <div class="row" style="margin-bottom: 0px">
+                                        <div class="col-md-3 padding-defined">
+                                            <div class="input-group">
+                                                <input id="inputrows-{{ loop.index0 }}-item_id"
+                                                       name="inputrows-{{ loop.index0 }}-item_id" type="hidden"
+                                                       value="{{ v.data.item_id or '' }}">
+                                                <input id="inputrows-{{ loop.index0 }}-item_type"
+                                                       name="inputrows-{{ loop.index0 }}-item_type" type="hidden"
+                                                       value="{{ v.data.item_type or '' }}">
+                                                <input id="inputrows-{{ loop.index0 }}-store"
+                                                       name="inputrows-{{ loop.index0 }}-store" type="hidden"
+                                                       value="{{ v.data.store or '' }}">
+                                                <input id="inputrows-{{ loop.index0 }}-item_name" readonly
+                                                       name="inputrows-{{ loop.index0 }}-item_name" class="form-control"
+                                                       placeholder="请选择商品" type="text"
+                                                       value="{{ v.data.item_name or '' }}">
+                                                <span class="input-group-btn">
+                                                <button class="btn btn-default" type="button"
+                                                        loop_index="{{ loop.index0 }}" name="stock_choice"> 物</button>
+                                                </span>
+                                                <span class="input-group-btn">
+                                                <button class="btn btn-default" type="button"
+                                                        loop_index="{{ loop.index0 }}" name="service_choice"> 服</button>
+                                                </span>
+                                            </div>
+                                            {% for err in v.item_name.errors %}
+                                                <div class="col-md-12">
+                                                    <p style="color: red" class="small">{{ err }}</p>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-md-1 padding-defined">
+                                            <div class="form-group">
+                                                <input id="inputrows-{{ loop.index0 }}-item_unit"
+                                                       name="inputrows-{{ loop.index0 }}-item_unit"
+                                                       class="form-control"
+                                                       placeholder="单位" type="text"
+                                                       value="{{ v.data.item_unit or '' }}"
+                                                       readonly>
+                                            </div>
+                                            {% for err in v.item_unit.errors %}
+                                                <div class="col-md-12">
+                                                    <p style="color: red" class="small">{{ err }}</p>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-md-1 padding-defined">
+                                            <div class="form-group">
+                                                <input id="inputrows-{{ loop.index0 }}-item_salesprice"
+                                                       name="inputrows-{{ loop.index0 }}-item_salesprice"
+                                                       class="form-control"
+                                                       placeholder="售价" type="text"
+                                                       value="{{ v.data.item_salesprice or '' }}"
+                                                       readonly>
+                                            </div>
+                                            {% for err in v.item_salesprice.errors %}
+                                                <div class="col-md-12">
+                                                    <p style="color: red" class="small">{{ err }}</p>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-md-1 padding-defined">
+                                            <div class="form-group">
+                                                <input id="inputrows-{{ loop.index0 }}-discount"
+                                                       name="inputrows-{{ loop.index0 }}-discount"
+                                                       class="form-control costprice"
+                                                       placeholder="折扣价" type="text" readonly
+                                                       value="{{ v.data.costprice or '' }}">
+                                            </div>
+                                            {% for err in v.discount.errors %}
+                                                <div class="col-md-12">
+                                                    <p style="color: red" class="small">{{ err }}</p>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-md-1 padding-defined">
+                                            <div class="form-group">
+                                                <input id="inputrows-{{ loop.index0 }}-qty"
+                                                       name="inputrows-{{ loop.index0 }}-qty" class="form-control qty"
+                                                       placeholder="数量" type="text" value="{{ v.data.qty or '' }}">
+                                            </div>
+                                            {% for err in v.qty.errors %}
+                                                <div class="col-md-12">
+                                                    <p style="color: red" class="small">{{ err }}</p>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-md-3 padding-defined">
+                                            <select class="form-control select2 users-choice"
+                                                    id="inputrows-{{ loop.index0 }}-users"
+                                                    name="inputrows-{{ loop.index0 }}-users"
+                                                    data-placeholder="请选择工作人员(多选)" multiple
+                                                    v="{{ v.data.users or '' }}">
+                                            </select>
+                                            {% for err in v.users.errors %}
+                                                <div class="col-md-12">
+                                                    <p style="color: red" class="small">{{ err }}</p>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-md-1 padding-defined">
+                                            <div class="form-group">
+                                                <input id="inputrows-{{ loop.index0 }}-rowamount"
+                                                       name="inputrows-{{ loop.index0 }}-rowamount"
+                                                       class="form-control rowamount" readonly
+                                                       placeholder="合计" type="text"
+                                                       value="{{ v.data.rowamount or '' }}">
+                                            </div>
+                                            {% for err in v.rowamount.errors %}
+                                                <div class="col-md-12">
+                                                    <p style="color: red" class="small">{{ err }}</p>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-md-1" style="padding-left: 5px">
+                                            <button type="button" class="btn btn-box-tool" data-widget="collapse"
+                                                    name="row-minus">
+                                                <i class="fa fa-minus-square fa-lg" aria-hidden="true"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="row" style="margin-bottom: 0px">
+                                <div class="col-md-7 padding-defined pull-left">
+                                    <div class="input-group">
+                                        <span class="input-group-btn">
+                                                <button class="btn btn-default" type="button"> 应付金额</button>
+                                        </span>
+                                        {{ form.amount }}
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="button"> 优惠后金额</button>
+                                        </span>
+                                        {{ form.discount }}
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="button"> 本次付款</button>
+                                        </span>
+                                        {{ form.payment }}
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="button"> 本次欠款</button>
+                                        </span>
+                                        {{ form.debt }}
+                                    </div>
+                                </div>
+                                <div class="col-md-5 padding-defined pull-left">
+                                        {% for err in form.discount.errors %}
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        {% endfor %}
+                                        {% for err in form.payment.errors %}
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        {% endfor %}
+                                        {% for err in form.debt.errors %}
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        {% endfor %}
+                                </div>
+                            </div>
+                            <div class="box-footer">
+                                {{ form.submit }}
+                                {{ form.type_switch }}
+                                <input name="switch" id="switch" type="checkbox" data-size="small">
+                                <a href="{{ url_for('home.order_list') }}" class="btn btn-default pull-right"
+                                   role="button"> 返回</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- 客户选择模态框!-->
+        <div class="modal fade" id="customerModal" tabindex="-1" role="dialog" aria-labelledby="customerModalLabel">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                        <h4 class="modal-title" id="customerModalLabel"> 客户选择</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="input-group input-group-sm pull-right" style="width: 300px;">
+                                <input type="text" name="table_search" class="form-control pull-right"
+                                       placeholder="请输入关键字...  (姓名/手机/车牌/邮箱)" id="customer_search">
+                                <div class="input-group-btn">
+                                    <button type="submit" class="btn btn-default" id="do_customer_search">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                <tr>
+                                    <th> 编号</th>
+                                    <th> 姓名</th>
+                                    <th> 手机</th>
+                                    <th> 车牌</th>
+                                    <th> 车型</th>
+                                    <th> 邮箱</th>
+                                    <th> 会员卡</th>
+                                    <th> 到店次数</th>
+                                    <th> 累计消费</th>
+                                </tr>
+                                </thead>
+                                <tbody id="customers">
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal"> 关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 库存商品选择模态框!-->
+        <div class="modal fade" id="stockModal" tabindex="-1" role="dialog" aria-labelledby="stockModalLabel">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                        <h4 class="modal-title" id="stockModalLabel"> 商品选择</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="input-group input-group-sm pull-right" style="width: 300px;">
+                                <input type="text" name="table_search" class="form-control pull-right"
+                                       placeholder="请输入关键字...  (名称/规格)" id="stock_search">
+                                <div class="input-group-btn">
+                                    <button type="submit" class="btn btn-default" id="do_stock_search">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                <tr>
+                                    <th> 编号</th>
+                                    <th> 名称</th>
+                                    <th> 规格</th>
+                                    <th> 单位</th>
+                                    <th> 售价</th>
+                                    <th> 仓库</th>
+                                    <th> 库存数量</th>
+                                    <th> 商品类型</th>
+                                </tr>
+                                </thead>
+                                <tbody id="stocks">
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal"> 关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 服务选择模态框!-->
+        <div class="modal fade" id="serviceModal" tabindex="-1" role="dialog" aria-labelledby="serviceModalLabel">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                        <h4 class="modal-title" id="serviceModalLabel"> 服务选择</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="input-group input-group-sm pull-right" style="width: 300px;">
+                                <input type="text" name="table_search" class="form-control pull-right"
+                                       placeholder="请输入关键字...  (名称/规格)" id="service_search">
+                                <div class="input-group-btn">
+                                    <button type="submit" class="btn btn-default" id="do_service_search">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                <tr>
+                                    <th> 编号</th>
+                                    <th> 名称</th>
+                                    <th> 规格</th>
+                                    <th> 单位</th>
+                                    <th> 售价</th>
+                                    <th> 服务类型</th>
+                                </tr>
+                                </thead>
+                                <tbody id="services">
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal"> 关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block js %}
+    <script>
+        $(document).ready(function () {
+            $("#g-order").addClass("active");
+            $("#g-order-list").addClass("active");
+            // 弹出提示初始化
+            $(function () {
+                $('[data-toggle="tooltip"]').tooltip()
+            });
+            // switch
+            $('#switch').bootstrapSwitch(
+                {
+                    onText: "结算",
+                    offText: "暂存",
+                    onColor: "success",
+                    offColor: "warning",
+                    size: "small",
+                    onSwitchChange: function (event, state) {
+                        if (state==true){
+                            $("#type_switch").val('1');
+                        } else {
+                            $("#type_switch").val('0');
+                        }
+                    }
+                }
+            );
+            // 默认为保存
+            $('#switch').bootstrapSwitch('state',true);
+
+            // 下拉框设置
+            $('.users-choice').select2(
+                {
+                    language: "zh-CN",
+                    allowClear: true,
+                    ajax: {
+                        url: "{{ url_for('home.select_user') }}",
+                        dataType: 'json',
+                        delay: 250,
+                        data: function (params) {
+                          return {
+                            q: params.term,
+                          };
+                        },
+                        processResults: function (data) {
+                          return {
+                            results: data
+                          };
+                        },
+                        cache: true
+                      },
+                }
+            );
+
+            // 动态加载inputrows
+            let MaxInputs = 20; //maximum input boxes allowed
+            let InputsWrapper = $("#inputs"); //Input boxes wrapper ID
+            let id_ins = {{ form_count }}; //initlal text box count
+            let row_ins = {{ form_count }};
+            //只有一个+，可以通过ID获取
+            $('#row-plus').on('click', (function (e) //on add input button click
+            {
+                if (row_ins < MaxInputs) //max input box allowed
+                {
+                    InputsWrapper.append('' +
+                        '<div class="row" style="margin-bottom: 0px">\n' +
+                        '                                    <div class="col-md-3 padding-defined">\n' +
+                        '                                        <div class="input-group">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-item_id"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-item_id" type="hidden">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-item_type"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-item_type" type="hidden">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-store"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-store" type="hidden">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-item_name"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-item_name" class="form-control" ' +
+                        '                                                   placeholder="请选择商品" type="text" readonly>' +
+                        '                                            <span class="input-group-btn">\n' +
+                        '                                                <button class="btn btn-default" type="button" loop_index="' + id_ins + '" name="stock_choice"> 物</button>\n' +
+                        '                                            </span>\n' +
+                        '                                            <span class="input-group-btn">\n' +
+                        '                                                <button class="btn btn-default" type="button" loop_index="' + id_ins + '" name="service_choice"> 服</button>\n' +
+                        '                                            </span>\n' +
+                        '                                        </div>\n' +
+                        '                                    </div>\n' +
+                        '                                    <div class="col-md-1 padding-defined">\n' +
+                        '                                        <div class="form-group">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-item_unit"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-item_unit"\n' +
+                        '                                                   class="form-control"\n' +
+                        '                                                   placeholder="单位" type="text"\n' +
+                        '                                                   readonly>\n' +
+                        '                                        </div>\n' +
+                        '                                    </div>\n' +
+                        '                                    <div class="col-md-1 padding-defined">\n' +
+                        '                                        <div class="form-group">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-item_salesprice"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-item_salesprice" class="form-control"\n' +
+                        '                                                   placeholder="售价" type="text" readonly>' +
+                        '                                        </div>\n' +
+                        '                                    </div>\n' +
+                        '                                    <div class="col-md-1 padding-defined">\n' +
+                        '                                        <div class="form-group">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-discount"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-discount" class="form-control"\n' +
+                        '                                                   placeholder="折扣价" type="text" readonly>' +
+                        '                                        </div>\n' +
+                        '                                    </div>\n' +
+                        '                                    <div class="col-md-1 padding-defined">\n' +
+                        '                                        <div class="form-group">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-qty"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-qty" class="form-control qty"\n' +
+                        '                                                   placeholder="数量" type="text">\n' +
+                        '                                        </div>\n' +
+                        '                                    </div>\n' +
+                        '                                    <div class="col-md-3 padding-defined">\n' +
+                        '                                        <div class="form-group">\n' +
+                                '                                    <select class="form-control select2 users-choice"\n' +
+                                '                                            id="inputrows-' + id_ins + '-users"\n' +
+                                '                                            name="inputrows-' + id_ins + '-users"\n' +
+                                '                                            multiple data-placeholder="请选择工作人员(多选)">\n' +
+                                '                                    </select>\n' +
+                        '                                        </div>\n' +
+                        '                                    </div>\n' +
+                        '                                    <div class="col-md-1 padding-defined">\n' +
+                        '                                        <div class="form-group">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-rowamount"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-rowamount"\n' +
+                        '                                                   class="form-control rowamount" readonly\n' +
+                        '                                                   placeholder="合计" type="text">\n' +
+                        '                                        </div>\n' +
+                        '                                    </div>\n' +
+                        '                                    <div class="col-md-1" style="padding-left: 5px">\n' +
+                        '                                        <button type="button" class="btn btn-box-tool" data-widget="collapse"\n' +
+                        '                                                name="row-minus">\n' +
+                        '                                            <i class="fa fa-minus-square fa-lg" aria-hidden="true"></i>\n' +
+                        '                                        </button>\n' +
+                        '                                    </div>\n' +
+                        '                                </div>');
+                    // 动态添加行后，要处理select2下拉框初始化
+                    $("#" + "inputrows-" + id_ins + "-users").select2({
+                            language: "zh-CN",
+                            allowClear: true,
+                            ajax: {
+                                url: "{{ url_for('home.select_user') }}",
+                                dataType: 'json',
+                                delay: 250,
+                                data: function (params) {
+                                  return {
+                                    q: params.term,
+                                  };
+                                },
+                                processResults: function (data) {
+                                  return {
+                                    results: data
+                                  };
+                                },
+                                cache: true
+                              },
+                    });
+                    id_ins++; //这个要放到select2监听后面，否则id错误
+                    row_ins++;
+                    $("#cnt").text(row_ins)//显示总行数
+                }
+                return false;
+            }));
+            // 监听函数，是在网页加载的时候就指定了对象。通过jQuery动态生成的元素是没办法匹配的，因此要找到原来加载的元素通过委托的方式处理
+            $("#inputs").on("click", "button[name='row-minus']", function () {
+                if (row_ins > 1) {
+                    $(this).parent('div').parent('div').remove(); //remove text box
+                    row_ins--; //decrement textbox
+                    $("#cnt").text(row_ins) //显示总行数
+                }
+                return false;
+            });
+
+            //客户弹出模态框选择物料
+            $("button[name='customer_choice']").on("click", function () {
+                let appendId = $('#customers');
+                let url = "{{ url_for('home.modal_customer') }}";
+                let key = $("#customer_search").val();
+                modal_customer(appendId, url, key);
+                //显示modal
+                $('#customerModal').modal();
+            });
+            //模态框模糊查询
+            $("#do_customer_search").click(function () {
+                let appendId = $('#customers');
+                let url = "{{ url_for('home.modal_customer') }}";
+                let key = $("#customer_search").val();
+                modal_customer(appendId, url, key);
+            });
+            $("#customer_search").bind("keyup", function (event) {
+                if (event.keyCode == "13") {
+                    //回车执行查询
+                    let appendId = $('#customers');
+                    let url = "{{ url_for('home.modal_customer') }}";
+                    let key = $("#customer_search").val();
+                    modal_customer(appendId, url, key);
+                }
+            });
+
+            //modal_stock高亮事件
+            $("#customers").on("mouseenter", "tr", function () {
+                $(this).addClass("danger");
+            });
+            //modal_stock高亮事件
+            $("#customers").on("mouseleave", "tr", function () {
+                $(this).removeClass("danger");
+            });
+            //modal_stock点击事件
+            $("#customers").on("dblclick", "tr", function () {
+                // 填充输入框
+                let id = $(this).find("td:first").text();
+                let name = $(this).find("td:eq(1)").text();
+                let phone = $(this).find("td:eq(2)").text();
+                let pnumber = $(this).find("td:eq(3)").text();
+                let brand = $(this).find("td:eq(4)").text();
+                let email = $(this).find("td:eq(5)").text();
+                let vip_name = $(this).find("td:eq(6)").text();
+                let freq = $(this).find("td:eq(7)").text();
+                let summary = $(this).find("td:eq(8)").text();
+                let vip_id = $(this).find("td:eq(9)").text();
+                let vip_balance = $(this).find("td:eq(10)").text();
+                let vip_score = $(this).find("td:eq(11)").text();
+
+                $("#customerModal").modal("hide");
+                // 给输入框赋值
+                $("#" + 'customer_id').val(id);
+                $("#" + 'customer_name').val(name);
+                $("#" + 'customer_phone').val(phone);
+                $("#" + 'customer_pnumber').val(pnumber);
+                $("#" + 'customer_brand').val(brand);
+                $("#" + 'vip_id').val(vip_id);
+                $("#" + 'vip_name').val(vip_name);
+                $("#" + 'vip_balance').val(vip_balance);
+                $("#" + 'vip_score').val(vip_score);
+            });
+
+            /////////////////////////////分割两个模态框
+
+            //定义loop_index,获取所选行数据
+            let loop_index;
+            //库存弹出模态框选择物料
+            $("#inputs").on("click", "button[name='stock_choice']", function () {
+                let appendId = $('#stocks');
+                let url = "{{ url_for('home.modal_stock') }}";
+                let key = $("#stock_search").val();
+                order_modal_stock(appendId, url, key);
+                //显示modal
+                $('#stockModal').modal();
+                // 获取loop_index
+                loop_index = $(this).attr('loop_index');
+            });
+            //模态框模糊查询
+            $("#do_stock_search").click(function () {
+                let appendId = $('#stocks');
+                let url = "{{ url_for('home.modal_stock') }}";
+                let key = $("#stock_search").val();
+                order_modal_stock(appendId, url, key);
+            });
+            $("#stock_search").bind("keyup", function (event) {
+                if (event.keyCode == "13") {
+                    //回车执行查询
+                    let appendId = $('#stocks');
+                    let url = "{{ url_for('home.modal_stock') }}";
+                    let key = $("#stock_search").val();
+                    order_modal_stock(appendId, url, key);
+                }
+            });
+
+            //modal_stock高亮事件
+            $("#stocks").on("mouseenter", "tr", function () {
+                $(this).addClass("danger");
+            });
+            //modal_stock高亮事件
+            $("#stocks").on("mouseleave", "tr", function () {
+                $(this).removeClass("danger");
+            });
+            //modal_stock点击事件
+            $("#stocks").on("dblclick", "tr", function () {
+                // item_id 放到stock_id 的v里面
+                let item_id = $(this).find("td:first").attr("v");
+                let item_name = $(this).find("td:eq(1)").text();
+                let item_standard = $(this).find("td:eq(2)").text();
+                let item_unit = $(this).find("td:eq(3)").text();
+                let item_salesprice = $(this).find("td:eq(4)").text();
+                let store = $(this).find("td:eq(5)").text();
+
+                $("#stockModal").modal("hide");
+                // 给输入框赋值
+                let input_item_id = $("#" + 'inputrows-' + loop_index + '-item_id');
+                input_item_id.val(item_id);
+                let input_item_name = $("#" + 'inputrows-' + loop_index + '-item_name');
+                input_item_name.val(item_name);
+                let input_item_standard = $("#" + 'inputrows-' + loop_index + '-item_standard');
+                input_item_standard.val(item_standard);
+                let input_item_unit = $("#" + 'inputrows-' + loop_index + '-item_unit');
+                input_item_unit.val(item_unit);
+                let input_item_salesprice = $("#" + 'inputrows-' + loop_index + '-item_salesprice');
+                input_item_salesprice.val(item_salesprice);
+                //还有类型和仓库两个hidden需要赋值
+                let input_item_type = $("#" + 'inputrows-' + loop_index + '-item_type');
+                input_item_type.val('0');
+                let input_store = $("#" + 'inputrows-' + loop_index + '-store');
+                input_store.val(store);
+            });
+
+            /////////////////////////////分割两个模态框
+
+            $("#inputs").on("click", "button[name='service_choice']", function () {
+                let appendId = $('#services');
+                let url = "{{ url_for('home.modal_service') }}";
+                let key = $("#service_search").val();
+                order_modal_service(appendId, url, key);
+                //显示modal
+                $('#serviceModal').modal();
+                // 获取loop_index
+                loop_index = $(this).attr('loop_index');
+            });
+            //模态框模糊查询
+            $("#do_service_search").click(function () {
+                let appendId = $('#services');
+                let url = "{{ url_for('home.modal_service') }}";
+                let key = $("#service_search").val();
+                order_modal_service(appendId, url, key);
+            });
+            $("#stock_search").bind("keyup", function (event) {
+                if (event.keyCode == "13") {
+                    //回车执行查询
+                    let appendId = $('#services');
+                    let url = "{{ url_for('home.modal_service') }}";
+                    let key = $("#service_search").val();
+                    order_modal_service(appendId, url, key);
+                }
+            });
+
+            //modal_stock高亮事件
+            $("#services").on("mouseenter", "tr", function () {
+                $(this).addClass("danger");
+            });
+            //modal_stock高亮事件
+            $("#services").on("mouseleave", "tr", function () {
+                $(this).removeClass("danger");
+            });
+            //modal_stock点击事件
+            $("#services").on("dblclick", "tr", function () {
+                // item_id 放到stock_id 的v里面
+                let item_id = $(this).find("td:eq(0)").text();
+                let item_name = $(this).find("td:eq(1)").text();
+                let item_standard = $(this).find("td:eq(2)").text();
+                let item_unit = $(this).find("td:eq(3)").text();
+                let item_salesprice = $(this).find("td:eq(4)").text();
+
+                $("#serviceModal").modal("hide");
+                // 给输入框赋值
+                let input_item_id = $("#" + 'inputrows-' + loop_index + '-item_id');
+                input_item_id.val(item_id);
+                let input_item_name = $("#" + 'inputrows-' + loop_index + '-item_name');
+                input_item_name.val(item_name);
+                let input_item_standard = $("#" + 'inputrows-' + loop_index + '-item_standard');
+                input_item_standard.val(item_standard);
+                let input_item_unit = $("#" + 'inputrows-' + loop_index + '-item_unit');
+                input_item_unit.val(item_unit);
+                let input_item_salesprice = $("#" + 'inputrows-' + loop_index + '-item_salesprice');
+                input_item_salesprice.val(item_salesprice);
+                //还有类型hidden需要赋值
+                let input_item_type = $("#" + 'inputrows-' + loop_index + '-item_type');
+                input_item_type.val('1');
+            });
+
+
+
+            //数量监听事件
+            $("#inputs").on("change", ".qty", function () {
+                let input_qty = $(this); //数量输入框
+                let id = input_qty.attr('id'); //数量的id
+                let index = id.substr(id.indexOf('-') + 1, 1); //获取index
+                let input_costprice = $("#" + 'inputrows-' + index + '-costprice'); //单价输入框
+                let input_rowamount = $("#" + 'inputrows-' + index + '-rowamount'); //单行合计输入框
+                //数量/单价有值就进行计算
+                if (input_qty.val() != "" && input_costprice.val() != "") {
+                    //设置单行合计
+                    input_rowamount.val(calcRowAmount(index));
+                    //设置合计
+                    $("#amount").val(calcAmount(row_ins));
+                };
+            });
+            //单价监听事件
+            $("#inputs").on("change", ".costprice", function () {
+                let input_costprice = $(this); //单价输入框
+                let id = input_costprice.attr('id'); //单价的id
+                let index = id.substr(id.indexOf('-') + 1, 1); //获取index
+                let input_qty = $("#" + 'inputrows-' + index + '-qty'); //数量输入框
+                let input_rowamount = $("#" + 'inputrows-' + index + '-rowamount'); //单行合计输入框
+                //数量/单价有值就进行计算
+                if (input_qty.val() != "" && input_costprice.val() != "") {
+                    //设置单行合计
+                    input_rowamount.val(calcRowAmount(index));
+                    //设置合计
+                    $("#amount").val(calcAmount(row_ins));
+                };
+            });
+            //优惠后金额监听事件
+            $("#discount").on("change", function () {
+                if ($("#discount").val() != "" && $("#payment").val() != "") {
+                    $("#debt").val(calcDebt());
+                }
+            });
+            //本次退款监听事件
+            $("#payment").on("change", function () {
+                if ($("#discount").val() != "" && $("#payment").val() != "") {
+                    $("#debt").val(calcDebt());
+                }
+            });
+
+            {#Prefilters是一个预过滤器，在每个请求之前被发送和$.ajax()处理它们前处理。#}
+            {#options 是请求的选项#}
+            {#originalOptions 值作为提供给Ajax方法未经修改的选项，因此，没有ajaxSettings设置中的默认值#}
+            {#jqXHR 是请求的jqXHR对象#}
+            {#核心思想是维护一个队列，发送请求时，将请求加入队列，请求响应后，从队列中清除，这就保证了在任一时刻只能有一个同样的请求发送.#}
+            {#调用abort后jquery会执行error的方法，抛出abort的异常信息。#}
+            {#按钮每次点击都会向后端发送请求，下面的demo实现了多次点击按钮之后，只保证最后一次点击的请求能够成功。#}
+            let pendingRequests = {};
+            $.ajaxPrefilter(function (options, originalOptions, jqXHR) {
+                let key = options.url;
+                console.log(key);
+                console.log(!pendingRequests[key]);
+                if (!pendingRequests[key]) {
+                    pendingRequests[key] = jqXHR
+                } else {
+                    //jqXHR.abort();    //放弃后触发的提交
+                    pendingRequests[key].abort()   // 放弃先触发的提交
+                }
+
+                let complete = options.complete;
+                options.complete = function (jqXHR, textStatus) {
+                    pendingRequests[key] = null;
+                    if (jQuery.isFunction(complete)) {
+                        complete.apply(this, arguments)
+                    }
+                }
+            });
+        });
+
+        // 计算每行合计
+        function calcRowAmount(index) {
+            let rowamount = 0;
+            // 单价
+            let costprice = $("#inputrows-" + index + "-costprice").val();
+            // 数量
+            let qty = $("#inputrows-" + index + "-qty").val();
+            rowamount = parseFloat(costprice) * parseFloat(qty);
+            return rowamount;
+        }
+        // 计算应退金额
+        function calcAmount(count) {
+            let amount = 0;
+            let rowamount = 0;
+            for (let i = 0; i < count; i++) {
+                rowamount = $("#inputrows-" + i + "-rowamount").val();
+                amount += parseFloat(rowamount);
+            }
+            return amount;
+        }
+        // 计算欠款
+        function calcDebt() {
+                //本次欠款
+                return parseFloat($("#discount").val()) - parseFloat($("#payment").val());
+        }
+    </script>
+{% endblock %}

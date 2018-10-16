@@ -3,7 +3,7 @@ from . import home
 from flask import render_template, session, redirect, request, url_for, flash, current_app
 from forms import LoginForm, PwdForm, CustomerForm, CusVipForm, CusVipDepositForm, StockBuyForm, StockBuyListForm, StockBuyDebtForm, \
     StockOutListForm, StockOutForm, StockAllotListForm, StockAllotForm, StockLossListForm, StockLossForm, StockReturnListForm, \
-    StockReturnForm, StockReturnDebtForm
+    StockReturnForm, StockReturnDebtForm, OrderListForm, OrderForm
 from app.models import User, Userlog, Oplog, Item, Supplier, Customer, Stock, Porder, Podetail, Kvp, Mscard, Msdetail, Vip, Vipdetail, Order, Odetail
 from app import db
 from werkzeug.security import generate_password_hash
@@ -396,6 +396,65 @@ def cus_vip_deposit(vip_id=None):
         return redirect(url_for('home.customer_list'))
     return render_template('home/cus_vip_deposit.html', obj_vip=obj_vip, form=form)
 
+@home.route('/modal/customer', methods=['GET'])
+def modal_customer():
+    # 获取客户弹出框数据
+    key = request.args.get('key', '')
+    customers = Customer.query.outerjoin(
+        Vip, Customer.vip_id == Vip.id
+    )
+    # 条件查询
+    if key:
+        # 姓名/手机/车牌/邮箱
+        customers = customers.filter(
+            or_(Customer.name.ilike('%' + key + '%'),
+                Customer.phone.ilike('%' + key + '%'),
+                Customer.pnumber.ilike('%' + key + '%'),
+                Customer.email.ilike('%' + key + '%'),
+                )
+        )
+    customers = customers.order_by(Customer.name.asc()).limit(current_app.config['POSTS_PER_PAGE']).all()
+    # 返回的数据格式为
+    # {
+    # "pages": 1,
+    # "data": [
+    #         {"id": "1",
+    #         "name": "xx"}
+    #         ]
+    # }
+    data = []
+    for v in customers:
+        vip_id = ''
+        vip_name = ''
+        vip_balance = ''
+        vip_score = ''
+        if v.vip:
+            vip_id = v.vip_id
+            vip_name = v.vip.name
+            vip_balance = v.vip.balance
+            vip_score = v.vip.score
+        data.append(
+            {
+                "id": v.id,
+                "name": v.name,
+                "phone": v.phone,
+                "pnumber": v.pnumber,
+                "brand": v.brand,
+                "email": v.email,
+                "freq": v.freq,
+                "summary": v.freq,
+                "vip_id": vip_id,
+                "vip_name": vip_name,
+                "vip_balance": vip_balance,
+                "vip_score": vip_score,
+            }
+        )
+    res = {
+        "key": key,
+        "data": data,
+    }
+    return dumps(res)
+
 @home.route('/modal/item', methods=['GET'])
 def modal_item():
     # 获取商品弹出框数据
@@ -450,6 +509,95 @@ def modal_item():
     }
     return dumps(res)
 
+@home.route('/modal/service', methods=['GET'])
+def modal_service():
+    # 获取服务弹出框数据
+    key = request.args.get('key', '')
+    items = Item.query.filter(Item.valid == 1, Item.type == 1)
+    # 条件查询
+    if key:
+        # 库房/零件名称/类别/规格
+        items = items.filter(
+            or_(Item.name.ilike('%' + key + '%'),
+                Item.cate.ilike('%' + key + '%'),
+                Item.standard.ilike('%' + key + '%'),
+                )
+        )
+    items = items.order_by(Item.name.asc()).limit(current_app.config['POSTS_PER_PAGE']).all()
+    # 返回的数据格式为
+    # {
+    # "pages": 1,
+    # "data": [
+    #         {"id": "1",
+    #         "name": "xx"}
+    #         ]
+    # }
+    data = []
+    for v in items:
+        data.append(
+            {
+                "item_id": v.id,
+                "item_name": v.name,
+                "item_standard": v.standard,
+                "item_unit": v.unit,
+                "item_costprice": v.costprice,
+                "item_salesprice": v.salesprice,
+                "item_cate": v.cate,
+            }
+        )
+    res = {
+        "key": key,
+        "data": data,
+    }
+    return dumps(res)
+
+@home.route('/modal/stock', methods=['GET'])
+def modal_stock():
+    # 获取库存弹出框数据
+    key = request.args.get('key', '')
+    stocks = Stock.query.join(Item)
+    # 条件查询
+    if key:
+        # 库房/零件名称/类别/规格
+        stocks = stocks.filter(
+            or_(Stock.store.ilike('%' + key + '%'),
+                Item.name.ilike('%' + key + '%'),
+                Item.cate.ilike('%' + key + '%'),
+                Item.standard.ilike('%' + key + '%'),
+                )
+        )
+    stocks = stocks.order_by(Stock.item_id.asc(), Stock.store.asc()).limit(current_app.config['POSTS_PER_PAGE']).all()
+    # 返回的数据格式为
+    # {
+    # "pages": 1,
+    # "data": [
+    #         {"id": "1",
+    #         "name": "xx"}
+    #         ]
+    # }
+    data = []
+    for v in stocks:
+        data.append(
+            {
+                "id": v.id,
+                "item_id": v.item.id,
+                "item_name": v.item.name,
+                "item_standard": v.item.standard,
+                "item_unit": v.item.unit,
+                "item_costprice": v.item.costprice,
+                "item_salesprice": v.item.salesprice,
+                "costprice": v.costprice,
+                "store": v.store,
+                "qty": v.qty,
+                "item_cate": v.item.cate,
+            }
+        )
+    res = {
+        "key": key,
+        "data": data,
+    }
+    return dumps(res)
+
 @home.route('/store/get', methods=['GET', 'POST'])
 def store_get():
     # 获取库房分页清单
@@ -489,6 +637,19 @@ def store_get():
             "data": data,
         }
     return dumps(res)
+
+@home.route('/select/user', methods=["GET"])
+def select_user():
+    # 加载员工
+    users = []
+    for v in User.query.order_by(User.name).all():
+        users.append(
+            {
+                "id": v.id,
+                "text": v.name,
+            }
+        )
+    return dumps(users)
 
 @home.route('/stock/list', methods=['GET'])
 def stock_list():
@@ -756,52 +917,6 @@ def stock_buy_del(id=None):
     flash(u'采购单删除成功', 'ok')
     return redirect(url_for('home.stock_buy_list'))
 
-@home.route('/modal/stock', methods=['GET'])
-def modal_stock():
-    # 获取库存弹出框数据
-    key = request.args.get('key', '')
-    stocks = Stock.query.join(Item)
-    # 条件查询
-    if key:
-        # 库房/零件名称/类别/规格
-        stocks = stocks.filter(
-            or_(Stock.store.ilike('%' + key + '%'),
-                Item.name.ilike('%' + key + '%'),
-                Item.cate.ilike('%' + key + '%'),
-                Item.standard.ilike('%' + key + '%'),
-                )
-        )
-    stocks = stocks.order_by(Stock.item_id.asc(), Stock.store.asc()).limit(current_app.config['POSTS_PER_PAGE']).all()
-    # 返回的数据格式为
-    # {
-    # "pages": 1,
-    # "data": [
-    #         {"id": "1",
-    #         "name": "xx"}
-    #         ]
-    # }
-    data = []
-    for v in stocks:
-        data.append(
-            {
-                "id": v.id,
-                "item_id": v.item.id,
-                "item_name": v.item.name,
-                "item_standard": v.item.standard,
-                "item_unit": v.item.unit,
-                "item_costprice": v.item.costprice,
-                "costprice": v.costprice,
-                "store": v.store,
-                "qty": v.qty,
-                "cate": v.item.cate,
-            }
-        )
-    res = {
-        "key": key,
-        "data": data,
-    }
-    return dumps(res)
-
 @home.route('/stock/out/list', methods=['GET'])
 def stock_out_list():
     # 领料单列表
@@ -887,6 +1002,7 @@ def stock_out_edit(id=None):
                 porder.status = 0
                 porder.remarks = form.remarks.data
                 porder.addtime = datetime.now()  # 更新为发布日期
+            db.session.begin_nested()
             db.session.add(porder)
             # 主表暂存，需要使用id
             db.session.flush()
@@ -1033,7 +1149,7 @@ def stock_allot_edit(id=None):
     if porder:
         # 如果表单不属于用户，不是编辑状态 退出
         if porder.user_id != int(session['user_id']) or porder.status == 1 or porder.type != 2:
-            return redirect(url_for('home.stock_allot_edit'))
+            return redirect(url_for('home.stock_allot_list'))
 
     podetails = db.session.query(Podetail, Stock).filter(
         Podetail.porder_id == id,
@@ -1094,6 +1210,7 @@ def stock_allot_edit(id=None):
                 porder.status = 0
                 porder.remarks = form.remarks.data
                 porder.addtime = datetime.now()  # 更新为发布日期
+            db.session.begin_nested()
             db.session.add(porder)
             # 主表暂存，需要使用id
             db.session.flush()
@@ -1257,7 +1374,7 @@ def stock_loss_edit(id=None):
     if porder:
         # 如果表单不属于用户，不是编辑状态 退出
         if porder.user_id != int(session['user_id']) or porder.status == 1 or porder.type != 3:
-            return redirect(url_for('home.stock_allot_edit'))
+            return redirect(url_for('home.stock_loss_list'))
 
     podetails = db.session.query(Podetail, Stock).filter(
         Podetail.porder_id == id,
@@ -1308,6 +1425,7 @@ def stock_loss_edit(id=None):
                 porder.status = 0
                 porder.remarks = form.remarks.data
                 porder.addtime = datetime.now()  # 更新为发布日期
+            db.session.begin_nested()
             db.session.add(porder)
             # 主表暂存，需要使用id
             db.session.flush()
@@ -1527,6 +1645,7 @@ def stock_return_edit(id=None):
                 porder.status = status
                 porder.remarks = form.remarks.data
                 porder.addtime = datetime.now()  # 更新为发布日期
+            db.session.begin_nested()
             db.session.add(porder)
             db.session.flush()  # 提交一下获取id,不要使用commit
 
@@ -1726,3 +1845,175 @@ def order_list():
                per_page=current_app.config['POSTS_PER_PAGE'],
                error_out=False)
     return render_template('home/order_list.html', pagination=pagination, key=key, status=status, debt=debt)
+
+@home.route('/order/edit/<int:id>', methods=['GET', 'POST'])
+def order_edit(id=None):
+    # 收银单
+    form = OrderForm()
+    order = Order.query.filter_by(id=id).first()
+    # 表单不存在代表新增不做校验
+    if order:
+        # 如果表单不属于用户，不是编辑状态 退出
+        if order.user_id != int(session['user_id']) or order.status == 1 or order.type != 0:
+            return redirect(url_for('home.order_list'))
+
+    odetails = Odetail.query.filter(Odetail.order_id == id,).order_by(Odetail.id.asc()).all()
+    if request.method == 'GET':
+        # porder赋值
+        if order:
+            form.customer_id.data = order.customer_id
+            form.customer_name.data = order.customer.name
+            form.customer_phone.data = order.customer.phone
+            form.customer_pnumber.data = order.customer.pnumber
+            form.customer_brand.data = order.customer.brand
+            form.vip_id.data = order.customer.vip_id
+            form.vip_name.data = order.customer.vip.name
+            form.vip_balance.data = order.customer.vip.balance
+            form.vip_score.data = order.customer.vip.score
+            form.amount.data = order.amount
+            form.discount.data = order.discount
+            form.payment.data = order.payment
+            form.debt.data = order.debt
+            form.remarks.data = order.remarks
+
+        # 如果存在明细
+        if odetails:
+            # 先把空行去除
+            while len(form.inputrows) > 0:
+                form.inputrows.pop_entry()
+            # 对FormField赋值，要使用append_entry方法
+            for detail in odetails:
+                listform = OrderListForm()
+                listform.item_id = detail.item_id
+                listform.item_name = detail.item.name
+                listform.item_type = detail.item.type
+                listform.store = detail.store
+                listform.item_unit = detail.item.unit
+                listform.item_salesprice = detail.item.item_salesprice
+                listform.discount = detail.discount
+                listform.qty = detail.qty
+                listform.users = detail.users
+                listform.rowamount = detail.rowamount
+                form.inputrows.append_entry(listform)
+    # 计算动态input的初值
+    form_count = len(form.inputrows)
+    if form.validate_on_submit():
+        try:
+            # type_switch:1结算;0暂存
+            switch = int(form.type_switch.data)
+            # 添加主表
+            if not order:  # 没有新增一个
+                order = Order(
+                    id=datetime.now().strftime('%Y%m%d%H%M%S') + str(uuid.uuid4().hex),
+                    type=0,
+                    user_id=int(session['user_id']),
+                    customer_id=form.customer_id.data,
+                    amount=form.amount.data,
+                    discount=form.discount.data,
+                    payment=form.payment.data,
+                    debt=form.debt.data,
+                    status=0,
+                    remarks=form.remarks.data,
+                )
+            else:  # 有更新值
+                order.user_id = int(session['user_id'])
+                order.customer_id = form.customer_id.data
+                order.amount = form.amount.data
+                order.discount = form.discount.data
+                order.payment = form.payment
+                order.debt = form.debt
+                order.status = 0
+                order.remarks = form.remarks.data
+                order.addtime = datetime.now()  # 更新为发布日期
+            db.session.begin_nested()
+            db.session.add(order)
+            # 主表暂存，需要使用id
+            db.session.flush()
+
+            # 更改删除方式直接找到全部删除
+            db.session.query(Odetail).filter(Odetail.order_id == order.id).delete()
+            for iter_add in form.inputrows:
+                # 新增明细
+                odetail = Odetail(
+                    order_id=order.id,
+                    item_id=iter_add.item_id.data,
+                    store=iter_add.store.data,
+                    qty=float(iter_add.qty.data), # 这里一定要强转，临时数据后面要比较
+                    salesprice=float(iter_add.salesprice.data),
+                    discount=float(iter_add.discount.data),
+                    rowamount=float(iter_add.rowamount.data),
+                    users=iter_add.users.data,
+                )
+                db.session.add(odetail)
+            # 把所有明细暂存，后面用于计算是否存在核减为负数的情况
+            db.session.flush()
+            # todo
+            ''' 
+            if switch == 1:# 结算
+                # valid True可以提交; False 不能提交
+                valid = True
+                # 判断临时数据中有无报损数量大于库存的
+                sql_text = 'select b.item_id, d.name as item_name, b.ostore, b.sum_qty, c.qty from ' \
+                           '(select a.item_id, ostore, sum(qty) as sum_qty from tb_podetail as a ' \
+                           'where a.porder_id = :id group by item_id, ostore) as b, tb_stock as c, tb_item as d ' \
+                           'where b.item_id = c.item_id and b.ostore = c.store and b.item_id = d.id'
+                grouplists = db.session.execute(text(sql_text), {'id': porder.id})
+                for iter in grouplists:
+                    if iter.qty < iter.sum_qty:
+                        flash(u'零件:' + iter.item_name + u',报损后数量小于0', 'err')
+                        valid = False
+
+                # 校验通过
+                if valid:
+                    # 遍历临时数据
+                    checklists = db.session.query(Podetail, Stock).filter(
+                        Podetail.porder_id == porder.id,
+                        Podetail.item_id == Stock.item_id,
+                        Podetail.ostore == Stock.store,
+                    ).order_by(Podetail.id.asc()).all()
+                    for iter in checklists:
+                        # 减少原库存数量
+                        iter.Stock.qty -= iter.Podetail.qty
+                        db.session.add(iter.Stock)
+
+                    porder.status = 1 # 设置为发布状态
+                    db.session.add(porder)
+                    # 记录出库日志
+                    oplog = Oplog(
+                        user_id=session['user_id'],
+                        ip=request.remote_addr,
+                        reason=u'结算报损单:%s' % porder.id
+                    )
+                    db.session.add(oplog)
+                    db.session.commit()
+                    flash(u'报损单结算成功', 'ok')
+                    return redirect(url_for('home.stock_loss_list'))
+                # 校验不通过,暂存
+                else:
+                    oplog = Oplog(
+                        user_id=session['user_id'],
+                        ip=request.remote_addr,
+                         reason=u'结算报损单:%s失败' % porder.id
+                    )
+                    db.session.add(oplog)
+                    db.session.commit()
+                    return redirect(url_for('home.stock_loss_edit', id=porder.id))
+
+            else: # 暂存
+                oplog = Oplog(
+                    user_id=session['user_id'],
+                    ip=request.remote_addr,
+                    reason=u'暂存报损单:%s' % porder.id
+                )
+                db.session.commit()
+                flash(u'报损单暂存成功', 'ok')
+                return redirect(url_for('home.stock_loss_list'))
+            '''
+        except Exception as e:
+            db.session.rollback()
+            flash(u'收银单:%s结算/暂存异常,错误码：%s' % (order.id, e.message), 'err')
+            return redirect(url_for('home.order_edit', id=order.id))
+        finally:
+            db.session.close()
+
+    return render_template('home/order_edit.html', form=form, order=order, form_count=form_count)

@@ -1,8 +1,8 @@
 /*
-* 库存选择模态框
+* 订单库存选择模态框
 * appendId: 表格ID
 * */
-function modal_stock(appendId, url, key) {
+function order_modal_stock(appendId, url, key) {
     $.ajax({
         url: url,
         type: "GET",
@@ -18,8 +18,7 @@ function modal_stock(appendId, url, key) {
                     '<td>' + data[i].item_name + '</td>' +
                     '<td>' + data[i].item_standard + '</td>' +
                     '<td>' + data[i].item_unit + '</td>' +
-                    '<td>' + data[i].item_costprice + '</td>' +
-                    '<td>' + data[i].costprice + '</td>' +
+                    '<td>' + data[i].item_salesprice + '</td>' +
                     '<td>' + data[i].store + '</td>' +
                     '<td>' + data[i].qty + '</td>' +
                     '<td>' + data[i].item_cate + '</td></tr>'
