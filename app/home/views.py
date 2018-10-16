@@ -555,33 +555,17 @@ def modal_service():
 def order_modal_service(vip_id=0):
     # 获取服务弹出框数据
     key = request.args.get('key', '')
-    now = datetime.now()
-    vipdetail_subq = Vipdetail.query.filter(
-        Vipdetail.vip_id == vip_id,
-        Vipdetail.quantity > 0,
-        Vipdetail.addtime <= now,
-        Vipdetail.endtime > now,
-    ).subquery()
-    items = Item.query.outerjoin(
-        vipdetail_subq,
-        Item.id == vipdetail_subq.c.item_id,
-    ).filter(
-        Item.valid == 1,
-        Item.type == 1,
-    )
-    # 条件查询
+    sql_text = "select a.id, a.name, a.cate, a.type, a.salesprice, a.rewardprice, a.costprice, a.unit, a.standard, a.valid, " \
+               "b.id as vipdetail_id, b.vip_id, b.discountprice, b.quantity, b.addtime, b.endtime " \
+               "from tb_item a left outer join tb_vipdetail b on " \
+               "a.id = b.item_id and vip_id = :vip_id and b.quantity > 0 and b.endtime > now() where a.type = 1 and a.valid = 1 "
+    # 条件查询(零件名称/类别/规格)
     if key:
-        # 库房/零件名称/类别/规格
-        items = items.filter(
-            or_(Item.name.ilike('%' + key + '%'),
-                Item.cate.ilike('%' + key + '%'),
-                Item.standard.ilike('%' + key + '%'),
-                )
-        )
-    items = items.order_by(
-        vipdetail_subq.c.vip_id.desc(),
-        Item.name.asc()
-    ).limit(current_app.config['POSTS_PER_PAGE']).all()
+        sql_text += "and (a.name like '%" + key + "%' or a.standard like '%" + key + "%' or a.cate like '%" + key + "%')"
+    # 排序
+    sql_text += "order by b.vip_id desc, a.name limit " + str(current_app.config['POSTS_PER_PAGE'])
+    services = db.session.execute(text(sql_text), {'vip_id': vip_id})
+
     # 返回的数据格式为
     # {
     # "pages": 1,
@@ -591,44 +575,34 @@ def order_modal_service(vip_id=0):
     #         ]
     # }
     data = []
-    for v in items:
+    for iter in services:
+        vipdetail_id = ''
         vipdetail_discountprice = ''
         vipdetail_quantity = ''
-        vipdetail_id = ''
-        if v.vipdetails:
-            for j in v.vipdetails:
-                vipdetail_id = j.id
-                vipdetail_discountprice = j.discountprice
-                vipdetail_quantity = j.quantity
-                data.append(
-                    {
-                        "item_id": v.id,
-                        "item_name": v.name,
-                        "item_standard": v.standard,
-                        "item_unit": v.unit,
-                        "item_costprice": v.costprice,
-                        "item_salesprice": v.salesprice,
-                        "item_cate": v.cate,
-                        "vipdetail_id": vipdetail_id,
-                        "vipdetail_discountprice": vipdetail_discountprice,
-                        "vipdetail_quantity": vipdetail_quantity,
-                    }
-                )
-        else:
-            data.append(
-                {
-                    "item_id": v.id,
-                    "item_name": v.name,
-                    "item_standard": v.standard,
-                    "item_unit": v.unit,
-                    "item_costprice": v.costprice,
-                    "item_salesprice": v.salesprice,
-                    "item_cate": v.cate,
-                    "vipdetail_id": vipdetail_id,
-                    "vipdetail_discountprice": vipdetail_discountprice,
-                    "vipdetail_quantity": vipdetail_quantity,
-                }
-            )
+        vipdetail_addtime = ''
+        vipdetail_endtime = ''
+        if iter.vipdetail_id:
+            vipdetail_id = iter.vipdetail_id
+            vipdetail_discountprice = iter.discountprice
+            vipdetail_quantity = iter.quantity
+            vipdetail_addtime = iter.addtime
+            vipdetail_endtime = iter.endtime
+        data.append(
+            {
+                "item_id": iter.id,
+                "item_name": iter.name,
+                "item_standard": iter.standard,
+                "item_unit": iter.unit,
+                "item_costprice": iter.costprice,
+                "item_salesprice": iter.salesprice,
+                "item_cate": iter.cate,
+                "vipdetail_id": vipdetail_id,
+                "vipdetail_discountprice": vipdetail_discountprice,
+                "vipdetail_quantity": vipdetail_quantity,
+                "vipdetail_addtime": vipdetail_addtime,
+                "vipdetail_endtime": vipdetail_endtime,
+            }
+        )
 
     res = {
         "key": key,
