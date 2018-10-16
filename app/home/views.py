@@ -551,6 +551,91 @@ def modal_service():
     }
     return dumps(res)
 
+@home.route('/order/modal/service/<int:vip_id>', methods=['GET'])
+def order_modal_service(vip_id=0):
+    # 获取服务弹出框数据
+    key = request.args.get('key', '')
+    now = datetime.now()
+    vipdetail_subq = Vipdetail.query.filter(
+        Vipdetail.vip_id == vip_id,
+        Vipdetail.quantity > 0,
+        Vipdetail.addtime <= now,
+        Vipdetail.endtime > now,
+    ).subquery()
+    items = Item.query.outerjoin(
+        vipdetail_subq,
+        Item.id == vipdetail_subq.c.item_id,
+    ).filter(
+        Item.valid == 1,
+        Item.type == 1,
+    )
+    # 条件查询
+    if key:
+        # 库房/零件名称/类别/规格
+        items = items.filter(
+            or_(Item.name.ilike('%' + key + '%'),
+                Item.cate.ilike('%' + key + '%'),
+                Item.standard.ilike('%' + key + '%'),
+                )
+        )
+    items = items.order_by(
+        vipdetail_subq.c.vip_id.desc(),
+        Item.name.asc()
+    ).limit(current_app.config['POSTS_PER_PAGE']).all()
+    # 返回的数据格式为
+    # {
+    # "pages": 1,
+    # "data": [
+    #         {"id": "1",
+    #         "name": "xx"}
+    #         ]
+    # }
+    data = []
+    for v in items:
+        vipdetail_discountprice = ''
+        vipdetail_quantity = ''
+        vipdetail_id = ''
+        if v.vipdetails:
+            for j in v.vipdetails:
+                vipdetail_id = j.id
+                vipdetail_discountprice = j.discountprice
+                vipdetail_quantity = j.quantity
+                data.append(
+                    {
+                        "item_id": v.id,
+                        "item_name": v.name,
+                        "item_standard": v.standard,
+                        "item_unit": v.unit,
+                        "item_costprice": v.costprice,
+                        "item_salesprice": v.salesprice,
+                        "item_cate": v.cate,
+                        "vipdetail_id": vipdetail_id,
+                        "vipdetail_discountprice": vipdetail_discountprice,
+                        "vipdetail_quantity": vipdetail_quantity,
+                    }
+                )
+        else:
+            data.append(
+                {
+                    "item_id": v.id,
+                    "item_name": v.name,
+                    "item_standard": v.standard,
+                    "item_unit": v.unit,
+                    "item_costprice": v.costprice,
+                    "item_salesprice": v.salesprice,
+                    "item_cate": v.cate,
+                    "vipdetail_id": vipdetail_id,
+                    "vipdetail_discountprice": vipdetail_discountprice,
+                    "vipdetail_quantity": vipdetail_quantity,
+                }
+            )
+
+    res = {
+        "key": key,
+        "data": data,
+    }
+    return dumps(res)
+
 @home.route('/modal/stock', methods=['GET'])
 def modal_stock():
     # 获取库存弹出框数据

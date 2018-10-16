@@ -1573,7 +1573,7 @@ class OrderForm(FlaskForm):
     payment = StringField(
         label=u'本次付款',
         validators=[
-            DataRequired(message=u'请输入本次付款金额'),
+            DataRequired(message=u'请输入付款金额'),
             Regexp('[\d+\.\d]', message=u'请输入数字'),
         ],
         description=u'本次付款',
@@ -1582,12 +1582,24 @@ class OrderForm(FlaskForm):
             # 'placeholder': u'请输入本次付款金额',
         }
     )
+    # 积分抵扣
+    score = StringField(
+        label=u'积分',
+        validators=[
+            DataRequired(message=u'请输入抵扣积分'),
+            Regexp('[\d+\.\d]', message=u'数字'),
+        ],
+        description=u'积分',
+        render_kw={
+            'class': 'form-control',
+        }
+    )
     # 欠款
     debt = StringField(
         label=u'本次欠款',
         description=u'本次欠款',
         validators=[
-            Regexp('^[+]{0,1}(\d+)$|^[+]{0,1}(\d+\.\d+)$', message=u'欠款不能为负数'),
+            Regexp('^[+]{0,1}(\d+)$|^[+]{0,1}(\d+\.\d+)$', message=u'不为负数'),
         ],
         render_kw={
             'class': 'form-control',

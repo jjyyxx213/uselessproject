@@ -302,7 +302,7 @@
                                 {% endfor %}
                             </div>
                             <div class="row" style="margin-bottom: 0px">
-                                <div class="col-md-7 padding-defined pull-left">
+                                <div class="col-md-9 padding-defined pull-left">
                                     <div class="input-group">
                                         <span class="input-group-btn">
                                                 <button class="btn btn-default" type="button"> 应付金额</button>
@@ -317,16 +317,23 @@
                                         </span>
                                         {{ form.payment }}
                                         <span class="input-group-btn">
+                                            <button class="btn btn-default" type="button"> 积分抵扣</button>
+                                        </span>
+                                        {{ form.score }}
+                                        <span class="input-group-btn">
                                             <button class="btn btn-default" type="button"> 本次欠款</button>
                                         </span>
                                         {{ form.debt }}
                                     </div>
                                 </div>
-                                <div class="col-md-5 padding-defined pull-left">
+                                <div class="col-md-3 padding-defined pull-left">
                                         {% for err in form.discount.errors %}
                                             <p style="color: red" class="small">{{ err }}</p>
                                         {% endfor %}
                                         {% for err in form.payment.errors %}
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        {% endfor %}
+                                        {% for err in form.score.errors %}
                                             <p style="color: red" class="small">{{ err }}</p>
                                         {% endfor %}
                                         {% for err in form.debt.errors %}
@@ -803,7 +810,7 @@
 
             $("#inputs").on("click", "button[name='service_choice']", function () {
                 let appendId = $('#services');
-                let url = "{{ url_for('home.modal_service') }}";
+                let url = "{{ url_for('home.order_modal_service', vip_id=1) }}";
                 let key = $("#service_search").val();
                 order_modal_service(appendId, url, key);
                 //显示modal
