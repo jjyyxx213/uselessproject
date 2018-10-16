@@ -241,6 +241,9 @@
                                         </div>
                                         <div class="col-md-1 padding-defined">
                                             <div class="form-group">
+                                                <input id="inputrows-{{ loop.index0 }}-vipdetail_id"
+                                                       name="inputrows-{{ loop.index0 }}-vipdetail_id" type="hidden"
+                                                       value="{{ v.data.vipdetail_id or '' }}">
                                                 <input id="inputrows-{{ loop.index0 }}-discount"
                                                        name="inputrows-{{ loop.index0 }}-discount"
                                                        class="form-control costprice"
@@ -604,6 +607,8 @@
                         '                                    </div>\n' +
                         '                                    <div class="col-md-1 padding-defined">\n' +
                         '                                        <div class="form-group">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-vipdetail_id"\n' +
+                        '                                                       name="inputrows-' + id_ins + '-vipdetail_id" type="hidden">\n'+
                         '                                            <input id="inputrows-' + id_ins + '-discount"\n' +
                         '                                                   name="inputrows-' + id_ins + '-discount" class="form-control"\n' +
                         '                                                   placeholder="折扣价" type="text" readonly>' +
@@ -703,15 +708,15 @@
                 }
             });
 
-            //modal_stock高亮事件
+            //modal_customer高亮事件
             $("#customers").on("mouseenter", "tr", function () {
                 $(this).addClass("danger");
             });
-            //modal_stock高亮事件
+            //modal_customer高亮事件
             $("#customers").on("mouseleave", "tr", function () {
                 $(this).removeClass("danger");
             });
-            //modal_stock点击事件
+            //modal_customer点击事件
             $("#customers").on("dblclick", "tr", function () {
                 // 填充输入框
                 let id = $(this).find("td:first").text();
@@ -854,6 +859,8 @@
                 let item_standard = $(this).find("td:eq(2)").text();
                 let item_unit = $(this).find("td:eq(3)").text();
                 let item_salesprice = $(this).find("td:eq(4)").text();
+                let vipdetail_discountprice = $(this).find("td:eq(5)").text();
+                let vipdetail_id = $(this).find("td:eq(9)").text();
 
                 $("#serviceModal").modal("hide");
                 // 给输入框赋值
@@ -861,15 +868,18 @@
                 input_item_id.val(item_id);
                 let input_item_name = $("#" + 'inputrows-' + loop_index + '-item_name');
                 input_item_name.val(item_name);
+                let input_item_type = $("#" + 'inputrows-' + loop_index + '-item_type');
+                input_item_type.val('1');
                 let input_item_standard = $("#" + 'inputrows-' + loop_index + '-item_standard');
                 input_item_standard.val(item_standard);
                 let input_item_unit = $("#" + 'inputrows-' + loop_index + '-item_unit');
                 input_item_unit.val(item_unit);
                 let input_item_salesprice = $("#" + 'inputrows-' + loop_index + '-item_salesprice');
                 input_item_salesprice.val(item_salesprice);
-                //还有类型hidden需要赋值
-                let input_item_type = $("#" + 'inputrows-' + loop_index + '-item_type');
-                input_item_type.val('1');
+                let input_vipdetail_discountprice = $("#" + 'inputrows-' + loop_index + '-discount');
+                input_vipdetail_discountprice.val(vipdetail_discountprice);
+                let input_vipdetail_id = $("#" + 'inputrows-' + loop_index + '-vipdetail_id');
+                input_vipdetail_id.val(vipdetail_id);
             });
 
 

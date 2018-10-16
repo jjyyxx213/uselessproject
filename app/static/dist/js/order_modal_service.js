@@ -22,7 +22,8 @@ function order_modal_service(appendId, url, key) {
                     '<td>' + data[i].vipdetail_discountprice + '</td>' +
                     '<td>' + data[i].vipdetail_quantity + '</td>' +
                     '<td>' + data[i].vipdetail_endtime + '</td>' +
-                    '<td>' + data[i].item_cate + '</td></tr>'
+                    '<td>' + data[i].item_cate + '</td>' +
+                    '<td class="hide">' + data[i].vipdetail_id + '</td></tr>'
                 );
             }
         },

@@ -1408,6 +1408,11 @@ class OrderListForm(FlaskForm):
             'readonly': 'true',
         }
     )
+    # VIP明细id
+    vipdetail_id = HiddenField(
+        label=u'VIP明细ID',
+        description=u'VIP明细ID',
+    )
     # 折扣价
     discount = StringField(
         label=u'折扣价',
