@@ -1,8 +1,8 @@
 /*
-* 订单服务选择模态框
+* 会员卡商品选择模态框
 * appendId: 表格ID
 * */
-function order_modal_service(appendId, url, key) {
+function card_modal_item(appendId, url, key) {
     $.ajax({
         url: url,
         type: "GET",
@@ -13,7 +13,7 @@ function order_modal_service(appendId, url, key) {
             var data = result.data;
             var len = data.length;
             for (var i = 0; i < len; i++) {
-                $('#services').append(
+                $('#items').append(
                     '<tr><td>' + data[i].item_id + '</td>' +
                     '<td>' + data[i].item_name + '</td>' +
                     '<td>' + data[i].item_standard + '</td>' +

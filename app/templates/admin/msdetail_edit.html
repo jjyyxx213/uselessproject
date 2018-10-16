@@ -61,17 +61,23 @@
                             {% for v in form.inputrows %}
                                 <div class="row">
                                     <div class="col-md-3 padding-defined">
-                                        <input id="inputrows-{{ loop.index0 }}-item_id"
-                                               name="inputrows-{{ loop.index0 }}-item_id" type="hidden"
-                                               value="{{ v.data.item_id or '' }}">
-                                        <input id="inputrows-{{ loop.index0 }}-item_name"
-                                               name="inputrows-{{ loop.index0 }}-item_name" type="hidden"
+                                        <div class="input-group">
+                                            <input id="inputrows-{{ loop.index0 }}-item_id"
+                                                   name="inputrows-{{ loop.index0 }}-item_id" type="hidden"
+                                                   value="{{ v.data.item_id or '' }}">
+                                            <input id="inputrows-{{ loop.index0 }}-item_name"
+                                               name="inputrows-{{ loop.index0 }}-item_name" type="text" class="form-control"
+                                                   placeholder="请选择商品/服务" readonly
                                                value="{{ v.data.item_name or '' }}">
-                                        <select class="form-control select2 item-choice"
-                                                id="inputrows-{{ loop.index0 }}-item"
-                                                name="inputrows-{{ loop.index0 }}-item"
-                                                data-placeholder="请选择商品或服务">
-                                        </select>
+                                            <span class="input-group-btn">
+                                                <button class="btn btn-default" type="button" name="item_choice" loop_index="{{ loop.index0 }}" style="border-radius: 0">
+                                                    物
+                                                </button>
+                                                <button class="btn btn-default" type="button" name="service_choice" loop_index="{{ loop.index0 }}" style="border-radius: 0">
+                                                    服
+                                                </button>
+                                            </span>
+                                        </div>
                                         {% for err in v.item_id.errors %}
                                                 <div class="col-md-12">
                                                     <p style="color: red" class="small">{{ err }}</p>
@@ -140,6 +146,99 @@
                 </div>
             </div>
         </div>
+
+        <!-- 服务选择模态框!-->
+        <div class="modal fade" id="serviceModal" tabindex="-1" role="dialog" aria-labelledby="serviceModalLabel">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                        <h4 class="modal-title" id="serviceModalLabel"> 服务选择</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="input-group input-group-sm pull-right" style="width: 300px;">
+                                <input type="text" name="table_search" class="form-control pull-right"
+                                       placeholder="请输入关键字...  (名称/规格)" id="service_search">
+                                <div class="input-group-btn">
+                                    <button type="submit" class="btn btn-default" id="do_service_search">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                <tr>
+                                    <th> 编号</th>
+                                    <th> 名称</th>
+                                    <th> 规格</th>
+                                    <th> 单位</th>
+                                    <th> 售价</th>
+                                    <th> 服务类型</th>
+                                </tr>
+                                </thead>
+                                <tbody id="services">
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal"> 关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 商品选择模态框!-->
+        <div class="modal fade" id="itemModal" tabindex="-1" role="dialog" aria-labelledby="itemModalLabel">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                        <h4 class="modal-title" id="itemModalLabel"> 商品选择</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="input-group input-group-sm pull-right" style="width: 300px;">
+                                <input type="text" name="table_search" class="form-control pull-right"
+                                       placeholder="请输入关键字...  (名称/规格)" id="item_search">
+                                <div class="input-group-btn">
+                                    <button type="submit" class="btn btn-default" id="do_item_search">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                <tr>
+                                    <th> 编号</th>
+                                    <th> 名称</th>
+                                    <th> 规格</th>
+                                    <th> 单位</th>
+                                    <th> 售价</th>
+                                    <th> 商品类型</th>
+                                </tr>
+                                </thead>
+                                <tbody id="items">
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal"> 关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 {% endblock %}
 
@@ -164,12 +263,21 @@
                 {
                     InputsWrapper.append('<div class="row">\n' +
                         '                                    <div class="col-md-3 padding-defined">\n' +
-                        '                                       <input id="inputrows-' + id_ins + '-item_id" name="inputrows-' + id_ins + '-item_id" type="hidden">' +
-                        '                                       <input id="inputrows-' + id_ins + '-item_name" name="inputrows-' + id_ins + '-item_name" type="hidden">' +
-                        '                                       <select class="form-control select2 item-choice" id="inputrows-' + id_ins + '-item"' +
-                        '                                               name="inputrows-' + id_ins + '-item"' +
-                        '                                               data-placeholder="请选择商品或服务">' +
-                        '                                       </select>' +
+                        '                                       <div class="input-group">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-item_id"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-item_id" type="hidden">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-item_name"\n' +
+                        '                                               name="inputrows-' + id_ins + '-item_name" type="text" class="form-control"\n' +
+                        '                                                   placeholder="请选择商品/服务" readonly>\n' +
+                        '                                          <span class="input-group-btn">\n' +
+                        '                                                <button class="btn btn-default" type="button" name="item_choice" loop_index="' + id_ins + '" style="border-radius: 0">\n' +
+                        '                                                    物\n' +
+                        '                                                </button>\n' +
+                        '                                                <button class="btn btn-default" type="button" name="service_choice" loop_index="' + id_ins + '" style="border-radius: 0">\n' +
+                        '                                                    服\n' +
+                        '                                                </button>\n' +
+                        '                                            </span>\n' +
+                        '                                        </div>\n' +
                         '                                    </div>\n' +
                         '                                    <div class="col-md-2 padding-defined">\n' +
                         '                                        <div class="form-group">\n' +
@@ -206,16 +314,7 @@
                         '                                        </button>\n' +
                         '                                    </div>\n' +
                         '                                </div>');
-                    // 动态添加行后，要处理select2下拉框初始化
-                    let options = {
-                        url: "{{ url_for('admin.item_get') }}",      // 数据接口url
-                        pageSize: 10, // 每次加载的数据条数[屏蔽，目前从后台获取]
-                        value: "id",  // 下拉框value字段名称
-                        name: "name", // 下拉框显示字段名称
-                        selected: []  // 默认选中项，格式：[{id:1,text:"选项1"},{id:2,text:"选项2"}]
-                    };
-                    console.log("inputrows-" + id_ins + "-item");
-                    ajaxSelect2("inputrows-" + id_ins + "-item", options);
+
                     id_ins++; //这个要放到select2监听后面，否则id错误
                     row_ins++;
                     $("#cnt").text(row_ins)//显示总行数
@@ -231,38 +330,139 @@
                 }
                 return false;
             });
-            //这里要处理商品和服务下拉
-            let options = {
-                url: "{{ url_for('admin.item_get') }}",      // 数据接口url
-                pageSize: 10, // 每次加载的数据条数[屏蔽，目前从后台获取]
-                value: "id",  // 下拉框value字段名称
-                name: "name", // 下拉框显示字段名称
-                selected: []  // 默认选中项，格式：[{id:1,text:"选项1"},{id:2,text:"选项2"}]
-            };
-            //遍历.item-choice，为进入时所有的下拉框动态初始化
-            $(".item-choice").each(function () {
-                id = $(this).attr("id");
-                ajaxSelect2(id, options);
-                setSelect2Value(id);
+
+            let loop_index;
+            $("#inputs").on("click", "button[name='service_choice']", function () {
+                let appendId = $('#services');
+                let url = "{{ url_for('admin.modal_service') }}";
+                let key = $("#service_search").val();
+                card_modal_service(appendId, url, key);
+                //显示modal
+                $('#serviceModal').modal();
+                // 获取loop_index
+                loop_index = $(this).attr('loop_index');
             });
-            // 点击保存时，如果有校验信息。要为item_id/item_name赋值。否则setSelect2Value获取不到值，下拉框为空
-            $("#inputs").on("change", ".item-choice", function () {
-                // 获取下拉选中的值和文本
-                let select_val = $(this).val();
-                let select_text = $(this).find("option:selected").text();
-                // 给item_id赋值
-                $(this).siblings().eq(0).val(select_val);
-                // 给item_name赋值
-                $(this).siblings().eq(1).val(select_text);
-            })
+            //模态框模糊查询
+            $("#do_service_search").click(function () {
+                let appendId = $('#services');
+                let url = "{{ url_for('admin.modal_service') }}";
+                let key = $("#service_search").val();
+                card_modal_service(appendId, url, key);
+            });
+            $("#service_search").bind("keyup", function (event) {
+                if (event.keyCode == "13") {
+                    //回车执行查询
+                    let appendId = $('#services');
+                    let url = "{{ url_for('admin.modal_service') }}";
+                    let key = $("#service_search").val();
+                    card_modal_service(appendId, url, key);
+                }
+            });
+
+            //modal_service高亮事件
+            $("#services").on("mouseenter", "tr", function () {
+                $(this).addClass("danger");
+            });
+            //modal_service高亮事件
+            $("#services").on("mouseleave", "tr", function () {
+                $(this).removeClass("danger");
+            });
+            //modal_service点击事件
+            $("#services").on("dblclick", "tr", function () {
+                let item_id = $(this).find("td:eq(0)").text();
+                let item_name = $(this).find("td:eq(1)").text();
+                let salesprice = $(this).find("td:eq(4)").text();
+
+                $("#serviceModal").modal("hide");
+                // 给输入框赋值
+                let input_item_id = $("#" + 'inputrows-' + loop_index + '-item_id');
+                input_item_id.val(item_id);
+                let input_item_name = $("#" + 'inputrows-' + loop_index + '-item_name');
+                input_item_name.val(item_name);
+                let input_salesprice = $("#" + 'inputrows-' + loop_index + '-salesprice');
+                input_salesprice.val(salesprice);
+            });
+            //////////////商品与服务分隔
+            $("#inputs").on("click", "button[name='item_choice']", function () {
+                let appendId = $('#items');
+                let url = "{{ url_for('admin.modal_item') }}";
+                let key = $("#item_search").val();
+                card_modal_item(appendId, url, key);
+                //显示modal
+                $('#itemModal').modal();
+                // 获取loop_index
+                loop_index = $(this).attr('loop_index');
+            });
+            //模态框模糊查询
+            $("#do_item_search").click(function () {
+                let appendId = $('#items');
+                let url = "{{ url_for('admin.modal_item') }}";
+                let key = $("#service_search").val();
+                card_modal_item(appendId, url, key);
+            });
+            $("#item_search").bind("keyup", function (event) {
+                if (event.keyCode == "13") {
+                    //回车执行查询
+                    let appendId = $('#items');
+                    let url = "{{ url_for('admin.modal_item') }}";
+                    let key = $("#item_search").val();
+                    card_modal_item(appendId, url, key);
+                }
+            });
+
+            //modal_item高亮事件
+            $("#items").on("mouseenter", "tr", function () {
+                $(this).addClass("danger");
+            });
+            //modal_item高亮事件
+            $("#items").on("mouseleave", "tr", function () {
+                $(this).removeClass("danger");
+            });
+            //modal_item点击事件
+            $("#items").on("dblclick", "tr", function () {
+                let item_id = $(this).find("td:eq(0)").text();
+                let item_name = $(this).find("td:eq(1)").text();
+                let salesprice = $(this).find("td:eq(4)").text();
+
+                $("#itemModal").modal("hide");
+                // 给输入框赋值
+                let input_item_id = $("#" + 'inputrows-' + loop_index + '-item_id');
+                input_item_id.val(item_id);
+                let input_item_name = $("#" + 'inputrows-' + loop_index + '-item_name');
+                input_item_name.val(item_name);
+                let input_salesprice = $("#" + 'inputrows-' + loop_index + '-salesprice');
+                input_salesprice.val(salesprice);
+            });
+
+            {#Prefilters是一个预过滤器，在每个请求之前被发送和$.ajax()处理它们前处理。#}
+            {#options 是请求的选项#}
+            {#originalOptions 值作为提供给Ajax方法未经修改的选项，因此，没有ajaxSettings设置中的默认值#}
+            {#jqXHR 是请求的jqXHR对象#}
+            {#核心思想是维护一个队列，发送请求时，将请求加入队列，请求响应后，从队列中清除，这就保证了在任一时刻只能有一个同样的请求发送.#}
+            {#调用abort后jquery会执行error的方法，抛出abort的异常信息。#}
+            {#按钮每次点击都会向后端发送请求，下面的demo实现了多次点击按钮之后，只保证最后一次点击的请求能够成功。#}
+            let pendingRequests = {};
+            $.ajaxPrefilter(function (options, originalOptions, jqXHR) {
+                let key = options.url;
+                console.log(key);
+                console.log(!pendingRequests[key]);
+                if (!pendingRequests[key]) {
+                    pendingRequests[key] = jqXHR
+                } else {
+                    //jqXHR.abort();    //放弃后触发的提交
+                    pendingRequests[key].abort()   // 放弃先触发的提交
+                }
+
+                let complete = options.complete;
+                options.complete = function (jqXHR, textStatus) {
+                    pendingRequests[key] = null;
+                    if (jQuery.isFunction(complete)) {
+                        complete.apply(this, arguments)
+                    }
+                }
+            });
+
         });
 
-        // select2为已有的数据设置初值
-        function setSelect2Value(select_id) {
-            let select = $("#" + select_id);
-            let item_id = select.siblings().eq(0).val();
-            let item_name = select.siblings().eq(1).val();
-            select.append(new Option(item_name, item_id, false, true));
-        }
     </script>
 {% endblock %}

@@ -271,7 +271,7 @@ class MsdetailListForm(FlaskForm):
             DataRequired(message=u'请选择产品或服务'),
         ],
     )
-    item_name = HiddenField(
+    item_name = StringField(
         label=u'产品/服务',
         description=u'产品/服务',
     )

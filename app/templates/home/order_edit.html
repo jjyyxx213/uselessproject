@@ -818,7 +818,7 @@
                 let key = $("#service_search").val();
                 order_modal_service(appendId, url, key);
             });
-            $("#stock_search").bind("keyup", function (event) {
+            $("#service_search").bind("keyup", function (event) {
                 if (event.keyCode == "13") {
                     //回车执行查询
                     let appendId = $('#services');

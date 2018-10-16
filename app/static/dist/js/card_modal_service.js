@@ -1,8 +1,8 @@
 /*
-* 订单服务选择模态框
+* 会员卡服务选择模态框
 * appendId: 表格ID
 * */
-function order_modal_service(appendId, url, key) {
+function card_modal_service(appendId, url, key) {
     $.ajax({
         url: url,
         type: "GET",
