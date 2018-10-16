@@ -551,10 +551,11 @@ def modal_service():
     }
     return dumps(res)
 
-@home.route('/order/modal/service/<int:vip_id>', methods=['GET'])
-def order_modal_service(vip_id=0):
+@home.route('/order/modal/service', methods=['GET'])
+def order_modal_service():
     # 获取服务弹出框数据
     key = request.args.get('key', '')
+    vip_id = request.args.get('vip_id', '')
     sql_text = "select a.id, a.name, a.cate, a.type, a.salesprice, a.rewardprice, a.costprice, a.unit, a.standard, a.valid, " \
                "b.id as vipdetail_id, b.vip_id, b.discountprice, b.quantity, b.addtime, b.endtime " \
                "from tb_item a left outer join tb_vipdetail b on " \
@@ -585,8 +586,8 @@ def order_modal_service(vip_id=0):
             vipdetail_id = iter.vipdetail_id
             vipdetail_discountprice = iter.discountprice
             vipdetail_quantity = iter.quantity
-            vipdetail_addtime = iter.addtime
-            vipdetail_endtime = iter.endtime
+            vipdetail_addtime = iter.addtime.strftime('%Y-%m-%d %H:%M:%S')
+            vipdetail_endtime = iter.endtime.strftime('%Y-%m-%d %H:%M:%S')
         data.append(
             {
                 "item_id": iter.id,
