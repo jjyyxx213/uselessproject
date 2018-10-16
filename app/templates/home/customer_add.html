@@ -172,6 +172,8 @@
                         </div>
                         <div class="box-footer">
                             {{ form.submit }}
+                            <a href="{{ url_for('home.customer_list') }}" class="btn btn-default pull-right"
+                               role="button"> 返回</a>
                         </div>
                     </form>
                 </div>
@@ -187,8 +189,8 @@
             $("#g-customer-list").addClass("active")
             $('.select2').select2(
                 {
-                language: "zh-CN",
-                allowClear: true,
+                    language: "zh-CN",
+                    allowClear: true,
                 }
             )
             //只要遇到radio,checkbox 直接转换为icheck

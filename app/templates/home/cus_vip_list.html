@@ -105,7 +105,9 @@
                             </form>
                         </table>
                         <div class="box-footer">
-                            <button class="btn btn-danger pull-right" data-toggle="modal" data-target="#myModal">
+                            <a href="{{ url_for('home.customer_list') }}" class="btn btn-default pull-right margin-defined"
+                               role="button"> 返回</a>
+                            <button class="btn btn-danger pull-right margin-defined" data-toggle="modal" data-target="#myModal">
                                 注销
                             </button>
 
@@ -123,15 +125,14 @@
                                         </div>
 
                                         <div class="modal-footer">
-                                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                                             <button type="button" id="cancel" class="btn btn-danger" data-dismiss="modal">注销</button>
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                                         </div>
                                     </div><!-- /.modal-content -->
                                 </div><!-- /.modal -->
                             </div>
 
-                            <a href="{{ url_for('home.customer_list') }}" class="btn btn-default pull-right  margin-defined"
-                               role="button"> 返回</a>
+
 
                         </div>
                     </div>
