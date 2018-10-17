@@ -458,6 +458,8 @@
                     $(this).parent('div').parent('div').remove(); //remove text box
                     row_ins--; //decrement textbox
                     $("#cnt").text(row_ins) //显示总行数
+                    //这里也要重新计算合计
+                    $("#amount").val(calcAmount());
                 }
                 return false;
             });
@@ -518,7 +520,12 @@
                     //设置单行合计
                     input_rowamount.val(calcRowAmount(index));
                     //设置合计
-                    $("#amount").val(calcAmount(row_ins));
+                    $("#amount").val(calcAmount());
+                } else {
+                    //设置单行合计
+                    input_rowamount.val('');
+                    //设置合计
+                    $("#amount").val('');
                 };
             });
             //单价监听事件
@@ -533,7 +540,12 @@
                     //设置单行合计
                     input_rowamount.val(calcRowAmount(index));
                     //设置合计
-                    $("#amount").val(calcAmount(row_ins));
+                    $("#amount").val(calcAmount());
+                } else {
+                    //设置单行合计
+                    input_rowamount.val('');
+                    //设置合计
+                    $("#amount").val('');
                 };
             });
             //优惠后金额监听事件
@@ -646,13 +658,13 @@
             return rowamount;
         }
         // 计算应付金额
-        function calcAmount(count) {
+        function calcAmount() {
             let amount = 0;
             let rowamount = 0;
-            for (let i = 0; i < count; i++) {
-                rowamount = $("#inputrows-" + i + "-rowamount").val();
-                amount += parseFloat(rowamount);
-            }
+            $(".rowamount").each(function () {
+                rowamount = $(this).val() == "" ? 0 : parseFloat($(this).val());
+                amount += rowamount;
+            });
             return amount;
         }
         // 计算欠款

@@ -323,7 +323,8 @@
                                         </span>
                                         {{ form.payment }}
                                         <span class="input-group-btn">
-                                            <button class="btn btn-default" type="button"> 积分抵扣</button>
+                                            <button class="btn btn-default" type="button" data-toggle="tooltip"
+                                       title="积分兑换比率100:1"> 积分消耗(?)</button>
                                         </span>
                                         {{ form.score }}
                                         <span class="input-group-btn">
@@ -423,7 +424,7 @@
                         <div class="row">
                             <div class="input-group input-group-sm pull-right" style="width: 300px;">
                                 <input type="text" name="table_search" class="form-control pull-right"
-                                       placeholder="请输入关键字...  (名称/规格)" id="stock_search">
+                                       placeholder="请输入关键字...  (名称/规格/商品类型)" id="stock_search">
                                 <div class="input-group-btn">
                                     <button type="submit" class="btn btn-default" id="do_stock_search">
                                         <i class="fa fa-search"></i>
@@ -687,6 +688,8 @@
                     $(this).parent('div').parent('div').remove(); //remove text box
                     row_ins--; //decrement textbox
                     $("#cnt").text(row_ins) //显示总行数
+                    //这里要处理合计
+                    $("#amount").val(calcAmount());
                 }
                 return false;
             });
@@ -901,42 +904,40 @@
                 let input_qty = $(this); //数量输入框
                 let id = input_qty.attr('id'); //数量的id
                 let index = id.substr(id.indexOf('-') + 1, 1); //获取index
-                let input_costprice = $("#" + 'inputrows-' + index + '-costprice'); //单价输入框
+                let input_discount = $("#" + 'inputrows-' + index + '-discount'); //折扣价
+                let input_item_salesprice = $("#" + 'inputrows-' + index + '-item_salesprice'); //售价
                 let input_rowamount = $("#" + 'inputrows-' + index + '-rowamount'); //单行合计输入框
+
+                //如果存在discount,根据优惠价计算；否则根据原价计算
+                let price = "";
+                if (input_discount.val() != "") {
+                    price = input_discount.val()
+                } else {
+                    price = input_item_salesprice.val()
+                }
                 //数量/单价有值就进行计算
-                if (input_qty.val() != "" && input_costprice.val() != "") {
+                if (price != "" && input_qty.val() != "") {
                     //设置单行合计
-                    input_rowamount.val(calcRowAmount(index));
+                    let rowamount = parseFloat(price) * parseFloat(input_qty.val());
+                    input_rowamount.val(rowamount);
                     //设置合计
-                    $("#amount").val(calcAmount(row_ins));
-                };
-            });
-            //单价监听事件
-            $("#inputs").on("change", ".costprice", function () {
-                let input_costprice = $(this); //单价输入框
-                let id = input_costprice.attr('id'); //单价的id
-                let index = id.substr(id.indexOf('-') + 1, 1); //获取index
-                let input_qty = $("#" + 'inputrows-' + index + '-qty'); //数量输入框
-                let input_rowamount = $("#" + 'inputrows-' + index + '-rowamount'); //单行合计输入框
-                //数量/单价有值就进行计算
-                if (input_qty.val() != "" && input_costprice.val() != "") {
-                    //设置单行合计
-                    input_rowamount.val(calcRowAmount(index));
-                    //设置合计
-                    $("#amount").val(calcAmount(row_ins));
+                    $("#amount").val(calcAmount());
+                } else {
+                    input_rowamount.val('');
+                    $("#amount").val('');
                 };
             });
             //优惠后金额监听事件
             $("#discount").on("change", function () {
-                if ($("#discount").val() != "" && $("#payment").val() != "") {
-                    $("#debt").val(calcDebt());
-                }
+                $("#debt").val(calcDebt());
             });
-            //本次退款监听事件
+            //本次付款监听事件
             $("#payment").on("change", function () {
-                if ($("#discount").val() != "" && $("#payment").val() != "") {
-                    $("#debt").val(calcDebt());
-                }
+                $("#debt").val(calcDebt());
+            });
+            //积分监听事件
+            $("#score").on("change", function () {
+                $("#debt").val(calcDebt());
             });
 
             {#Prefilters是一个预过滤器，在每个请求之前被发送和$.ajax()处理它们前处理。#}
@@ -968,30 +969,25 @@
             });
         });
 
-        // 计算每行合计
-        function calcRowAmount(index) {
-            let rowamount = 0;
-            // 单价
-            let costprice = $("#inputrows-" + index + "-costprice").val();
-            // 数量
-            let qty = $("#inputrows-" + index + "-qty").val();
-            rowamount = parseFloat(costprice) * parseFloat(qty);
-            return rowamount;
-        }
-        // 计算应退金额
-        function calcAmount(count) {
+        // 计算合计
+        function calcAmount() {
             let amount = 0;
             let rowamount = 0;
-            for (let i = 0; i < count; i++) {
-                rowamount = $("#inputrows-" + i + "-rowamount").val();
-                amount += parseFloat(rowamount);
-            }
+            $(".rowamount").each(function () {
+                rowamount = $(this).val() == "" ? 0 : parseFloat($(this).val());
+                amount += rowamount;
+            });
             return amount;
         }
         // 计算欠款
         function calcDebt() {
-                //本次欠款
-                return parseFloat($("#discount").val()) - parseFloat($("#payment").val());
+            let discount = $("#discount").val() == "" ? 0 : parseFloat($("#discount").val());
+            let payment = $("#payment").val() == "" ? 0 : parseFloat($("#payment").val());
+            // SCORE X 100 = RMB
+            let score = $("#score").val() == "" ? 0 : parseFloat($("#score").val()) * 0.01;
+            let debt = discount - payment - score;
+
+            return debt;
         }
     </script>
 {% endblock %}
