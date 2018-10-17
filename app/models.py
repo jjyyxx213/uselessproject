@@ -513,12 +513,16 @@ class Odetail(db.Model):
     order_id = db.Column(db.String(20), db.ForeignKey('tb_order.id'), nullable=False)
     # 项目/商品ID
     item_id = db.Column(db.Integer, db.ForeignKey('tb_item.id'), nullable=True)
+    # 仓库编号 冗余
+    stock_id = db.Column(db.Integer)
     # 仓库
     store = db.Column(db.String(40))
     # 数量
     qty = db.Column(db.Float, default=0)
     # 销售单价
     salesprice = db.Column(db.Float, default=0)
+    # 会员卡明细id  冗余
+    vipdetail_id = db.Column(db.Integer)
     # 折扣价
     discount = db.Column(db.Float, default=0)
     # 单行合计

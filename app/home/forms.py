@@ -1382,6 +1382,11 @@ class OrderListForm(FlaskForm):
         label=u'商品/服务类别',
         description=u'商品/服务类别',
     )
+    # 仓库编码
+    stock_id = HiddenField(
+        label=u'仓库ID',
+        description=u'仓库ID',
+    )
     # 仓库
     store = HiddenField(
         label=u'仓库',

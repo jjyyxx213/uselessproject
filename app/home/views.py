@@ -560,7 +560,7 @@ def order_modal_service():
                "b.id as vipdetail_id, b.vip_id, b.discountprice, b.quantity, b.addtime, b.endtime " \
                "from tb_item a left outer join tb_vipdetail b on " \
                "a.id = b.item_id and vip_id = :vip_id and b.quantity > 0 and b.endtime > now() where a.type = 1 and a.valid = 1 "
-    # 条件查询(零件名称/类别/规格)
+    # 条件查询(服务名称/类别/规格)
     if key:
         sql_text += "and (a.name like '%" + key + "%' or a.standard like '%" + key + "%' or a.cate like '%" + key + "%')"
     # 排序
@@ -597,6 +597,70 @@ def order_modal_service():
                 "item_costprice": iter.costprice,
                 "item_salesprice": iter.salesprice,
                 "item_cate": iter.cate,
+                "vipdetail_id": vipdetail_id,
+                "vipdetail_discountprice": vipdetail_discountprice,
+                "vipdetail_quantity": vipdetail_quantity,
+                "vipdetail_addtime": vipdetail_addtime,
+                "vipdetail_endtime": vipdetail_endtime,
+            }
+        )
+
+    res = {
+        "key": key,
+        "data": data,
+    }
+    return dumps(res)
+
+@home.route('/order/modal/stock', methods=['GET'])
+def order_modal_stock():
+    # 获取库存商品弹出框数据
+    key = request.args.get('key', '')
+    vip_id = request.args.get('vip_id', '')
+    sql_text = "select c.stock_id, c.item_id, c.qty, c.store, c.item_name, c.salesprice, c.rewardprice, c.costprice, c.unit, c.standard, c.cate, " \
+               "d.id as vipdetail_id, d.vip_id, d.discountprice, d.quantity, d.addtime, d.endtime  " \
+               "from (select a.id as stock_id, a.item_id, a.qty, a.store, b.name as item_name, b.salesprice, b.rewardprice, b.costprice, b.unit, b.standard, b.cate " \
+               "from tb_stock a, tb_item b where a.item_id = b.id and a.qty > 0 and b.type = 0 and b.valid = 1) c " \
+               "left outer join tb_vipdetail d on c.item_id = d.item_id and d.vip_id = :vip_id and d.quantity > 0 and d.endtime > now() "
+    # 条件查询(零件名称/类别/规格)
+    if key:
+        sql_text += "where (c.item_name like '%" + key + "%' or c.standard like '%" + key + "%' or c.cate like '%" + key + "%')"
+    # 排序
+    sql_text += "order by d.vip_id desc, c.item_id, c.store limit " + str(current_app.config['POSTS_PER_PAGE'])
+    services = db.session.execute(text(sql_text), {'vip_id': vip_id})
+
+    # 返回的数据格式为
+    # {
+    # "pages": 1,
+    # "data": [
+    #         {"id": "1",
+    #         "name": "xx"}
+    #         ]
+    # }
+    data = []
+    for iter in services:
+        vipdetail_id = ''
+        vipdetail_discountprice = ''
+        vipdetail_quantity = ''
+        vipdetail_addtime = ''
+        vipdetail_endtime = ''
+        if iter.vipdetail_id:
+            vipdetail_id = iter.vipdetail_id
+            vipdetail_discountprice = iter.discountprice
+            vipdetail_quantity = iter.quantity
+            vipdetail_addtime = iter.addtime.strftime('%Y-%m-%d %H:%M:%S')
+            vipdetail_endtime = iter.endtime.strftime('%Y-%m-%d %H:%M:%S')
+        data.append(
+            {
+                "item_id": iter.item_id,
+                "item_name": iter.item_name,
+                "item_standard": iter.standard,
+                "item_unit": iter.unit,
+                "item_costprice": iter.costprice,
+                "item_salesprice": iter.salesprice,
+                "item_cate": iter.cate,
+                "stock_id": iter.stock_id,
+                "qty": iter.qty,
+                "store": iter.store,
                 "vipdetail_id": vipdetail_id,
                 "vipdetail_discountprice": vipdetail_discountprice,
                 "vipdetail_quantity": vipdetail_quantity,
@@ -1947,9 +2011,11 @@ def order_edit(id=None):
                 listform.item_id = detail.item_id
                 listform.item_name = detail.item.name
                 listform.item_type = detail.item.type
+                listform.stock_id = detail.stock_id # 方便计算
                 listform.store = detail.store
                 listform.item_unit = detail.item.unit
                 listform.item_salesprice = detail.item.item_salesprice
+                listform.vipdetail_id = detail.vipdetail_id # 方便计算
                 listform.discount = detail.discount
                 listform.qty = detail.qty
                 listform.users = detail.users
@@ -1997,9 +2063,11 @@ def order_edit(id=None):
                 odetail = Odetail(
                     order_id=order.id,
                     item_id=iter_add.item_id.data,
+                    stock_id=iter_add.stock_id.data,
                     store=iter_add.store.data,
                     qty=float(iter_add.qty.data), # 这里一定要强转，临时数据后面要比较
                     salesprice=float(iter_add.salesprice.data),
+                    vipdetail_id=iter_add.vipdetail_id,
                     discount=float(iter_add.discount.data),
                     rowamount=float(iter_add.rowamount.data),
                     users=iter_add.users.data,

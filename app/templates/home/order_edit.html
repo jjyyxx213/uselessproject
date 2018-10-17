@@ -187,6 +187,9 @@
                                                 <input id="inputrows-{{ loop.index0 }}-item_type"
                                                        name="inputrows-{{ loop.index0 }}-item_type" type="hidden"
                                                        value="{{ v.data.item_type or '' }}">
+                                                <input id="inputrows-{{ loop.index0 }}-stock_id"
+                                                       name="inputrows-{{ loop.index0 }}-stock_id" type="hidden"
+                                                       value="{{ v.data.stock_id or '' }}">
                                                 <input id="inputrows-{{ loop.index0 }}-store"
                                                        name="inputrows-{{ loop.index0 }}-store" type="hidden"
                                                        value="{{ v.data.store or '' }}">
@@ -368,6 +371,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="row">
+                                <div class="pull-left label label-warning">警告：如果已选择明细，更换客户将导致有折扣的商品/服务失效</div>
                             <div class="input-group input-group-sm pull-right" style="width: 300px;">
                                 <input type="text" name="table_search" class="form-control pull-right"
                                        placeholder="请输入关键字...  (姓名/手机/车牌/邮箱)" id="customer_search">
@@ -435,9 +439,12 @@
                                     <th> 名称</th>
                                     <th> 规格</th>
                                     <th> 单位</th>
-                                    <th> 售价</th>
                                     <th> 仓库</th>
                                     <th> 库存数量</th>
+                                    <th> 售价</th>
+                                    <th> 优惠价</th>
+                                    <th> 优惠次数</th>
+                                    <th> 截止日期</th>
                                     <th> 商品类型</th>
                                 </tr>
                                 </thead>
@@ -576,6 +583,8 @@
                         '                                                   name="inputrows-' + id_ins + '-item_id" type="hidden">\n' +
                         '                                            <input id="inputrows-' + id_ins + '-item_type"\n' +
                         '                                                   name="inputrows-' + id_ins + '-item_type" type="hidden">\n' +
+                        '                                            <input id="inputrows-' + id_ins + '-stock_id"\n' +
+                        '                                                   name="inputrows-' + id_ins + '-stock_id" type="hidden">\n' +
                         '                                            <input id="inputrows-' + id_ins + '-store"\n' +
                         '                                                   name="inputrows-' + id_ins + '-store" type="hidden">\n' +
                         '                                            <input id="inputrows-' + id_ins + '-item_name"\n' +
@@ -752,7 +761,7 @@
             //库存弹出模态框选择物料
             $("#inputs").on("click", "button[name='stock_choice']", function () {
                 let appendId = $('#stocks');
-                let url = "{{ url_for('home.modal_stock') }}";
+                let url = "{{ url_for('home.order_modal_stock') }}?vip_id=" + $("#vip_id").val();
                 let key = $("#stock_search").val();
                 order_modal_stock(appendId, url, key);
                 //显示modal
@@ -763,7 +772,7 @@
             //模态框模糊查询
             $("#do_stock_search").click(function () {
                 let appendId = $('#stocks');
-                let url = "{{ url_for('home.modal_stock') }}";
+                let url = "{{ url_for('home.order_modal_stock') }}?vip_id=" + $("#vip_id").val();
                 let key = $("#stock_search").val();
                 order_modal_stock(appendId, url, key);
             });
@@ -771,7 +780,7 @@
                 if (event.keyCode == "13") {
                     //回车执行查询
                     let appendId = $('#stocks');
-                    let url = "{{ url_for('home.modal_stock') }}";
+                    let url = "{{ url_for('home.order_modal_stock') }}?vip_id=" + $("#vip_id").val();
                     let key = $("#stock_search").val();
                     order_modal_stock(appendId, url, key);
                 }
@@ -790,10 +799,11 @@
                 // item_id 放到stock_id 的v里面
                 let item_id = $(this).find("td:first").attr("v");
                 let item_name = $(this).find("td:eq(1)").text();
-                let item_standard = $(this).find("td:eq(2)").text();
                 let item_unit = $(this).find("td:eq(3)").text();
-                let item_salesprice = $(this).find("td:eq(4)").text();
-                let store = $(this).find("td:eq(5)").text();
+                let store = $(this).find("td:eq(4)").text();
+                let item_salesprice = $(this).find("td:eq(6)").text();
+                let vipdetail_discountprice = $(this).find("td:eq(7)").text();
+                let vipdetail_id = $(this).find("td:eq(11)").text();
 
                 $("#stockModal").modal("hide");
                 // 给输入框赋值
@@ -801,17 +811,19 @@
                 input_item_id.val(item_id);
                 let input_item_name = $("#" + 'inputrows-' + loop_index + '-item_name');
                 input_item_name.val(item_name);
-                let input_item_standard = $("#" + 'inputrows-' + loop_index + '-item_standard');
-                input_item_standard.val(item_standard);
                 let input_item_unit = $("#" + 'inputrows-' + loop_index + '-item_unit');
                 input_item_unit.val(item_unit);
                 let input_item_salesprice = $("#" + 'inputrows-' + loop_index + '-item_salesprice');
                 input_item_salesprice.val(item_salesprice);
+                let input_vipdetail_discountprice = $("#" + 'inputrows-' + loop_index + '-discount');
+                input_vipdetail_discountprice.val(vipdetail_discountprice);
                 //还有类型和仓库两个hidden需要赋值
                 let input_item_type = $("#" + 'inputrows-' + loop_index + '-item_type');
                 input_item_type.val('0');
                 let input_store = $("#" + 'inputrows-' + loop_index + '-store');
                 input_store.val(store);
+                let input_vipdetail_id = $("#" + 'inputrows-' + loop_index + '-vipdetail_id');
+                input_vipdetail_id.val(vipdetail_id);
             });
 
             /////////////////////////////分割两个模态框
@@ -882,7 +894,7 @@
                 input_vipdetail_id.val(vipdetail_id);
             });
 
-
+            ///////模态框end
 
             //数量监听事件
             $("#inputs").on("change", ".qty", function () {
