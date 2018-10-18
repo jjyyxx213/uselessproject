@@ -2060,7 +2060,7 @@ def order_edit(id=None):
             db.session.add(order)
             # 主表暂存，需要使用id
             db.session.flush()
-            db.session.begin_nested()
+            # db.session.begin_nested()
             # 更改删除方式直接找到全部删除
             db.session.query(Odetail).filter(Odetail.order_id == order.id).delete()
             for iter_add in form.inputrows:
@@ -2082,7 +2082,7 @@ def order_edit(id=None):
                 )
                 db.session.add(odetail)
             # 把所有明细暂存，后面用于计算是否存在核减为负数的情况
-            db.session.flush()
+            db.session.commit()
             # todo
             if switch == 1: # 结算
                 # valid True可以提交; False 不能提交

@@ -1437,7 +1437,7 @@ class OrderListForm(FlaskForm):
         }
     )
     # 工作人员
-    users = StringField(
+    users = HiddenField(
         label=u'工作人员列表',
         validators=[
             DataRequired(message=u'请选择工作人员')

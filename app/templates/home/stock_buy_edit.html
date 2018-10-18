@@ -473,7 +473,7 @@
             };
             //遍历.store-choice，为进入时所有的库房下拉框动态初始化
             $(".store-choice").each(function () {
-                id = $(this).attr("id");
+                let id = $(this).attr("id");
                 ajaxSelect2(id, options);
                 setStoreValue(id);
             });

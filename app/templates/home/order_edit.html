@@ -272,11 +272,14 @@
                                             {% endfor %}
                                         </div>
                                         <div class="col-md-3 padding-defined">
+                                            <input class="users" id="inputrows-{{ loop.index0 }}-users"
+                                                       name="inputrows-{{ loop.index0 }}-users" type="hidden"
+                                                       value="{{ v.data.users or '' }}">
                                             <select class="form-control select2 users-choice"
-                                                    id="inputrows-{{ loop.index0 }}-users"
-                                                    name="inputrows-{{ loop.index0 }}-users"
-                                                    data-placeholder="请选择工作人员(多选)" multiple
-                                                    v="{{ v.data.users or '' }}">
+                                                    id="inputrows-{{ loop.index0 }}-userlist"
+                                                    name="inputrows-{{ loop.index0 }}-userlist"
+                                                    loop_index="{{ loop.index0 }}"
+                                                    data-placeholder="请选择工作人员(多选)" multiple>
                                             </select>
                                             {% for err in v.users.errors %}
                                                 <div class="col-md-12">
@@ -542,30 +545,34 @@
             // 默认为保存
             $('#switch').bootstrapSwitch('state',true);
 
-            // 下拉框设置
-            $('.users-choice').select2(
-                {
-                    language: "zh-CN",
-                    allowClear: true,
-                    multiple: true,
-                    ajax: {
-                        url: "{{ url_for('home.select_user') }}",
-                        dataType: 'json',
-                        delay: 250,
-                        data: function (params) {
-                          return {
-                            q: params.term,
-                          };
-                        },
-                        processResults: function (data) {
-                          return {
-                            results: data
-                          };
-                        },
-                        cache: true
-                      },
+            let users_data = {};
+            $.ajax({
+                url:"{{ url_for('home.select_user') }}",
+                type:"get",
+                data:{},
+                dataType:"json",
+                success:function(data){
+                    users_data = data;
+                    for(var i=0;i<data.length;i++){
+                        $(".users-choice").append('<option value="' + data[i].id + '">' + data[i].text + '</option>');
+                        $(".users-choice").trigger('change');
+                    }
+                    $(".users-choice").select2({
+                        data: data,
+                        language: "zh-CN",
+                        allowClear: true,
+                        multiple: true,
+                    });
+                    $(".users-choice").each(function () {
+                        let loop_index = $(this).attr("loop_index");
+                        let users = $("#" + 'inputrows-' + loop_index + '-users'); //从users获取值
+                        let mulSelData = $(users).val().split(",");//获取多选输入框选中值的方式
+                        $(this).val(mulSelData).trigger("change");
+                        console.log("初始化下拉：" + mulSelData);
+                    });
                 }
-            );
+            });
+
 
             // 动态加载inputrows
             let MaxInputs = 20; //maximum input boxes allowed
@@ -634,9 +641,11 @@
                         '                                    </div>\n' +
                         '                                    <div class="col-md-3 padding-defined">\n' +
                         '                                        <div class="form-group">\n' +
-                                '                                    <select class="form-control select2 users-choice"\n' +
-                                '                                            id="inputrows-' + id_ins + '-users"\n' +
-                                '                                            name="inputrows-' + id_ins + '-users"\n' +
+                        '                                       <input class="users" id="inputrows-' + id_ins + '-users"\n' +
+                        '                                               name="inputrows-' + id_ins + '-users" type="hidden">\n' +
+                                '                                    <select class="form-control select2 users-choice" loop_index="' + id_ins + '"\n' +
+                                '                                            id="inputrows-' + id_ins + '-userlist"\n' +
+                                '                                            name="inputrows-' + id_ins + '-userlist"\n' +
                                 '                                            multiple data-placeholder="请选择工作人员(多选)">\n' +
                                 '                                    </select>\n' +
                         '                                        </div>\n' +
@@ -657,26 +666,11 @@
                         '                                    </div>\n' +
                         '                                </div>');
                     // 动态添加行后，要处理select2下拉框初始化
-                    $("#" + "inputrows-" + id_ins + "-users").select2({
-                            language: "zh-CN",
-                            allowClear: true,
-                            multiple: true,
-                            ajax: {
-                                url: "{{ url_for('home.select_user') }}",
-                                dataType: 'json',
-                                delay: 250,
-                                data: function (params) {
-                                  return {
-                                    q: params.term,
-                                  };
-                                },
-                                processResults: function (data) {
-                                  return {
-                                    results: data
-                                  };
-                                },
-                                cache: true
-                              },
+                    $("#" + "inputrows-" + id_ins + "-userlist").select2({
+                        data: users_data,
+                        language: "zh-CN",
+                        allowClear: true,
+                        multiple: true,
                     });
                     id_ins++; //这个要放到select2监听后面，否则id错误
                     row_ins++;
@@ -694,6 +688,13 @@
                     $("#amount").val(calcAmount());
                 }
                 return false;
+            });
+
+            $("#inputs").on("select2:select", ".users-choice", function () {
+                SetUsersData(this);
+            });
+            $("#inputs").on("select2:unselect", ".users-choice", function () {
+                SetUsersData(this);
             });
 
             //客户弹出模态框选择物料
@@ -973,16 +974,14 @@
                 }
             });
         });
-        $("#inputrows-0-users").on("select2:select",function(){
-            getSelectedData(this);
-        });
-        $("#inputrows-0-users").on("select2:unselect",function(){
-            getSelectedData(this);
-        });
-        function getSelectedData(selectId) {
-            var mulSelData = $(selectId).val().join(",");//获取多选输入框选中值的方式
+
+        // 人员赋值
+        function SetUsersData(selectId) {
+            let loop_index = $(selectId).attr("loop_index");
+            let users = $("#" + 'inputrows-' + loop_index + '-users');
+            let mulSelData = $(selectId).val().join(",");//获取多选输入框选中值的方式
+            users.val(mulSelData);
             console.log("选中项是：" + mulSelData);
-            $(selectId).val(mulSelData);
         }
 
         // 计算合计
