@@ -943,7 +943,6 @@ def stock_buy_edit(id=None):
             porder.remarks = form.remarks.data
             porder.addtime = datetime.now()#更新为发布日期
         try:
-            db.session.begin_nested()
             db.session.add(porder)
             db.session.flush()  # 提交一下获取id,不要使用commit
 
@@ -1017,10 +1016,9 @@ def stock_buy_edit(id=None):
             return redirect(url_for('home.stock_buy_list'))
         except Exception as e:
             db.session.rollback()
-            flash(u'采购单:%s结算/暂存异常,错误码：%s' % (porder.id, e.message), 'err')
+            flash(u'采购单:%s结算/暂存异常,错误码：%s' % (porder.id, e), 'err')
             return redirect(url_for('home.stock_buy_edit', id=porder.id))
-        finally:
-            db.session.close()
+
     return render_template('home/stock_buy_edit.html', form=form, porder=porder, form_count=form_count)
 
 @home.route('/stock/buy/del/<int:id>', methods=['GET'])
@@ -1126,7 +1124,6 @@ def stock_out_edit(id=None):
                 porder.status = 0
                 porder.remarks = form.remarks.data
                 porder.addtime = datetime.now()  # 更新为发布日期
-            db.session.begin_nested()
             db.session.add(porder)
             # 主表暂存，需要使用id
             db.session.flush()
@@ -1209,8 +1206,6 @@ def stock_out_edit(id=None):
             db.session.rollback()
             flash(u'出库单:%s结算/暂存异常,错误码：%s' % (porder.id, e.message), 'err')
             return redirect(url_for('home.stock_out_edit', id=porder.id))
-        finally:
-            db.session.close()
 
     return render_template('home/stock_out_edit.html', form=form, porder=porder, form_count=form_count)
 
@@ -1334,7 +1329,6 @@ def stock_allot_edit(id=None):
                 porder.status = 0
                 porder.remarks = form.remarks.data
                 porder.addtime = datetime.now()  # 更新为发布日期
-            db.session.begin_nested()
             db.session.add(porder)
             # 主表暂存，需要使用id
             db.session.flush()
@@ -1432,10 +1426,8 @@ def stock_allot_edit(id=None):
                 return redirect(url_for('home.stock_allot_list'))
         except Exception as e:
             db.session.rollback()
-            flash(u'调拨单:%s结算/暂存异常,错误码：%s' % (porder.id, e.message), 'err')
+            flash(u'调拨单:%s结算/暂存异常,错误码：%s' % (porder.id, e), 'err')
             return redirect(url_for('home.stock_allot_edit', id=porder.id))
-        finally:
-            db.session.close()
 
     return render_template('home/stock_allot_edit.html', form=form, porder=porder, form_count=form_count)
 
@@ -1549,7 +1541,6 @@ def stock_loss_edit(id=None):
                 porder.status = 0
                 porder.remarks = form.remarks.data
                 porder.addtime = datetime.now()  # 更新为发布日期
-            db.session.begin_nested()
             db.session.add(porder)
             # 主表暂存，需要使用id
             db.session.flush()
@@ -1634,8 +1625,6 @@ def stock_loss_edit(id=None):
             db.session.rollback()
             flash(u'报损单:%s结算/暂存异常,错误码：%s' % (porder.id, e.message), 'err')
             return redirect(url_for('home.stock_loss_edit', id=porder.id))
-        finally:
-            db.session.close()
 
     return render_template('home/stock_loss_edit.html', form=form, porder=porder, form_count=form_count)
 
@@ -1769,7 +1758,6 @@ def stock_return_edit(id=None):
                 porder.status = status
                 porder.remarks = form.remarks.data
                 porder.addtime = datetime.now()  # 更新为发布日期
-            db.session.begin_nested()
             db.session.add(porder)
             db.session.flush()  # 提交一下获取id,不要使用commit
 
@@ -1849,8 +1837,6 @@ def stock_return_edit(id=None):
             db.session.rollback()
             flash(u'退货单:%s结算/暂存异常,错误码：%s' % (porder.id, e.message), 'err')
             return redirect(url_for('home.stock_return_edit', id=porder.id))
-        finally:
-            db.session.close()
 
     return render_template('home/stock_return_edit.html', form=form, porder=porder, form_count=form_count)
 
@@ -2060,7 +2046,6 @@ def order_edit(id=None):
             db.session.add(order)
             # 主表暂存，需要使用id
             db.session.flush()
-            # db.session.begin_nested()
             # 更改删除方式直接找到全部删除
             db.session.query(Odetail).filter(Odetail.order_id == order.id).delete()
             for iter_add in form.inputrows:
@@ -2155,9 +2140,8 @@ def order_edit(id=None):
             order_id = '0'
             if order:
                 order_id = order.id
-            flash(u'收银单:%s结算/暂存异常,错误码：%s' % (order_id, e.message), 'err')
+            flash(u'收银单:%s结算/暂存异常,错误码：%s' % (order_id, e), 'err')
             return redirect(url_for('home.order_edit', id=order_id))
-        finally:
-            db.session.close()
+
 
     return render_template('home/order_edit.html', form=form, order=order, form_count=form_count)
