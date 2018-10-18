@@ -293,6 +293,8 @@ class Item(db.Model):
     stocks = db.relationship('Stock', backref='item')
     # 采购单明细外键
     podetails = db.relationship('Podetail', backref='item')
+    # 收银单明细外键
+    odetails = db.relationship('Odetail', backref='item')
 
     def __repr__(self):
         return '<Item %r>' % self.name
@@ -514,7 +516,7 @@ class Odetail(db.Model):
     # 项目/商品ID
     item_id = db.Column(db.Integer, db.ForeignKey('tb_item.id'), nullable=True)
     # 仓库编号 冗余
-    stock_id = db.Column(db.Integer)
+    stock_id = db.Column(db.String(20))
     # 仓库
     store = db.Column(db.String(40))
     # 数量
@@ -522,7 +524,7 @@ class Odetail(db.Model):
     # 销售单价
     salesprice = db.Column(db.Float, default=0)
     # 会员卡明细id  冗余
-    vipdetail_id = db.Column(db.Integer)
+    vipdetail_id = db.Column(db.String(20))
     # 折扣价
     discount = db.Column(db.Float, default=0)
     # 单行合计

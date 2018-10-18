@@ -1391,9 +1391,6 @@ class OrderListForm(FlaskForm):
     store = HiddenField(
         label=u'仓库',
         description=u'仓库',
-        validators=[
-            DataRequired(message=u'请选择仓库'),
-        ],
     )
     # 单位
     item_unit = StringField(
@@ -1440,20 +1437,12 @@ class OrderListForm(FlaskForm):
         }
     )
     # 工作人员
-    users = SelectMultipleField(
+    users = StringField(
         label=u'工作人员列表',
         validators=[
             DataRequired(message=u'请选择工作人员')
         ],
-        coerce=int,
-        # 通过列表生成器生成列表
-        choices=[],
         description=u'工作人员列表',
-        render_kw={
-            'class': 'form-control select2',
-            'multiple': 'multiple',
-            'data-placeholder': u'请选择工作人员(多选)',
-        }
     )
     # 单行合计
     rowamount = StringField(
@@ -1571,7 +1560,7 @@ class OrderForm(FlaskForm):
         label=u'优惠后金额',
         validators=[
             DataRequired(message=u'请输入优惠后金额'),
-            Regexp('[\d+\.\d]', message=u'请输入数字'),
+            Regexp('[\d+\.\d]', message=u'优惠后金额请输入数字'),
         ],
         description=u'优惠后金额',
         render_kw={
@@ -1584,7 +1573,7 @@ class OrderForm(FlaskForm):
         label=u'本次付款',
         validators=[
             DataRequired(message=u'请输入付款金额'),
-            Regexp('[\d+\.\d]', message=u'请输入数字'),
+            Regexp('[\d+\.\d]', message=u'本次付款请输入数字'),
         ],
         description=u'本次付款',
         render_kw={
@@ -1596,8 +1585,7 @@ class OrderForm(FlaskForm):
     score = StringField(
         label=u'积分',
         validators=[
-            DataRequired(message=u'请输入抵扣积分'),
-            Regexp('[\d+\.\d]', message=u'数字'),
+            Regexp('[\d+\.\d]', message=u'积分请输入数字'),
         ],
         description=u'积分',
         render_kw={
@@ -1609,7 +1597,7 @@ class OrderForm(FlaskForm):
         label=u'本次欠款',
         description=u'本次欠款',
         validators=[
-            Regexp('^[+]{0,1}(\d+)$|^[+]{0,1}(\d+\.\d+)$', message=u'不为负数'),
+            Regexp('^[+]{0,1}(\d+)$|^[+]{0,1}(\d+\.\d+)$', message=u'欠款不为负数'),
         ],
         render_kw={
             'class': 'form-control',

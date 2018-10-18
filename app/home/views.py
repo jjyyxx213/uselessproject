@@ -10,7 +10,7 @@ from werkzeug.security import generate_password_hash
 from sqlalchemy import or_, and_, func, text
 from json import dumps
 from datetime import datetime, timedelta
-import os, uuid
+import os, random, uuid
 
 def change_filename(filename):
     # 修改文件名称
@@ -769,7 +769,7 @@ def select_user():
     for v in User.query.order_by(User.name).all():
         users.append(
             {
-                "id": v.id,
+                "id": v.name,
                 "text": v.name,
             }
         )
@@ -1970,7 +1970,7 @@ def order_list():
                error_out=False)
     return render_template('home/order_list.html', pagination=pagination, key=key, status=status, debt=debt)
 
-@home.route('/order/edit/<int:id>', methods=['GET', 'POST'])
+@home.route('/order/edit/<string:id>', methods=['GET', 'POST'])
 def order_edit(id=None):
     # 收银单
     form = OrderForm()
@@ -1998,7 +1998,11 @@ def order_edit(id=None):
             form.discount.data = order.discount
             form.payment.data = order.payment
             form.debt.data = order.debt
+            form.score.data = order.score
             form.remarks.data = order.remarks
+        else:
+            # 积分消耗默认为0
+            form.score.data = 0
 
         # 如果存在明细
         if odetails:
@@ -2014,7 +2018,7 @@ def order_edit(id=None):
                 listform.stock_id = detail.stock_id # 方便计算
                 listform.store = detail.store
                 listform.item_unit = detail.item.unit
-                listform.item_salesprice = detail.item.item_salesprice
+                listform.item_salesprice = detail.item.salesprice
                 listform.vipdetail_id = detail.vipdetail_id # 方便计算
                 listform.discount = detail.discount
                 listform.qty = detail.qty
@@ -2030,7 +2034,7 @@ def order_edit(id=None):
             # 添加主表
             if not order:  # 没有新增一个
                 order = Order(
-                    id=datetime.now().strftime('%Y%m%d%H%M%S') + str(uuid.uuid4().hex),
+                    id=datetime.now().strftime('%Y%m%d%H%M%S') + ''.join([str(random.randint(1,10)) for i in range(2)]),
                     type=0,
                     user_id=int(session['user_id']),
                     customer_id=form.customer_id.data,
@@ -2038,6 +2042,7 @@ def order_edit(id=None):
                     discount=form.discount.data,
                     payment=form.payment.data,
                     debt=form.debt.data,
+                    score=form.score.data,
                     status=0,
                     remarks=form.remarks.data,
                 )
@@ -2046,36 +2051,44 @@ def order_edit(id=None):
                 order.customer_id = form.customer_id.data
                 order.amount = form.amount.data
                 order.discount = form.discount.data
-                order.payment = form.payment
-                order.debt = form.debt
+                order.payment = form.payment.data
+                order.debt = form.debt.data
+                order.score = form.score.data
                 order.status = 0
                 order.remarks = form.remarks.data
                 order.addtime = datetime.now()  # 更新为发布日期
-            db.session.begin_nested()
             db.session.add(order)
             # 主表暂存，需要使用id
             db.session.flush()
-
+            db.session.begin_nested()
             # 更改删除方式直接找到全部删除
             db.session.query(Odetail).filter(Odetail.order_id == order.id).delete()
             for iter_add in form.inputrows:
                 # 新增明细
+                # 折扣有可能为空，处理一下
+                discount = 0 if iter_add.discount.data == "" else float(iter_add.discount.data)
                 odetail = Odetail(
                     order_id=order.id,
                     item_id=iter_add.item_id.data,
                     stock_id=iter_add.stock_id.data,
                     store=iter_add.store.data,
                     qty=float(iter_add.qty.data), # 这里一定要强转，临时数据后面要比较
-                    salesprice=float(iter_add.salesprice.data),
-                    vipdetail_id=iter_add.vipdetail_id,
-                    discount=float(iter_add.discount.data),
+                    salesprice=float(iter_add.item_salesprice.data),
+                    vipdetail_id=iter_add.vipdetail_id.data,
+                    discount=discount,
                     rowamount=float(iter_add.rowamount.data),
                     users=iter_add.users.data,
+                    #users=','.join(map(lambda v: str(v), iter_add.users.data)),
                 )
                 db.session.add(odetail)
             # 把所有明细暂存，后面用于计算是否存在核减为负数的情况
             db.session.flush()
             # todo
+            if switch == 1: # 结算
+                # valid True可以提交; False 不能提交
+                valid = True
+                # 判断优惠是否属于当前会员
+                # 判断商品中有无大于库存的
             ''' 
             if switch == 1:# 结算
                 # valid True可以提交; False 不能提交
@@ -2139,8 +2152,11 @@ def order_edit(id=None):
             '''
         except Exception as e:
             db.session.rollback()
-            flash(u'收银单:%s结算/暂存异常,错误码：%s' % (order.id, e.message), 'err')
-            return redirect(url_for('home.order_edit', id=order.id))
+            order_id = '0'
+            if order:
+                order_id = order.id
+            flash(u'收银单:%s结算/暂存异常,错误码：%s' % (order_id, e.message), 'err')
+            return redirect(url_for('home.order_edit', id=order_id))
         finally:
             db.session.close()
 
