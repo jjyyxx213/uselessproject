@@ -251,7 +251,7 @@
                                                        name="inputrows-{{ loop.index0 }}-discount"
                                                        class="form-control costprice"
                                                        placeholder="折扣价" type="text" readonly
-                                                       value="{{ v.data.costprice or '' }}">
+                                                       value="{{ v.data.discount or '' }}">
                                             </div>
                                             {% for err in v.discount.errors %}
                                                 <div class="col-md-12">

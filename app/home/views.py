@@ -1156,7 +1156,7 @@ def stock_out_edit(id=None):
                 grouplists = db.session.execute(text(sql_text), {'id' : porder.id})
                 for iter in grouplists:
                     if iter.qty < iter.sum_qty:
-                        flash(u'零件:' + iter.item_name + u',出库后数量小于0', 'err')
+                        flash(u'零件:[' + iter.item_name + u']出库后数量小于0', 'err')
                         valid = False
 
                 # 校验通过
@@ -1362,7 +1362,7 @@ def stock_allot_edit(id=None):
                 grouplists = db.session.execute(text(sql_text), {'id': porder.id})
                 for iter in grouplists:
                     if iter.qty < iter.sum_qty:
-                        flash(u'零件:' + iter.item_name + u',调拨后数量小于0', 'err')
+                        flash(u'零件:[' + iter.item_name + u']调拨后数量小于0', 'err')
                         valid = False
 
                 # 校验通过
@@ -1573,7 +1573,7 @@ def stock_loss_edit(id=None):
                 grouplists = db.session.execute(text(sql_text), {'id': porder.id})
                 for iter in grouplists:
                     if iter.qty < iter.sum_qty:
-                        flash(u'零件:' + iter.item_name + u',报损后数量小于0', 'err')
+                        flash(u'零件:[' + iter.item_name + u']报损后数量小于0', 'err')
                         valid = False
 
                 # 校验通过
@@ -1788,7 +1788,7 @@ def stock_return_edit(id=None):
                 grouplists = db.session.execute(text(sql_text), {'id': porder.id})
                 for iter in grouplists:
                     if iter.qty < iter.sum_qty:
-                        flash(u'零件:' + iter.item_name + u',退货后数量小于0', 'err')
+                        flash(u'零件:[' + iter.item_name + u']退货后数量小于0', 'err')
                         valid = False
                 # 校验通过
                 if valid:
@@ -2073,7 +2073,22 @@ def order_edit(id=None):
                 # valid True可以提交; False 不能提交
                 valid = True
                 # 判断优惠是否属于当前会员
+                sql_text = 'select distinct o.order_id, o.item_id, i.name as item_name, o.discount, o.vipdetail_id from tb_odetail o, tb_item i  ' \
+                           'where o.order_id = :order_id and o.item_id = i.id and not exists ( ' \
+                           'select id  from tb_vipdetail v where o.vipdetail_id = v.id and v.endtime > now() ) order by o.id '
+                checklists = db.session.execute(text(sql_text), {'order_id': order.id})
+                for iter in checklists:
+                    flash(u'商品/服务:[' + iter.item_name + u']优惠已失效', 'err')
+                    valid = False
                 # 判断商品中有无大于库存的
+                sql_text = 'select a.item_id, i.name as item_name, a.vipdetail_id, a.sum_qty, v.quantity, v.addtime, v.endtime from ' \
+                           '(select item_id, vipdetail_id, sum(qty) as sum_qty from tb_odetail o where o.order_id = :order_id ' \
+                           'group by item_id, vipdetail_id) as a, tb_item as i, tb_vipdetail v ' \
+                           'where a.item_id = i.id and a.vipdetail_id = v.id and a.sum_qty > v.quantity and v.endtime > now()'
+                checklists = db.session.execute(text(sql_text), {'order_id': order.id})
+                for iter in checklists:
+                    flash(u'商品/服务:[' + iter.item_name + u']能选择的优惠总数为' + str(int(iter.quantity)) + u',已选择' + str(int(iter.sum_qty)) + u'次' , 'err')
+                    valid = False
             ''' 
             if switch == 1:# 结算
                 # valid True可以提交; False 不能提交
