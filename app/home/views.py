@@ -4,7 +4,7 @@ from flask import render_template, session, redirect, request, url_for, flash, c
 from forms import LoginForm, PwdForm, CustomerForm, CusVipForm, CusVipDepositForm, StockBuyForm, StockBuyListForm, StockBuyDebtForm, \
     StockOutListForm, StockOutForm, StockAllotListForm, StockAllotForm, StockLossListForm, StockLossForm, StockReturnListForm, \
     StockReturnForm, StockReturnDebtForm, OrderListForm, OrderForm
-from app.models import User, Userlog, Oplog, Item, Supplier, Customer, Stock, Porder, Podetail, Kvp, Mscard, Msdetail, Vip, Vipdetail, Order, Odetail
+from app.models import User, Userlog, Oplog, Item, Supplier, Customer, Stock, Porder, Podetail, Kvp, Mscard, Msdetail, Vip, Vipdetail, Order, Odetail, Billing
 from app import db
 from werkzeug.security import generate_password_hash
 from sqlalchemy import or_, and_, func, text
@@ -2078,8 +2078,8 @@ def order_edit(id=None):
                 sql_text = 'select distinct o.order_id, o.item_id, i.name as item_name, o.discount, o.vipdetail_id from tb_odetail o, tb_item i  ' \
                            'where o.order_id = :order_id and o.item_id = i.id and not exists ( ' \
                            'select id  from tb_vipdetail v where o.vipdetail_id = v.id and v.endtime > now() ) order by o.id '
-                checklists = db.session.execute(text(sql_text), {'order_id': order.id})
-                for iter in checklists:
+                checklist = db.session.execute(text(sql_text), {'order_id': order.id})
+                for iter in checklist:
                     flash(u'商品/服务:[' + iter.item_name + u']优惠已失效', 'err')
                     valid = False
                 # 判断商品中有无大于库存的
@@ -2087,19 +2087,61 @@ def order_edit(id=None):
                            '(select item_id, vipdetail_id, sum(qty) as sum_qty from tb_odetail o where o.order_id = :order_id ' \
                            'group by item_id, vipdetail_id) as a, tb_item as i, tb_vipdetail v ' \
                            'where a.item_id = i.id and a.vipdetail_id = v.id and a.sum_qty > v.quantity and v.endtime > now()'
-                checklists = db.session.execute(text(sql_text), {'order_id': order.id})
-                for iter in checklists:
+                checklist = db.session.execute(text(sql_text), {'order_id': order.id})
+                for iter in checklist:
                     flash(u'商品/服务:[' + iter.item_name + u']能选择的优惠总数为' + str(int(iter.quantity)) + u',已选择' + str(int(iter.sum_qty)) + u'次' , 'err')
                     valid = False
 
                 # 校验通过
                 if valid:
                     pass
-                    # 客户 更新到店次数/累计消费/欠款 tb_customer
-                    # 商品/服务 消减VIP优惠次数 tb_vipdetail
-                    # 增加客户流水 tb_billing
                     # 商品冲减库存 tb_stock
+                    ## 不过滤服务了，因为服务不可能有库存，有问题再说吧
+                    stocklist = db.session.query(Odetail, Stock).filter(
+                        Odetail.order_id == order.id,
+                        Odetail.stock_id == Stock.id,
+                    ).order_by(Odetail.id.asc()).all()
+                    for iter in stocklist:
+                        ## 减少库存数量
+                        iter.Stock.qty -= iter.Odetail.qty
+                        db.session.add(iter.Stock)
+                    # 商品/服务 消减VIP优惠次数 tb_vipdetail
+                    viplist = db.session.query(Odetail, Vipdetail).filter(
+                        Odetail.order_id == order.id,
+                        Odetail.vipdetail_id == Vipdetail.id,
+                    ).order_by(Odetail.id.asc()).all()
+                    for iter in viplist:
+                        ## 减少VIP使用次数
+                        iter.Vipdetail.quantity -= iter.Odetail.qty
+                        db.session.add(iter.Vipdetail)
+                    # 客户 更新到店次数/累计消费/欠款 tb_customer
+                    customer = Customer.query.filter(id == order.customer_id).first()
+                    customer.freq += 1
+                    customer.summary += order.payment
+                    customer.debt += order.debt
+                    db.session.add(customer)
+                    # 增加客户流水 tb_billing
+                    billing = Billing(
+                        cust_id=order.customer_id,
+                        paywith=order.paywith,
+                        order_id=order.id,
+                        price=order.payment,
+                        score=order.score,
+                    )
+                    db.session.add(billing)
                     # 订单状态更新 tb_order
+                    order.status = 1  # 设置为发布状态
+                    db.session.add(order)
+                    # 记录出库日志
+                    oplog = Oplog(
+                        user_id=session['user_id'],
+                        ip=request.remote_addr,
+                        reason=u'结算收银单:%s' % order.id
+                    )
+                    db.session.add(oplog)
+                    db.session.commit()
+                    flash(u'收银单结算成功', 'ok')
+                    return redirect(url_for('home.order_list'))
                 # 校验不通过,暂存
                 else:
                     oplog = Oplog(
@@ -2121,33 +2163,7 @@ def order_edit(id=None):
                 flash(u'收银单暂存成功', 'ok')
                 return redirect(url_for('home.order_list'))
 
-            ''' 
-                # 校验通过
-                if valid:
-                    # 遍历临时数据
-                    checklists = db.session.query(Podetail, Stock).filter(
-                        Podetail.porder_id == porder.id,
-                        Podetail.item_id == Stock.item_id,
-                        Podetail.ostore == Stock.store,
-                    ).order_by(Podetail.id.asc()).all()
-                    for iter in checklists:
-                        # 减少原库存数量
-                        iter.Stock.qty -= iter.Podetail.qty
-                        db.session.add(iter.Stock)
 
-                    porder.status = 1 # 设置为发布状态
-                    db.session.add(porder)
-                    # 记录出库日志
-                    oplog = Oplog(
-                        user_id=session['user_id'],
-                        ip=request.remote_addr,
-                        reason=u'结算报损单:%s' % porder.id
-                    )
-                    db.session.add(oplog)
-                    db.session.commit()
-                    flash(u'报损单结算成功', 'ok')
-                    return redirect(url_for('home.stock_loss_list'))
-            '''
         except Exception as e:
             db.session.rollback()
             order_id = '0'
