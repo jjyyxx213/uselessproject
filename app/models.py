@@ -482,6 +482,8 @@ class Order(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('tb_user.id'))
     # 客户id
     customer_id = db.Column(db.Integer, db.ForeignKey('tb_customer.id'))
+    # 支付方式
+    paywith = db.Column(db.String(100), nullable=False)
     # 应收金额
     amount = db.Column(db.Float, default=0)
     # 优惠后应收金额

@@ -76,12 +76,23 @@
                                         </div>
                                     {% endfor %}
                                 </div>
-                                <div class="col-md-5 padding-defined">
+                                <div class="col-md-3 padding-defined">
                                     <div class="input-group">
                                         <span class="input-group-addon">车型</span>
                                     {{ form.customer_brand }}
                                     </div>
                                     {% for err in form.customer_brand.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-2 padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">支付方式</span>
+                                    {{ form.paywith }}
+                                    </div>
+                                    {% for err in form.paywith.errors %}
                                         <div class="col-md-12">
                                             <p style="color: red" class="small">{{ err }}</p>
                                         </div>
@@ -544,6 +555,10 @@
             );
             // 默认为保存
             $('#switch').bootstrapSwitch('state',true);
+            // 支付方式初始化
+            $('#paywith').select2({
+                language: "zh-CN",
+            })
 
             let users_data = {};
             $.ajax({

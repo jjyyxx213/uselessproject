@@ -54,6 +54,11 @@ def dbinit():
     objects.append(Kvp(type='store', value=u'库房1'))
     objects.append(Kvp(type='store', value=u'库房2'))
     objects.append(Kvp(type='store', value=u'库房3'))
+    # 支付方式 paywith
+    objects.append(Kvp(type='paywith', value=u'现金'))
+    objects.append(Kvp(type='paywith', value=u'银行卡'))
+    objects.append(Kvp(type='paywith', value=u'支付宝'))
+    objects.append(Kvp(type='paywith', value=u'微信'))
 
     db.session.add_all(objects)
     db.session.commit()

@@ -1976,6 +1976,7 @@ def order_edit(id=None):
             form.customer_phone.data = order.customer.phone
             form.customer_pnumber.data = order.customer.pnumber
             form.customer_brand.data = order.customer.brand
+            form.paywith.data = order.paywith
             form.vip_id.data = order.customer.vip_id
             form.vip_name.data = order.customer.vip.name
             form.vip_balance.data = order.customer.vip.balance
@@ -2024,6 +2025,7 @@ def order_edit(id=None):
                     type=0,
                     user_id=int(session['user_id']),
                     customer_id=form.customer_id.data,
+                    paywith=form.paywith.data,
                     amount=form.amount.data,
                     discount=form.discount.data,
                     payment=form.payment.data,
@@ -2035,6 +2037,7 @@ def order_edit(id=None):
             else:  # 有更新值
                 order.user_id = int(session['user_id'])
                 order.customer_id = form.customer_id.data
+                order.paywith = form.paywith.data
                 order.amount = form.amount.data
                 order.discount = form.discount.data
                 order.payment = form.payment.data
@@ -2068,7 +2071,6 @@ def order_edit(id=None):
                 db.session.add(odetail)
             # 把所有明细暂存，后面用于计算是否存在核减为负数的情况
             db.session.commit()
-            # todo
             if switch == 1: # 结算
                 # valid True可以提交; False 不能提交
                 valid = True
@@ -2089,21 +2091,37 @@ def order_edit(id=None):
                 for iter in checklists:
                     flash(u'商品/服务:[' + iter.item_name + u']能选择的优惠总数为' + str(int(iter.quantity)) + u',已选择' + str(int(iter.sum_qty)) + u'次' , 'err')
                     valid = False
-            ''' 
-            if switch == 1:# 结算
-                # valid True可以提交; False 不能提交
-                valid = True
-                # 判断临时数据中有无报损数量大于库存的
-                sql_text = 'select b.item_id, d.name as item_name, b.ostore, b.sum_qty, c.qty from ' \
-                           '(select a.item_id, ostore, sum(qty) as sum_qty from tb_podetail as a ' \
-                           'where a.porder_id = :id group by item_id, ostore) as b, tb_stock as c, tb_item as d ' \
-                           'where b.item_id = c.item_id and b.ostore = c.store and b.item_id = d.id'
-                grouplists = db.session.execute(text(sql_text), {'id': porder.id})
-                for iter in grouplists:
-                    if iter.qty < iter.sum_qty:
-                        flash(u'零件:' + iter.item_name + u',报损后数量小于0', 'err')
-                        valid = False
 
+                # 校验通过
+                if valid:
+                    pass
+                    # 客户 更新到店次数/累计消费/欠款 tb_customer
+                    # 商品/服务 消减VIP优惠次数 tb_vipdetail
+                    # 增加客户流水 tb_billing
+                    # 商品冲减库存 tb_stock
+                    # 订单状态更新 tb_order
+                # 校验不通过,暂存
+                else:
+                    oplog = Oplog(
+                        user_id=session['user_id'],
+                        ip=request.remote_addr,
+                        reason=u'结算收银单:%s失败' % order.id
+                    )
+                    db.session.add(oplog)
+                    db.session.commit()
+                    return redirect(url_for('home.order_edit', id=order.id))
+
+            else:  # 暂存
+                oplog = Oplog(
+                    user_id=session['user_id'],
+                    ip=request.remote_addr,
+                    reason=u'暂存收银单:%s' % order.id
+                )
+                db.session.commit()
+                flash(u'收银单暂存成功', 'ok')
+                return redirect(url_for('home.order_list'))
+
+            ''' 
                 # 校验通过
                 if valid:
                     # 遍历临时数据
@@ -2129,26 +2147,6 @@ def order_edit(id=None):
                     db.session.commit()
                     flash(u'报损单结算成功', 'ok')
                     return redirect(url_for('home.stock_loss_list'))
-                # 校验不通过,暂存
-                else:
-                    oplog = Oplog(
-                        user_id=session['user_id'],
-                        ip=request.remote_addr,
-                         reason=u'结算报损单:%s失败' % porder.id
-                    )
-                    db.session.add(oplog)
-                    db.session.commit()
-                    return redirect(url_for('home.stock_loss_edit', id=porder.id))
-
-            else: # 暂存
-                oplog = Oplog(
-                    user_id=session['user_id'],
-                    ip=request.remote_addr,
-                    reason=u'暂存报损单:%s' % porder.id
-                )
-                db.session.commit()
-                flash(u'报损单暂存成功', 'ok')
-                return redirect(url_for('home.stock_loss_list'))
             '''
         except Exception as e:
             db.session.rollback()
