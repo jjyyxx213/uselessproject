@@ -125,9 +125,9 @@
                                 <div class="col-md-2 padding-defined">
                                     <div class="input-group">
                                         <span class="input-group-addon">余额</span>
-                                    {{ form.vip_balance }}
+                                    {{ form.customer_balance }}
                                     </div>
-                                    {% for err in form.vip_balance.errors %}
+                                    {% for err in form.customer_balance.errors %}
                                         <div class="col-md-12">
                                             <p style="color: red" class="small">{{ err }}</p>
                                         </div>
@@ -136,9 +136,9 @@
                                 <div class="col-md-2 padding-defined">
                                     <div class="input-group">
                                         <span class="input-group-addon">积分</span>
-                                        {{ form.vip_score }}
+                                        {{ form.customer_score }}
                                     </div>
-                                    {% for err in form.vip_score.errors %}
+                                    {% for err in form.customer_score.errors %}
                                         <div class="col-md-12">
                                             <p style="color: red" class="small">{{ err }}</p>
                                         </div>
@@ -333,14 +333,18 @@
                                         </span>
                                         {{ form.discount }}
                                         <span class="input-group-btn">
+                                            <button class="btn btn-default" type="button"> 余额消耗</button>
+                                        </span>
+                                        {{ form.balance }}
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="button" data-toggle="tooltip"
+                                            title="积分兑换比率100:1"> 积分消耗(?)</button>
+                                        </span>
+                                        {{ form.score }}
+                                        <span class="input-group-btn">
                                             <button class="btn btn-default" type="button"> 本次付款</button>
                                         </span>
                                         {{ form.payment }}
-                                        <span class="input-group-btn">
-                                            <button class="btn btn-default" type="button" data-toggle="tooltip"
-                                       title="积分兑换比率100:1"> 积分消耗(?)</button>
-                                        </span>
-                                        {{ form.score }}
                                         <span class="input-group-btn">
                                             <button class="btn btn-default" type="button"> 本次欠款</button>
                                         </span>
@@ -759,8 +763,8 @@
                 let freq = $(this).find("td:eq(7)").text();
                 let summary = $(this).find("td:eq(8)").text();
                 let vip_id = $(this).find("td:eq(9)").text();
-                let vip_balance = $(this).find("td:eq(10)").text();
-                let vip_score = $(this).find("td:eq(11)").text();
+                let balance = $(this).find("td:eq(10)").text();
+                let score = $(this).find("td:eq(11)").text();
 
                 $("#customerModal").modal("hide");
                 // 给输入框赋值
@@ -771,8 +775,8 @@
                 $("#" + 'customer_brand').val(brand);
                 $("#" + 'vip_id').val(vip_id);
                 $("#" + 'vip_name').val(vip_name);
-                $("#" + 'vip_balance').val(vip_balance);
-                $("#" + 'vip_score').val(vip_score);
+                $("#" + 'customer_balance').val(balance);
+                $("#" + 'customer_score').val(score);
             });
 
             /////////////////////////////分割两个模态框
@@ -956,6 +960,10 @@
             $("#payment").on("change", function () {
                 $("#debt").val(calcDebt());
             });
+            //余额监听事件
+            $("#balance").on("change", function () {
+                $("#debt").val(calcDebt());
+            });
             //积分监听事件
             $("#score").on("change", function () {
                 $("#debt").val(calcDebt());
@@ -1013,9 +1021,10 @@
         function calcDebt() {
             let discount = $("#discount").val() == "" ? 0 : parseFloat($("#discount").val());
             let payment = $("#payment").val() == "" ? 0 : parseFloat($("#payment").val());
+            let balance = $("#balance").val() == "" ? 0 : parseFloat($("#balance").val());
             // SCORE X 100 = RMB
             let score = $("#score").val() == "" ? 0 : parseFloat($("#score").val()) * 0.01;
-            let debt = discount - payment - score;
+            let debt = discount - payment - balance - score;
 
             return debt;
         }

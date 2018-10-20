@@ -24,8 +24,8 @@ function modal_customer(appendId, url, key) {
                     '<td>' + data[i].freq + '</td>' +
                     '<td>' + data[i].summary + '</td>' +
                     '<td class="hide">' + data[i].vip_id + '</td>' +
-                    '<td class="hide">' + data[i].vip_balance + '</td>' +
-                    '<td class="hide">' + data[i].vip_score + '</td></tr>'
+                    '<td class="hide">' + data[i].balance + '</td>' +
+                    '<td class="hide">' + data[i].score + '</td></tr>'
                 );
             }
         },

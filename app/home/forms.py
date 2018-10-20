@@ -1527,8 +1527,8 @@ class OrderForm(FlaskForm):
             'readonly': 'true',
         }
     )
-    # 余额
-    vip_balance = StringField(
+    # 余额 20181020 改为从用户表获取
+    customer_balance = StringField(
         label=u'余额',
         description=u'余额',
         render_kw={
@@ -1536,8 +1536,8 @@ class OrderForm(FlaskForm):
             'readonly': 'true',
         }
     )
-    # 积分
-    vip_score = StringField(
+    # 积分 20181020 改为从用户表获取
+    customer_score = StringField(
         label=u'积分',
         description=u'积分',
         render_kw={
@@ -1549,6 +1549,9 @@ class OrderForm(FlaskForm):
     paywith = SelectField(
         label=u'支付方式',
         coerce=unicode,
+        validators=[
+            DataRequired(message=u'请选择支付方式'),
+        ],
         choices=[],
         render_kw={
             "class": "form-control select2",
@@ -1589,6 +1592,17 @@ class OrderForm(FlaskForm):
         render_kw={
             'class': 'form-control',
             # 'placeholder': u'请输入本次付款金额',
+        }
+    )
+    # 余额抵扣
+    balance = StringField(
+        label=u'余额',
+        validators=[
+            Regexp('[\d+\.\d]', message=u'余额请输入数字'),
+        ],
+        description=u'余额',
+        render_kw={
+            'class': 'form-control',
         }
     )
     # 积分抵扣

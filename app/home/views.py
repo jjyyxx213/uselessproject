@@ -426,13 +426,9 @@ def modal_customer():
     for v in customers:
         vip_id = ''
         vip_name = ''
-        vip_balance = ''
-        vip_score = ''
         if v.vip:
             vip_id = v.vip_id
             vip_name = v.vip.name
-            vip_balance = v.vip.balance
-            vip_score = v.vip.score
         data.append(
             {
                 "id": v.id,
@@ -445,8 +441,8 @@ def modal_customer():
                 "summary": v.freq,
                 "vip_id": vip_id,
                 "vip_name": vip_name,
-                "vip_balance": vip_balance,
-                "vip_score": vip_score,
+                "balance": v.balance,
+                "score": v.score,
             }
         )
     res = {
@@ -1979,8 +1975,8 @@ def order_edit(id=None):
             form.paywith.data = order.paywith
             form.vip_id.data = order.customer.vip_id
             form.vip_name.data = order.customer.vip.name
-            form.vip_balance.data = order.customer.vip.balance
-            form.vip_score.data = order.customer.vip.score
+            form.customer_balance.data = order.customer.balance
+            form.customer_score.data = order.customer.score
             form.amount.data = order.amount
             form.discount.data = order.discount
             form.payment.data = order.payment
@@ -1989,6 +1985,7 @@ def order_edit(id=None):
             form.remarks.data = order.remarks
         else:
             # 积分消耗默认为0
+            form.balance.data = 0
             form.score.data = 0
 
         # 如果存在明细
@@ -2074,6 +2071,15 @@ def order_edit(id=None):
             if switch == 1: # 结算
                 # valid True可以提交; False 不能提交
                 valid = True
+                customer = Customer.query.filter(Customer.id == order.customer_id).first()
+                # 判断余额是否充足
+                if form.balance > customer.balance:
+                    flash(u'客户余额不足', 'err')
+                    valid = False
+                # 判断积分是否充足
+                if form.score > customer.score:
+                    flash(u'客户积分不足', 'err')
+                    valid = False
                 # 判断优惠是否属于当前会员
                 sql_text = 'select distinct o.order_id, o.item_id, i.name as item_name, o.discount, o.vipdetail_id from tb_odetail o, tb_item i  ' \
                            'where o.order_id = :order_id and o.item_id = i.id and not exists ( ' \
@@ -2094,7 +2100,7 @@ def order_edit(id=None):
 
                 # 校验通过
                 if valid:
-                    pass
+                    # todo 整个逻辑需要考虑 用户的余额和用户积分余额的消减
                     # 商品冲减库存 tb_stock
                     ## 不过滤服务了，因为服务不可能有库存，有问题再说吧
                     stocklist = db.session.query(Odetail, Stock).filter(
@@ -2114,8 +2120,7 @@ def order_edit(id=None):
                         ## 减少VIP使用次数
                         iter.Vipdetail.quantity -= iter.Odetail.qty
                         db.session.add(iter.Vipdetail)
-                    # 客户 更新到店次数/累计消费/欠款 tb_customer
-                    customer = Customer.query.filter(id == order.customer_id).first()
+                    # 客户 更新到店次数/累计消费/余额/欠款/积分 tb_customer
                     customer.freq += 1
                     customer.summary += order.payment
                     customer.debt += order.debt

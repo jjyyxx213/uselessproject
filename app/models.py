@@ -435,6 +435,10 @@ class Customer(db.Model):
     freq = db.Column(db.Integer, default=0)
     # 累计消费
     summary = db.Column(db.Float, default=0)
+    # 余额 20181020 增加
+    balance = db.Column(db.Float, default=0)
+    # 积分余额 20181020 增加
+    score = db.Column(db.Float, default=0)
     # 欠款 20181011 增加
     debt = db.Column(db.Float, default=0)
     # 会员卡号
