@@ -2100,7 +2100,7 @@ def order_edit(id=None):
 
                 # 校验通过
                 if valid:
-                    # todo 整个逻辑需要考虑 用户的余额和用户积分余额的消减
+                    # todo 整个逻辑需要考虑 用户的余额和用户积分余额的消减已处理待测试
                     # 商品冲减库存 tb_stock
                     ## 不过滤服务了，因为服务不可能有库存，有问题再说吧
                     stocklist = db.session.query(Odetail, Stock).filter(
@@ -2123,7 +2123,11 @@ def order_edit(id=None):
                     # 客户 更新到店次数/累计消费/余额/欠款/积分 tb_customer
                     customer.freq += 1
                     customer.summary += order.payment
+                    customer.balance -= order.balance
                     customer.debt += order.debt
+                    ## 积分 = 本次实际支付总额 - 消费的积分总额
+                    temp_score = order.payment - order.score
+                    customer.score += temp_score
                     db.session.add(customer)
                     # 增加客户流水 tb_billing
                     billing = Billing(

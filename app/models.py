@@ -494,6 +494,8 @@ class Order(db.Model):
     discount = db.Column(db.Float, default=0)
     # 实际收款金额
     payment = db.Column(db.Float, default=0)
+    # 余额抵扣
+    balance = db.Column(db.Float, default=0)
     # 积分抵扣
     score = db.Column(db.Float, default=0)
     # 欠款
