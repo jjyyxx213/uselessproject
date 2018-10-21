@@ -358,6 +358,9 @@
                                         {% for err in form.payment.errors %}
                                             <p style="color: red" class="small">{{ err }}</p>
                                         {% endfor %}
+                                        {% for err in form.balance.errors %}
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        {% endfor %}
                                         {% for err in form.score.errors %}
                                             <p style="color: red" class="small">{{ err }}</p>
                                         {% endfor %}

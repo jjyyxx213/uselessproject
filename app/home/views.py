@@ -1981,6 +1981,7 @@ def order_edit(id=None):
             form.discount.data = order.discount
             form.payment.data = order.payment
             form.debt.data = order.debt
+            form.balance.data = order.balance
             form.score.data = order.score
             form.remarks.data = order.remarks
         else:
@@ -2039,6 +2040,7 @@ def order_edit(id=None):
                 order.discount = form.discount.data
                 order.payment = form.payment.data
                 order.debt = form.debt.data
+                order.balance = form.balance.data
                 order.score = form.score.data
                 order.status = 0
                 order.remarks = form.remarks.data
@@ -2073,11 +2075,11 @@ def order_edit(id=None):
                 valid = True
                 customer = Customer.query.filter(Customer.id == order.customer_id).first()
                 # 判断余额是否充足
-                if form.balance > customer.balance:
+                if float(form.balance.data) > customer.balance:
                     flash(u'客户余额不足', 'err')
                     valid = False
                 # 判断积分是否充足
-                if form.score > customer.score:
+                if float(form.score.data) > customer.score:
                     flash(u'客户积分不足', 'err')
                     valid = False
                 # 判断优惠是否属于当前会员
@@ -2100,7 +2102,6 @@ def order_edit(id=None):
 
                 # 校验通过
                 if valid:
-                    # todo 整个逻辑需要考虑 用户的余额和用户积分余额的消减已处理待测试
                     # 商品冲减库存 tb_stock
                     ## 不过滤服务了，因为服务不可能有库存，有问题再说吧
                     stocklist = db.session.query(Odetail, Stock).filter(
@@ -2134,7 +2135,8 @@ def order_edit(id=None):
                         cust_id=order.customer_id,
                         paywith=order.paywith,
                         order_id=order.id,
-                        price=order.payment,
+                        payment=order.payment,
+                        balance=order.balance,
                         score=order.score,
                     )
                     db.session.add(billing)

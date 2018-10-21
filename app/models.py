@@ -465,10 +465,12 @@ class Billing(db.Model):
     paywith = db.Column(db.String(100), nullable=False)
     # 订单id
     order_id = db.Column(db.String(20), db.ForeignKey('tb_order.id'), unique=True)
-    # 销售金额
-    price = db.Column(db.Float, default=0)
-    # 销售积分
+    # 支付金额
+    payment = db.Column(db.Float, default=0)
+    # 积分抵扣
     score = db.Column(db.Float, default=0)
+    # 余额抵扣
+    balance = db.Column(db.Float, default=0)
     # 支付时间
     addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
