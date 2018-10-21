@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
 {% block css %}
     <style>
+        .first-padding-defined {
+            padding-left: 10px;
+            padding-right: 0px;
+        }
+
         .padding-defined {
             padding-left: 10px;
             padding-right: 0px;
@@ -30,6 +35,80 @@
                         {{ form.hidden_tag() }}
                         <div class="box-header with-border">
                             <h3 class="box-title"> 收银单 - {{ order.id }}</h3>
+                            <div class="row" style="margin-bottom: 5px">
+                                <div class="col-md-2 first-padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">客户</span>
+                                        {{ form.customer_name }}
+                                    </div>
+                                </div>
+                                <div class="col-md-2 padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">手机</span>
+                                        {{ form.customer_phone }}
+                                    </div>
+                                </div>
+                                <div class="col-md-2 padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">车牌</span>
+                                        {{ form.customer_pnumber }}
+                                    </div>
+                                </div>
+                                <div class="col-md-3 padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">车型</span>
+                                    {{ form.customer_brand }}
+                                    </div>
+                                </div>
+                                <div class="col-md-2 padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">支付方式</span>
+                                    {{ form.paywith }}
+                                    </div>
+                                    {% for err in form.paywith.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="row" style="margin-bottom: 5px">
+                                <div class="col-md-2 padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">会员</span>
+                                        {{ form.vip_id }}
+                                    </div>
+                                </div>
+                                <div class="col-md-2 padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">卡型</span>
+                                    {{ form.vip_name }}
+                                    </div>
+                                </div>
+                                <div class="col-md-2 padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">余额</span>
+                                    {{ form.customer_balance }}
+                                    </div>
+                                </div>
+                                <div class="col-md-2 padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">积分</span>
+                                        {{ form.customer_score }}
+                                    </div>
+                                </div>
+                                <div class="col-md-3 padding-defined">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">备注</span>
+                                    {{ form.remarks }}
+                                    </div>
+                                    {% for err in form.remarks.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
                         </div>
                         <div class="box-body">
                             <div class="row">
@@ -80,16 +159,6 @@
                                         {% endfor %}
                                 </div>
                             </div>
-                            <div class="row" style="margin-top: 10px">
-                                <div class="col-md-7 padding-defined pull-left">
-                                    <div class="input-group">
-                                        <span class="input-group-btn">
-                                                <button class="btn btn-default" type="button"> 备注</button>
-                                        </span>
-                                        {{ form.remarks }}
-                                    </div>
-                                </div>
-                            </div>
                             <div class="box-footer">
                                 {{ form.submit }}
                                 <a href="{{ url_for('home.order_list') }}" class="btn btn-default pull-right"
@@ -106,8 +175,8 @@
 {% block js %}
     <script>
         $(document).ready(function () {
-            $("#g-stock").addClass("active");
-            $("#g-stock-buy-list").addClass("active");
+            $("#g-order").addClass("active");
+            $("#g-order-list").addClass("active");
             // 弹出提示初始化
             $(function () {
                 $('[data-toggle="tooltip"]').tooltip()

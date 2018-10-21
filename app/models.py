@@ -464,7 +464,7 @@ class Billing(db.Model):
     # 支付方式
     paywith = db.Column(db.String(100), nullable=False)
     # 订单id
-    order_id = db.Column(db.String(20), db.ForeignKey('tb_order.id'), unique=True)
+    order_id = db.Column(db.String(20), db.ForeignKey('tb_order.id'), nullable=False)
     # 支付金额
     payment = db.Column(db.Float, default=0)
     # 积分抵扣

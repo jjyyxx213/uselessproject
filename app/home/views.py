@@ -1973,8 +1973,9 @@ def order_edit(id=None):
             form.customer_pnumber.data = order.customer.pnumber
             form.customer_brand.data = order.customer.brand
             form.paywith.data = order.paywith
-            form.vip_id.data = order.customer.vip_id
-            form.vip_name.data = order.customer.vip.name
+            if order.customer.vip:
+                form.vip_id.data = order.customer.vip_id
+                form.vip_name.data = order.customer.vip.name
             form.customer_balance.data = order.customer.balance
             form.customer_score.data = order.customer.score
             form.amount.data = order.amount
@@ -2084,7 +2085,7 @@ def order_edit(id=None):
                     valid = False
                 # 判断优惠是否属于当前会员
                 sql_text = 'select distinct o.order_id, o.item_id, i.name as item_name, o.discount, o.vipdetail_id from tb_odetail o, tb_item i  ' \
-                           'where o.order_id = :order_id and o.item_id = i.id and not exists ( ' \
+                           'where o.order_id = :order_id and o.item_id = i.id and o.vipdetail_id != \'\' and not exists ( ' \
                            'select id  from tb_vipdetail v where o.vipdetail_id = v.id and v.endtime > now() ) order by o.id '
                 checklist = db.session.execute(text(sql_text), {'order_id': order.id})
                 for iter in checklist:
@@ -2216,10 +2217,21 @@ def order_debt(id=None):
     # 收银单结款
     form = OrderDebtForm()
     order = Order.query.filter_by(id=id).first_or_404()
+    billing = Billing.query.filter_by(order_id=id).order_by(Billing.id.desc()).first_or_404()
     # 如果表单不属于用户，不是发布状态 退出
     if order.user_id != int(session['user_id']) or order.status == 0 or order.type != 0:
         return redirect(url_for('home.order_list'))
     if request.method == 'GET':
+        form.customer_name.data = order.customer.name
+        form.customer_phone.data = order.customer.phone
+        form.customer_pnumber.data = order.customer.pnumber
+        form.customer_brand.data = order.customer.brand
+        form.paywith.data = order.paywith
+        if order.customer.vip:
+            form.vip_id.data = order.customer.vip_id
+            form.vip_name.data = order.customer.vip.name
+        form.customer_balance.data = order.customer.balance
+        form.customer_score.data = order.customer.score
         form.amount.data = order.amount
         form.discount.data = order.discount
         form.payment.data = order.payment
@@ -2228,14 +2240,29 @@ def order_debt(id=None):
         form.debt.data = order.debt
         form.remarks.data = order.remarks
     if form.validate_on_submit():
-        order.amount = form.amount.data
-        order.discount = form.discount.data
-        order.payment = form.payment.data
-        order.balance = form.balance.data
-        order.score = form.score.data
-        order.debt = form.debt.data
+        if float(form.debt.data) > order.debt:
+            flash(u'欠款不能增多', 'err')
+            return redirect(url_for('home.order_debt', id=order_debt))
+        # 订单
+        order.paywith = form.paywith.data
+        order.amount = float(form.amount.data)
+        order.discount = float(form.discount.data)
+        order.payment = float(form.payment.data)
+        order.balance = float(form.balance.data)
+        order.score = float(form.score.data)
+        order.debt = float(form.debt.data)
         order.remarks = form.remarks.data
         db.session.add(order)
+        # 消费流水,与上次算差值
+        new_billing = Billing(
+            cust_id=order.customer_id,
+            paywith=order.paywith,
+            order_id=order.id,
+            payment=order.payment - billing.payment,
+            balance=order.balance - billing.balance,
+            score=order.score - billing.score,
+        )
+        db.session.add(new_billing)
         oplog = Oplog(
             user_id=session['user_id'],
             ip=request.remote_addr,

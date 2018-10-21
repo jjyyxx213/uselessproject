@@ -1655,6 +1655,94 @@ class OrderForm(FlaskForm):
         self.paywith.choices = [(v.value, v.value) for v in Kvp.query.filter_by(type='paywith').order_by(Kvp.value).all()]
 
 class OrderDebtForm(FlaskForm):
+    # 客户
+    customer_name = StringField(
+        label=u'客户',
+        validators=[
+            DataRequired(message=u'请选择客户')
+        ],
+        description=u'客户姓名',
+        render_kw={
+            'class': 'form-control',
+            'readonly': 'true',
+        }
+    )
+    # 手机
+    customer_phone = StringField(
+        label=u'手机',
+        description=u'手机',
+        render_kw={
+            'class': 'form-control',
+            'readonly': 'true',
+        }
+    )
+    # 车牌
+    customer_pnumber = StringField(
+        label=u'车牌',
+        description=u'车牌',
+        render_kw={
+            'class': 'form-control',
+            'readonly': 'true',
+        }
+    )
+    # 车型
+    customer_brand = StringField(
+        label=u'车型',
+        description=u'车型',
+        render_kw={
+            'class': 'form-control',
+            'readonly': 'true',
+        }
+    )
+    # 会员卡卡号
+    vip_id = StringField(
+        label=u'会员卡',
+        description=u'会员卡',
+        render_kw={
+            'class': 'form-control',
+            'readonly': 'true',
+        }
+    )
+    # 会员卡卡型
+    vip_name = StringField(
+        label=u'卡型',
+        description=u'卡型',
+        render_kw={
+            'class': 'form-control',
+            'readonly': 'true',
+        }
+    )
+    # 余额 20181020 改为从用户表获取
+    customer_balance = StringField(
+        label=u'余额',
+        description=u'余额',
+        render_kw={
+            'class': 'form-control',
+            'readonly': 'true',
+        }
+    )
+    # 积分 20181020 改为从用户表获取
+    customer_score = StringField(
+        label=u'积分',
+        description=u'积分',
+        render_kw={
+            'class': 'form-control',
+            'readonly': 'true',
+        }
+    )
+    # 支付方式
+    paywith = SelectField(
+        label=u'支付方式',
+        coerce=unicode,
+        validators=[
+            DataRequired(message=u'请选择支付方式'),
+        ],
+        choices=[],
+        render_kw={
+            "class": "form-control select2",
+            "data-placeholder": u"请选择支付方式",
+        }
+    )
     # 应付金额
     amount = StringField(
         label=u'应付金额',
@@ -1742,3 +1830,9 @@ class OrderDebtForm(FlaskForm):
             'class': 'btn btn-primary',
         }
     )
+
+    # 如果需要从数据库取值，一定要重写__init__方法，因为db对象不是全局的
+    def __init__(self, *args, **kwargs):
+        super(OrderDebtForm, self).__init__(*args, **kwargs)
+        self.paywith.choices = [(v.value, v.value) for v in
+                                Kvp.query.filter_by(type='paywith').order_by(Kvp.value).all()]
