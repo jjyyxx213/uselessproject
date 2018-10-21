@@ -16,8 +16,8 @@
     <section class="content-header">
         <h1> 门店管理系统</h1>
         <ol class="breadcrumb">
-            <li><a href="#"><i class="fa fa-dashboard"></i> 库存管理</a></li>
-            <li><a href="{{ url_for('home.stock_buy_list') }}"> 采购单列表</a></li>
+            <li><a href="#"><i class="fa fa-dashboard"></i> 收银管理</a></li>
+            <li><a href="{{ url_for('home.order_list') }}"> 收银单列表</a></li>
             <li class="active"> 结款修改</li>
         </ol>
     </section>
@@ -29,11 +29,11 @@
                         <!--启动CSRF-->
                         {{ form.hidden_tag() }}
                         <div class="box-header with-border">
-                            <h3 class="box-title"> 采购单 - {{ porder.id }}</h3>
+                            <h3 class="box-title"> 收银单 - {{ order.id }}</h3>
                         </div>
                         <div class="box-body">
                             <div class="row">
-                                <div class="col-md-7 padding-defined pull-left">
+                                <div class="col-md-9 padding-defined pull-left">
                                     <div class="input-group">
                                         <span class="input-group-btn">
                                                 <button class="btn btn-default" type="button"> 应付金额</button>
@@ -43,6 +43,15 @@
                                             <button class="btn btn-default" type="button"> 优惠后金额</button>
                                         </span>
                                         {{ form.discount }}
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="button"> 余额消耗</button>
+                                        </span>
+                                        {{ form.balance }}
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="button" data-toggle="tooltip"
+                                            title="积分兑换比率100:1"> 积分消耗(?)</button>
+                                        </span>
+                                        {{ form.score }}
                                         <span class="input-group-btn">
                                             <button class="btn btn-default" type="button"> 本次付款</button>
                                         </span>
@@ -58,6 +67,12 @@
                                             <p style="color: red" class="small">{{ err }}</p>
                                         {% endfor %}
                                         {% for err in form.payment.errors %}
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        {% endfor %}
+                                        {% for err in form.balance.errors %}
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        {% endfor %}
+                                        {% for err in form.score.errors %}
                                             <p style="color: red" class="small">{{ err }}</p>
                                         {% endfor %}
                                         {% for err in form.debt.errors %}
@@ -77,7 +92,7 @@
                             </div>
                             <div class="box-footer">
                                 {{ form.submit }}
-                                <a href="{{ url_for('home.stock_buy_list') }}" class="btn btn-default pull-right"
+                                <a href="{{ url_for('home.order_list') }}" class="btn btn-default pull-right"
                                    role="button"> 返回</a>
                             </div>
                         </div>
@@ -91,8 +106,8 @@
 {% block js %}
     <script>
         $(document).ready(function () {
-            $("#g-order").addClass("active");
-            $("#g-order-list").addClass("active");
+            $("#g-stock").addClass("active");
+            $("#g-stock-buy-list").addClass("active");
             // 弹出提示初始化
             $(function () {
                 $('[data-toggle="tooltip"]').tooltip()
@@ -100,22 +115,32 @@
 
             //优惠后金额监听事件
             $("#discount").on("change", function () {
-                if ($("#discount").val() != "" && $("#payment").val() != "") {
-                    $("#debt").val(calcDebt());
-                }
+                $("#debt").val(calcDebt());
             });
             //本次付款监听事件
             $("#payment").on("change", function () {
-                if ($("#discount").val() != "" && $("#payment").val() != "") {
-                    $("#debt").val(calcDebt());
-                }
+                $("#debt").val(calcDebt());
+            });
+            //余额监听事件
+            $("#balance").on("change", function () {
+                $("#debt").val(calcDebt());
+            });
+            //积分监听事件
+            $("#score").on("change", function () {
+                $("#debt").val(calcDebt());
             });
         });
 
         // 计算欠款
         function calcDebt() {
-                //本次欠款
-                return parseFloat($("#discount").val()) - parseFloat($("#payment").val());
+            let discount = $("#discount").val() == "" ? 0 : parseFloat($("#discount").val());
+            let payment = $("#payment").val() == "" ? 0 : parseFloat($("#payment").val());
+            let balance = $("#balance").val() == "" ? 0 : parseFloat($("#balance").val());
+            // SCORE X 100 = RMB
+            let score = $("#score").val() == "" ? 0 : parseFloat($("#score").val()) * 0.01;
+            let debt = discount - payment - balance - score;
+
+            return debt;
         }
     </script>
 {% endblock %}

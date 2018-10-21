@@ -3,7 +3,7 @@ from . import home
 from flask import render_template, session, redirect, request, url_for, flash, current_app
 from forms import LoginForm, PwdForm, CustomerForm, CusVipForm, CusVipDepositForm, StockBuyForm, StockBuyListForm, StockBuyDebtForm, \
     StockOutListForm, StockOutForm, StockAllotListForm, StockAllotForm, StockLossListForm, StockLossForm, StockReturnListForm, \
-    StockReturnForm, StockReturnDebtForm, OrderListForm, OrderForm
+    StockReturnForm, StockReturnDebtForm, OrderListForm, OrderForm, OrderDebtForm
 from app.models import User, Userlog, Oplog, Item, Supplier, Customer, Stock, Porder, Podetail, Kvp, Mscard, Msdetail, Vip, Vipdetail, Order, Odetail, Billing
 from app import db
 from werkzeug.security import generate_password_hash
@@ -2211,3 +2211,38 @@ def order_view(id=None):
     odetails = Odetail.query.filter_by(order_id=id).order_by(Odetail.id.asc()).all()
     return render_template('home/order_view.html', order=order, odetails=odetails)
 
+@home.route('/order/debt/<string:id>', methods=['GET', 'POST'])
+def order_debt(id=None):
+    # 收银单结款
+    form = OrderDebtForm()
+    order = Order.query.filter_by(id=id).first_or_404()
+    # 如果表单不属于用户，不是发布状态 退出
+    if order.user_id != int(session['user_id']) or order.status == 0 or order.type != 0:
+        return redirect(url_for('home.order_list'))
+    if request.method == 'GET':
+        form.amount.data = order.amount
+        form.discount.data = order.discount
+        form.payment.data = order.payment
+        form.balance.data = order.balance
+        form.score.data = order.score
+        form.debt.data = order.debt
+        form.remarks.data = order.remarks
+    if form.validate_on_submit():
+        order.amount = form.amount.data
+        order.discount = form.discount.data
+        order.payment = form.payment.data
+        order.balance = form.balance.data
+        order.score = form.score.data
+        order.debt = form.debt.data
+        order.remarks = form.remarks.data
+        db.session.add(order)
+        oplog = Oplog(
+            user_id=session['user_id'],
+            ip=request.remote_addr,
+            reason=u'修改结款,收银单号:%s' % order.id
+        )
+        db.session.add(oplog)
+        db.session.commit()
+        flash(u'结款修改成功', 'ok')
+        return redirect(url_for('home.order_list'))
+    return render_template('home/order_debt.html', form=form, order=order)

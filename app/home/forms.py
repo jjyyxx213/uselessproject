@@ -1653,3 +1653,92 @@ class OrderForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(OrderForm, self).__init__(*args, **kwargs)
         self.paywith.choices = [(v.value, v.value) for v in Kvp.query.filter_by(type='paywith').order_by(Kvp.value).all()]
+
+class OrderDebtForm(FlaskForm):
+    # 应付金额
+    amount = StringField(
+        label=u'应付金额',
+        description=u'应付金额',
+        render_kw={
+            'class': 'form-control',
+            # 'placeholder': u'请输入应付金额',
+            'readonly': 'true'
+        }
+    )
+    # 优惠后金额
+    discount = StringField(
+        label=u'优惠后金额',
+        validators=[
+            DataRequired(message=u'请输入优惠后金额'),
+            Regexp('[\d+\.\d]', message=u'优惠后金额请输入数字'),
+        ],
+        description=u'优惠后金额',
+        render_kw={
+            'class': 'form-control',
+            # 'placeholder': u'请输入优惠后金额',
+        }
+    )
+    # 实际付款金额
+    payment = StringField(
+        label=u'本次付款',
+        validators=[
+            DataRequired(message=u'请输入付款金额'),
+            Regexp('[\d+\.\d]', message=u'本次付款请输入数字'),
+        ],
+        description=u'本次付款',
+        render_kw={
+            'class': 'form-control',
+            # 'placeholder': u'请输入本次付款金额',
+        }
+    )
+    # 余额抵扣
+    balance = StringField(
+        label=u'余额',
+        validators=[
+            Regexp('[\d+\.\d]', message=u'余额请输入数字'),
+        ],
+        description=u'余额',
+        render_kw={
+            'class': 'form-control',
+        }
+    )
+    # 积分抵扣
+    score = StringField(
+        label=u'积分',
+        validators=[
+            Regexp('[\d+\.\d]', message=u'积分请输入数字'),
+        ],
+        description=u'积分',
+        render_kw={
+            'class': 'form-control',
+        }
+    )
+    # 欠款
+    debt = StringField(
+        label=u'本次欠款',
+        description=u'本次欠款',
+        validators=[
+            Regexp('^[+]{0,1}(\d+)$|^[+]{0,1}(\d+\.\d+)$', message=u'欠款不为负数'),
+        ],
+        render_kw={
+            'class': 'form-control',
+            # 'placeholder': u'请输入本次欠款金额',
+            'readonly': 'true',
+        }
+    )
+    # 备注
+    remarks = StringField(
+        label=u'备注',
+        description=u'备注',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入备注',
+        }
+    )
+    # 保存
+    submit = SubmitField(
+        label=u'确定',
+        render_kw={
+            'class': 'btn btn-primary',
+        }
+    )
