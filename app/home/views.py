@@ -2073,7 +2073,7 @@ def order_edit(id=None):
             if switch == 1: # 结算
                 # valid True可以提交; False 不能提交
                 valid = True
-                customer = Customer.query.filter(Customer.id == order.customer_id).first()
+                customer = Customer.query.filter(Customer.id == order.customer_id).first_or_404()
                 # 判断余额是否充足
                 if float(form.balance.data) > customer.balance:
                     flash(u'客户余额不足', 'err')
@@ -2185,3 +2185,29 @@ def order_edit(id=None):
 
 
     return render_template('home/order_edit.html', form=form, order=order, form_count=form_count)
+
+@home.route('/order/del/<string:id>', methods=['GET'])
+def order_del(id=None):
+    # 收银单删除
+    order = Order.query.filter_by(id=id).first_or_404()
+    if order.type != 0 or order.user_id != int(session['user_id']) or order.status == 1:
+        return redirect(url_for('home.order_list'))
+    Odetail.query.filter_by(order_id=id).delete()
+    db.session.delete(order)
+    oplog = Oplog(
+        user_id=session['user_id'],
+        ip=request.remote_addr,
+        reason=u'删除收银单:%s' % order.id
+    )
+    db.session.add(oplog)
+    db.session.commit()
+    flash(u'收银单删除成功', 'ok')
+    return redirect(url_for('home.order_list'))
+
+@home.route('/order/view/<string:id>', methods=['GET'])
+def order_view(id=None):
+    # 收银单明细查看
+    order = Order.query.filter_by(id=id).first_or_404()
+    odetails = Odetail.query.filter_by(order_id=id).order_by(Odetail.id.asc()).all()
+    return render_template('home/order_view.html', order=order, odetails=odetails)
+
