@@ -1157,3 +1157,25 @@ def modal_item():
         "data": data,
     }
     return dumps(res)
+
+#20181022 liuqq  数据字典查询
+@admin.route('/kvp/list', methods=['GET'])
+def kvp_list():
+    # 数据字典列表
+    key = request.args.get('key', '')
+    page = request.args.get('page', 1, type=int)
+    pagination = Kvp.query
+    # 条件查询
+    if key:
+        # 类型编码/值/添加时间
+        pagination = pagination.filter(
+            or_(Kvp.type.ilike('%' + key + '%'),
+                Kvp.value.ilike('%' + key + '%'),
+                Kvp.addtime.ilike('%' + key + '%'))
+        )
+    pagination = pagination.order_by(
+        Kvp.type.desc()
+    ).paginate(page=page,
+               per_page=current_app.config['POSTS_PER_PAGE'],
+               error_out=False)
+    return render_template('admin/kvp_list.html', type=type, pagination=pagination, key=key)
