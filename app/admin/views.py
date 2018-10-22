@@ -420,7 +420,7 @@ def mscard_add():
         db.session.add_all(objects)
         db.session.commit()
         flash(u'会员卡添加成功', 'ok')
-        return redirect(url_for('admin.mscard_add'))
+        return redirect(url_for('admin.mscard_list'))
     return render_template('admin/mscard_add.html', form=form)
 
 

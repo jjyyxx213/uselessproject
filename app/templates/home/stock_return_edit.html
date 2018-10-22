@@ -234,7 +234,7 @@
                                 {% endfor %}
                             </div>
                             <div class="row" style="margin-bottom: 0px">
-                                <div class="col-md-7 padding-defined pull-left">
+                                <div class="col-md-9 padding-defined pull-left">
                                     <div class="input-group">
                                         <span class="input-group-btn">
                                                 <button class="btn btn-default" type="button"> 应退金额</button>
@@ -254,7 +254,9 @@
                                         {{ form.debt }}
                                     </div>
                                 </div>
-                                <div class="col-md-5 padding-defined pull-left">
+                            </div>
+                            <div class="row" style="margin-bottom: 0px">
+                                <div class="col-md-9 padding-defined pull-left">
                                         {% for err in form.discount.errors %}
                                             <p style="color: red" class="small">{{ err }}</p>
                                         {% endfor %}
