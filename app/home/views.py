@@ -2143,6 +2143,7 @@ def order_edit(id=None):
                         cust_id=order.customer_id,
                         paywith=order.paywith,
                         order_id=order.id,
+                        amount=order.amount,
                         payment=order.payment,
                         balance=order.balance,
                         score=order.score,
@@ -2247,9 +2248,9 @@ def order_debt(id=None):
         form.debt.data = order.debt
         form.remarks.data = order.remarks
     if form.validate_on_submit():
-        if float(form.debt.data) > order.debt:
+        if float(form.debt.data) >= order.debt:
             flash(u'欠款不能增多', 'err')
-            return redirect(url_for('home.order_debt', id=order_debt))
+            return redirect(url_for('home.order_debt', id=id))
         # 订单
         order.paywith = form.paywith.data
         order.amount = float(form.amount.data)
@@ -2265,9 +2266,10 @@ def order_debt(id=None):
             cust_id=order.customer_id,
             paywith=order.paywith,
             order_id=order.id,
-            payment=order.payment - billing.payment,
-            balance=order.balance - billing.balance,
-            score=order.score - billing.score,
+            amount=order.amount,
+            payment=order.payment,
+            balance=order.balance,
+            score=order.score,
         )
         db.session.add(new_billing)
         oplog = Oplog(
