@@ -56,7 +56,7 @@
                                 <label for="input_scorerule" style="color: red">*</label>
                                 {{ form.scorerule.label }}
                                 <label for="input_scorerule" class="badge bg-green" data-toggle="tooltip"
-                                       title="积分=消费金额*积分规则">?</label>
+                                       title="会员：积分=消费金额*积分规则;普通用户:积分=消费金额*0.8">?</label>
                                 {{ form.scorerule }}
                                 {% for err in form.scorerule.errors %}
                                     <div class="col-md-12">

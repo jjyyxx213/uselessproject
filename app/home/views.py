@@ -2127,8 +2127,15 @@ def order_edit(id=None):
                     customer.summary += order.payment
                     customer.balance -= order.balance
                     customer.debt += order.debt
-                    ## 积分 = 本次实际支付总额 - 消费的积分总额
-                    temp_score = order.payment - order.score
+                    ## 积分 = 本次实际支付总额 * 会员积分系数 - 消费的积分总额
+                    score_ins = 0
+                    if customer.vip:
+                        ## 如果是会员 增加的积分 = 消费金额 * 系数
+                        score_ins = order.payment * customer.vip.scorerule
+                    else:
+                        ## 如果不是会员，系数按0.8计算；
+                        score_ins = order.payment * 0.8
+                    temp_score = score_ins - order.score
                     customer.score += temp_score
                     db.session.add(customer)
                     # 增加客户流水 tb_billing

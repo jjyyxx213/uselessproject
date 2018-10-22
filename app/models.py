@@ -34,7 +34,7 @@ class User(db.Model):
     # 工种
     jobs = db.Column(db.String(100))
     # 底薪
-    salary = db.Column(db.Float, default=0)
+    salary = db.Column(db.Float, default=0, nullable=False)
     # 是否冻结(1：冻结；0：解冻)
     frozen = db.Column(db.SmallInteger, default=0, nullable=False)
     # 注册时间
@@ -128,15 +128,15 @@ class Mscard(db.Model):
     # 名称
     name = db.Column(db.String(100), nullable=False)
     # 开卡金额
-    payment = db.Column(db.Float, default=0)
+    payment = db.Column(db.Float, default=0, nullable=False)
     # 有效期区间 数字类型(月)
-    interval = db.Column(db.Float, default=1)
+    interval = db.Column(db.Float, default=1, nullable=False)
     # 积分规则(积分=消费金额*积分规则)
-    scorerule = db.Column(db.Float, default=1)
+    scorerule = db.Column(db.Float, default=1, nullable=False)
     # 积分限制提醒(到达额度后，提醒会员升级)
-    scorelimit = db.Column(db.Float, default=9999)
+    scorelimit = db.Column(db.Float, default=9999, nullable=False)
     # 卡状态 (1有效；0无效)
-    valid = db.Column(db.SmallInteger, default=1)
+    valid = db.Column(db.SmallInteger, default=1, nullable=False)
     # 添加时间
     addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
@@ -168,11 +168,11 @@ class Msdetail(db.Model):
     # 服务/项目id
     item_id = db.Column(db.Integer, db.ForeignKey('tb_item.id'), nullable=True)
     # 优惠后销售价
-    discountprice = db.Column(db.Float, default=0)
+    discountprice = db.Column(db.Float, default=0, nullable=False)
     # 使用次数
-    quantity = db.Column(db.Integer, default=9999)
+    quantity = db.Column(db.Integer, default=9999, nullable=False)
     # 有效期 数字类型(月)
-    interval = db.Column(db.Float, default=0)
+    interval = db.Column(db.Float, default=0, nullable=False)
 
     def __repr__(self):
         return '<Msdetail %r>' % self.name
@@ -198,13 +198,13 @@ class Vip(db.Model):
     # 名称
     name = db.Column(db.String(100), nullable=False)
     # 余额
-    balance = db.Column(db.Float, default=0)
+    balance = db.Column(db.Float, default=0, nullable=False)
     # 积分余额
-    score = db.Column(db.Float, default=0)
+    score = db.Column(db.Float, default=0, nullable=False)
     # 积分规则(积分=消费金额*积分规则)
-    scorerule = db.Column(db.Float, default=1)
+    scorerule = db.Column(db.Float, default=1, nullable=False)
     # 积分限制提醒(到达额度后，提醒会员升级)
-    scorelimit = db.Column(db.Float, default=9999)
+    scorelimit = db.Column(db.Float, default=9999, nullable=False)
     # 办理时间
     addtime = db.Column(db.DateTime, index=True, default=datetime.now)
     # 截止时间
@@ -229,9 +229,9 @@ class Vipdetail(db.Model):
     # 服务/项目id
     item_id = db.Column(db.Integer, db.ForeignKey('tb_item.id'), nullable=False)
     # 优惠后销售价
-    discountprice = db.Column(db.Float, default=0)
+    discountprice = db.Column(db.Float, default=0, nullable=False)
     # 使用次数
-    quantity = db.Column(db.Integer, default=9999)
+    quantity = db.Column(db.Integer, default=9999, nullable=False)
     # 优惠开始时间
     addtime = db.Column(db.DateTime, index=True, default=datetime.now)
     # 优惠结束时间
@@ -248,7 +248,7 @@ class Category(db.Model):
     # 名称
     name = db.Column(db.String(100), nullable=False)
     # 类别(0:商品;1:服务项目)
-    type = db.Column(db.SmallInteger, default=0)
+    type = db.Column(db.SmallInteger, default=0, nullable=False)
     # 备注
     remarks = db.Column(db.Text)
     # 添加时间
@@ -267,13 +267,13 @@ class Item(db.Model):
     # 商品/服务类别(冗余避免关联查询)
     cate = db.Column(db.String(100))
     # 类别(类别字段冗余，避免关联查询 type 0: item; 1: service)
-    type = db.Column(db.SmallInteger, default=0)
+    type = db.Column(db.SmallInteger, default=0, nullable=False)
     # 销售价
-    salesprice = db.Column(db.Float, default=0)
+    salesprice = db.Column(db.Float, default=0, nullable=False)
     # 提成
-    rewardprice = db.Column(db.Float, default=0)
+    rewardprice = db.Column(db.Float, default=0, nullable=False)
     # 成本价
-    costprice = db.Column(db.Float, default=0)
+    costprice = db.Column(db.Float, default=0, nullable=False)
     # 单位
     unit = db.Column(db.String(40))
     # 规格
@@ -315,15 +315,15 @@ class Supplier(db.Model):
     # 联络人
     contact = db.Column(db.String(50), nullable=False)
     # 手机
-    phone = db.Column(db.String(11))
+    phone = db.Column(db.String(20))
     # 联系电话
-    tel = db.Column(db.String(11))
+    tel = db.Column(db.String(20))
     # QQ
-    qq = db.Column(db.String(11))
+    qq = db.Column(db.String(20))
     # 地址
     address = db.Column(db.String(200))
     # 状态 (1有效；0无效)
-    valid = db.Column(db.SmallInteger, default=1)
+    valid = db.Column(db.SmallInteger, default=1, nullable=False)
     # 备注
     remarks = db.Column(db.Text)
     # 添加时间
@@ -345,9 +345,9 @@ class Stock(db.Model):
     # 商品ID
     item_id = db.Column(db.Integer, db.ForeignKey('tb_item.id'), nullable=True)
     # 采购单价（最后一次采购价）
-    costprice = db.Column(db.Float, default=0)
+    costprice = db.Column(db.Float, default=0, nullable=False)
     # 数量
-    qty = db.Column(db.Float, default=0)
+    qty = db.Column(db.Float, default=0, nullable=False)
     # 添加时间
     addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
@@ -360,21 +360,21 @@ class Porder(db.Model):
     # 编号
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     # 单据类型 0:采购单 1:领料单 2:调拨单 3:报损单 4:退货单
-    type = db.Column(db.SmallInteger, default=0)
+    type = db.Column(db.SmallInteger, default=0, nullable=False)
     # 采购/领料/退货/报损ID
     user_id = db.Column(db.Integer, db.ForeignKey('tb_user.id'))
     # 供应商id
     supplier_id = db.Column(db.Integer, db.ForeignKey('tb_supplier.id'))
     # 应收应付金额（主体为店主+为收款/-为付款）
-    amount = db.Column(db.Float, default=0)
+    amount = db.Column(db.Float, default=0, nullable=False)
     # 优惠后应收应付金额(主体为店主+为收款/-为付款)
-    discount = db.Column(db.Float, default=0)
+    discount = db.Column(db.Float, default=0, nullable=False)
     # 实际收付金额(主体为店主+为收款/-为付款)
-    payment = db.Column(db.Float, default=0)
+    payment = db.Column(db.Float, default=0, nullable=False)
     # 欠款(主体为店主+为收款/-为付款)
-    debt = db.Column(db.Float, default=0)
+    debt = db.Column(db.Float, default=0, nullable=False)
     # 单据状态 0:暂存 1:生效
-    status = db.Column(db.SmallInteger, default=0)
+    status = db.Column(db.SmallInteger, default=0, nullable=False)
     # 备注
     remarks = db.Column(db.String(200))
     # 添加时间
@@ -397,11 +397,11 @@ class Podetail(db.Model):
     # 新仓库
     nstore = db.Column(db.String(40))
     # 数量(进货、退货数量)
-    qty = db.Column(db.Float, default=0)
+    qty = db.Column(db.Float, default=0, nullable=False)
     # 进货/退货单价
-    costprice = db.Column(db.Float, default=0)
+    costprice = db.Column(db.Float, default=0, nullable=False)
     # 单行合计
-    rowamount = db.Column(db.Float, default=0)
+    rowamount = db.Column(db.Float, default=0, nullable=False)
 
     def __repr__(self):
         return '<Podetail %r>' % self.id
@@ -432,15 +432,15 @@ class Customer(db.Model):
     # 所属客户经理
     user_id = db.Column(db.Integer, db.ForeignKey('tb_user.id'))
     # 到店次数
-    freq = db.Column(db.Integer, default=0)
+    freq = db.Column(db.Integer, default=0, nullable=False)
     # 累计消费
-    summary = db.Column(db.Float, default=0)
+    summary = db.Column(db.Float, default=0, nullable=False)
     # 余额 20181020 增加
-    balance = db.Column(db.Float, default=0)
+    balance = db.Column(db.Float, default=0, nullable=False)
     # 积分余额 20181020 增加
-    score = db.Column(db.Float, default=0)
+    score = db.Column(db.Float, default=0, nullable=False)
     # 欠款 20181011 增加
-    debt = db.Column(db.Float, default=0)
+    debt = db.Column(db.Float, default=0, nullable=False)
     # 会员卡号
     vip_id = db.Column(db.Integer, db.ForeignKey('tb_vip.id'))
     # 注册时间
@@ -466,11 +466,11 @@ class Billing(db.Model):
     # 订单id
     order_id = db.Column(db.String(20), db.ForeignKey('tb_order.id'), nullable=False)
     # 支付金额
-    payment = db.Column(db.Float, default=0)
+    payment = db.Column(db.Float, default=0, nullable=False)
     # 积分抵扣
-    score = db.Column(db.Float, default=0)
+    score = db.Column(db.Float, default=0, nullable=False)
     # 余额抵扣
-    balance = db.Column(db.Float, default=0)
+    balance = db.Column(db.Float, default=0, nullable=False)
     # 支付时间
     addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
@@ -483,7 +483,7 @@ class Order(db.Model):
     # 编号
     id = db.Column(db.String(20), primary_key=True)
     # 单据类型 0:快速开单
-    type = db.Column(db.SmallInteger, default=0)
+    type = db.Column(db.SmallInteger, default=0, nullable=False)
     # 开单人id
     user_id = db.Column(db.Integer, db.ForeignKey('tb_user.id'))
     # 客户id
@@ -491,19 +491,19 @@ class Order(db.Model):
     # 支付方式
     paywith = db.Column(db.String(100), nullable=False)
     # 应收金额
-    amount = db.Column(db.Float, default=0)
+    amount = db.Column(db.Float, default=0, nullable=False)
     # 优惠后应收金额
-    discount = db.Column(db.Float, default=0)
+    discount = db.Column(db.Float, default=0, nullable=False)
     # 实际收款金额
-    payment = db.Column(db.Float, default=0)
+    payment = db.Column(db.Float, default=0, nullable=False)
     # 余额抵扣
-    balance = db.Column(db.Float, default=0)
+    balance = db.Column(db.Float, default=0, nullable=False)
     # 积分抵扣
-    score = db.Column(db.Float, default=0)
+    score = db.Column(db.Float, default=0, nullable=False)
     # 欠款
-    debt = db.Column(db.Float, default=0)
+    debt = db.Column(db.Float, default=0, nullable=False)
     # 单据状态 0:暂存 1:生效
-    status = db.Column(db.SmallInteger, default=0)
+    status = db.Column(db.SmallInteger, default=0, nullable=False)
     # 备注
     remarks = db.Column(db.String(200))
     # 添加时间
@@ -530,15 +530,15 @@ class Odetail(db.Model):
     # 仓库
     store = db.Column(db.String(40))
     # 数量
-    qty = db.Column(db.Float, default=0)
+    qty = db.Column(db.Float, default=0, nullable=False)
     # 销售单价
-    salesprice = db.Column(db.Float, default=0)
+    salesprice = db.Column(db.Float, default=0, nullable=False)
     # 会员卡明细id  冗余
     vipdetail_id = db.Column(db.String(20))
     # 折扣价
-    discount = db.Column(db.Float, default=0)
+    discount = db.Column(db.Float, default=0, nullable=False)
     # 单行合计
-    rowamount = db.Column(db.Float, default=0)
+    rowamount = db.Column(db.Float, default=0, nullable=False)
     # 施工/销售人员 用于计算提成
     users = db.Column(db.String(100), nullable=False)
 

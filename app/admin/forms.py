@@ -473,14 +473,14 @@ class ItemForm(FlaskForm):
 
 class SupplierForm(FlaskForm):
     name = StringField(
-        label=u'分类名称',
+        label=u'供应商名称',
         validators=[
-            DataRequired(message=u'请输入分类名称')
+            DataRequired(message=u'请输入供应商名称')
         ],
-        description=u'分类名称',
+        description=u'供应商名称',
         render_kw={
             'class': 'form-control',
-            'placeholder': u'请输入分类名称',
+            'placeholder': u'请输入供应商名称',
         }
     )
     contact = StringField(
@@ -500,6 +500,7 @@ class SupplierForm(FlaskForm):
         render_kw={
             'class': 'form-control',
             'placeholder': u'请输入手机号',
+            'maxlength': '11'
         }
     )
     tel = StringField(
@@ -508,6 +509,7 @@ class SupplierForm(FlaskForm):
         render_kw={
             'class': 'form-control',
             'placeholder': u'请输入联系电话',
+            'maxlength': '20'
         }
     )
     qq = StringField(
@@ -516,6 +518,7 @@ class SupplierForm(FlaskForm):
         render_kw={
             'class': 'form-control',
             'placeholder': u'请输入QQ',
+            'maxlength': '20'
         }
     )
     address = StringField(
