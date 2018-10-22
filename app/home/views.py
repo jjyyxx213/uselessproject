@@ -2147,6 +2147,7 @@ def order_edit(id=None):
                         payment=order.payment,
                         balance=order.balance,
                         score=order.score,
+                        debt=order.debt,
                     )
                     db.session.add(billing)
                     # 订单状态更新 tb_order
@@ -2191,8 +2192,6 @@ def order_edit(id=None):
                 order_id = order.id
             flash(u'收银单:%s结算/暂存异常,错误码：%s' % (order_id, e), 'err')
             return redirect(url_for('home.order_edit', id=order_id))
-
-
     return render_template('home/order_edit.html', form=form, order=order, form_count=form_count)
 
 @home.route('/order/del/<string:id>', methods=['GET'])
@@ -2270,6 +2269,7 @@ def order_debt(id=None):
             payment=order.payment,
             balance=order.balance,
             score=order.score,
+            debt=order.debt,
         )
         db.session.add(new_billing)
         oplog = Oplog(
@@ -2282,3 +2282,14 @@ def order_debt(id=None):
         flash(u'结款修改成功', 'ok')
         return redirect(url_for('home.order_list'))
     return render_template('home/order_debt.html', form=form, order=order)
+
+@home.route('/order/billing/<string:id>', methods=['GET'])
+def order_billing(id=None):
+    # 流水历史列表
+    page = request.args.get('page', 1, type=int)
+    pagination = Billing.query.filter_by(order_id=id).order_by(
+        Billing.addtime.asc()
+    ).paginate(page=page,
+               per_page=current_app.config['POSTS_PER_PAGE'],
+               error_out=False)
+    return render_template('home/order_billing.html', pagination=pagination, id=id)

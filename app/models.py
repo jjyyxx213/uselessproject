@@ -473,6 +473,8 @@ class Billing(db.Model):
     score = db.Column(db.Float, default=0, nullable=False)
     # 余额抵扣
     balance = db.Column(db.Float, default=0, nullable=False)
+    # 欠款
+    debt = db.Column(db.Float, default=0, nullable=False)
     # 支付时间
     addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
