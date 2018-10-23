@@ -23,6 +23,9 @@
                     <div class="box-header">
                         <h3 class="box-title"> 收银报表</h3>
                         <div class="box-tools">
+                            <div class="pull-left border-right">
+                                <button class="btn btn-default btn-sm" id="sales">高级查询</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            </div>
                             <div class="input-group input-group-sm" style="width: 300px;">
                                 <input type="text" name="table_search" class="form-control"
                                        placeholder="请输入关键字...(订单/客户/商品/工作人员)" id="search_key" value="{{ key }}">
@@ -92,26 +95,99 @@
                 </div>
             </div>
         </div>
+        <!-- 高级查询模态框!-->
+        <div class="modal fade" id="salesModal" tabindex="-1" role="dialog" aria-labelledby="salesModalLabel">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                        <h4 class="modal-title" id="salesModalLabel"> 高级查询</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>订单号</label>
+                                <input type="text" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label>客户</label>
+                                <input type="text" class="form-control">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>商品/服务</label>
+                                <input type="text" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label>工作人员</label>
+                                <input type="text" class="form-control">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="">开始时间</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </div>
+                                        <input type="text" class="form-control date-choice" id="date_from"
+                                               data-date-format="yyyy-mm-dd">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="">结束时间</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </div>
+                                        <input type="text" class="form-control date-choice" id="date_to"
+                                               data-date-format="yyyy-mm-dd">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary pull-left" data-dismiss="modal"> 查询</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal"> 关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 {% endblock %}
 
 {% block js %}
     <script>
         $(document).ready(function () {
-            $("#g-report").addClass("active")
-            $("#g-sales-report").addClass("active")
+            $("#g-report").addClass("active");
+            $("#g-sales-report").addClass("active");
             // 搜索按钮
             $("#do_search").click(function () {
-                var key = $("#search_key").val()
-                location.href = "{{ url_for('home.sales_report') }}?key=" + key
-            })
+                let key = $("#search_key").val();
+                location.href = "{{ url_for('home.sales_report') }}?key=" + key;
+            });
             $("#search_key").bind("keyup", function (event) {
                 if (event.keyCode == "13") {
                     //回车执行查询
-                    var key = $("#search_key").val()
-                    location.href = "{{ url_for("home.sales_report") }}?key=" + key
+                    let key = $("#search_key").val();
+                    location.href = "{{ url_for("home.sales_report") }}?key=" + key;
                 }
-            })
+            });
+
+            $('.date-choice').datepicker({
+            "autoclose": true,
+            "language": "zh-CN",
+            });
+
+
+            //高级查询模态框
+            $("#sales").on("click", function () {
+                //显示modal
+                $('#salesModal').modal();
+            });
 
         })
     </script>
