@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% import 'ui/admin_page.html' as macros %}
+{% block css %}
+    <style>
+    th {
+        text-align:center; /*设置水平居中*/
+        vertical-align:middle;/*设置垂直居中*/
+        }
+    </style>
+{% endblock %}
+{% block page_content %}
+    <section class="content-header">
+        <h1> 门店管理系统</h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> 报表查询</a></li>
+            <li class="active"> 收银报表</li>
+        </ol>
+    </section>
+    <section class="content" id="showcontent">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="box-header">
+                        <h3 class="box-title"> 收银报表</h3>
+                        <div class="box-tools">
+                            <div class="pull-left border-right">
+                                <button class="btn btn-default btn-sm" id="sales">高级查询</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            </div>
+                            <div class="input-group input-group-sm" style="width: 300px;">
+                                <input type="text" name="table_search" class="form-control"
+                                       placeholder="请输入关键字...(订单/客户/商品/工作人员)" id="search_key" value="{{ key }}">
+                                <div class="input-group-btn">
+                                    <button type="submit" class="btn btn-default" id="do_search">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-striped table-hover">
+                            <tbody>
+                            <tr>
+                                <th colspan="8">订单</th>
+                                <th colspan="7" style="border-left:1px lightgrey solid">订单明细</th>
+                            </tr>
+                            <tr>
+                                <th> 编号</th>
+                                <th> 订单号</th>
+                                <th> 应收</th>
+                                <th> 优惠后</th>
+                                <th> 实收</th>
+                                <th> 欠款</th>
+                                <th> 客户</th>
+                                <th> 时间</th>
+                                <th style="border-left:1px lightgrey solid"> 商品/服务</th>
+                                <th> 单价</th>
+                                <th> 折扣价</th>
+                                <th> 提成</th>
+                                <th> 数量</th>
+                                <th> 合计</th>
+                                <th> 工作人员</th>
+                            </tr>
+                            {% for v in pagination.items %}
+                                <tr>
+                                    <td>{{ loop.index0 + 1 }}</td>
+                                    <td>{{ v.Order.id }}</td>
+                                    <td>{{ v.Order.amount }}</td>
+                                    <td>{{ v.Order.discount }}</td>
+                                    <td>{{ v.Order.payment }}</td>
+                                    {% if v.Order.debt > 0 %}
+                                    <td style="color: red;">{{ v.Order.debt }}</td>
+                                    {% else %}
+                                    <td>{{ v.Order.debt }}</td>
+                                    {%  endif %}
+                                    <td>{{ v.Customer.name }}</td>
+                                    <td>{{ v.Order.addtime }}</td>
+                                    <td style="border-left:1px lightgrey solid">{{ v.Item.name }}</td>
+                                    <td>{{ v.Odetail.salesprice }}</td>
+                                    <td>{{ v.Odetail.discount }}</td>
+                                    <td>{{ v.Item.rewardprice }}</td>
+                                    <td>{{ v.Odetail.qty }}</td>
+                                    <td>{{ v.Odetail.rowamount }}</td>
+                                    <td>{{ v.Odetail.users }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="box-footer clearfix">
+                        <ul class="pagination pagination-sm no-margin pull-right">
+                            {{ macros.pagination_widget(pagination, 'home.sales_report', key=key) }}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 高级查询模态框!-->
+        <div class="modal fade" id="salesModal" tabindex="-1" role="dialog" aria-labelledby="salesModalLabel">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                        <h4 class="modal-title" id="salesModalLabel"> 高级查询</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>订单号</label>
+                                <input type="text" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label>客户</label>
+                                <input type="text" class="form-control">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>商品/服务</label>
+                                <input type="text" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label>工作人员</label>
+                                <input type="text" class="form-control">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="">开始时间</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </div>
+                                        <input type="text" class="form-control date-choice" id="date_from"
+                                               data-date-format="yyyy-mm-dd">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="">结束时间</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </div>
+                                        <input type="text" class="form-control date-choice" id="date_to"
+                                               data-date-format="yyyy-mm-dd">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary pull-left" data-dismiss="modal"> 查询</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal"> 关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block js %}
+    <script>
+        $(document).ready(function () {
+            $("#g-report").addClass("active");
+            $("#g-sales-report").addClass("active");
+            // 搜索按钮
+            $("#do_search").click(function () {
+                let key = $("#search_key").val();
+                location.href = "{{ url_for('home.sales_report') }}?key=" + key;
+            });
+            $("#search_key").bind("keyup", function (event) {
+                if (event.keyCode == "13") {
+                    //回车执行查询
+                    let key = $("#search_key").val();
+                    location.href = "{{ url_for("home.sales_report") }}?key=" + key;
+                }
+            });
+
+            $('.date-choice').datepicker({
+            "autoclose": true,
+            "language": "zh-CN",
+            });
+
+
+            //高级查询模态框
+            $("#sales").on("click", function () {
+                //显示modal
+                $('#salesModal').modal();
+            });
+
+        })
+    </script>
+{% endblock %}

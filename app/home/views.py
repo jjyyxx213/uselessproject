@@ -2259,6 +2259,7 @@ def order_debt(id=None):
         order.score = float(form.score.data)
         order.debt = float(form.debt.data)
         order.remarks = form.remarks.data
+        order.addtime = datetime.now()
         db.session.add(order)
         # 消费流水,与上次算差值
         new_billing = Billing(
