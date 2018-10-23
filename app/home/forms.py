@@ -1836,3 +1836,63 @@ class OrderDebtForm(FlaskForm):
         super(OrderDebtForm, self).__init__(*args, **kwargs)
         self.paywith.choices = [(v.value, v.value) for v in
                                 Kvp.query.filter_by(type='paywith').order_by(Kvp.value).all()]
+
+class SalesAdvancedForm(FlaskForm):
+    # 收银报表高级查询
+    order_id = StringField(
+        label=u'订单号',
+        description=u'订单号',
+        render_kw={
+            'class': 'form-control',
+        }
+    )
+    # 客户
+    customer_name = StringField(
+        label=u'客户',
+        description=u'客户',
+        render_kw={
+            'class': 'form-control',
+        }
+    )
+    # 商品/服务
+    item_name = StringField(
+        label=u'商品/服务',
+        description=u'商品/服务',
+        render_kw={
+            'class': 'form-control',
+        }
+    )
+    # 工作人员
+    users = StringField(
+        label=u'工作人员',
+        description=u'工作人员',
+        render_kw={
+            'class': 'form-control',
+        }
+    )
+    # 开始时间
+    date_from = StringField(
+        label=u'开始时间',
+        description=u'开始时间',
+        render_kw={
+            'class': 'form-control date-choice',
+            'data-date-format': 'yyyy-mm-dd',
+        }
+    )
+    # 结束时间
+    date_to = StringField(
+        label=u'结束时间',
+        description=u'结束时间',
+        render_kw={
+            'class': 'form-control date-choice',
+            'data-date-format': 'yyyy-mm-dd',
+        }
+    )
+    # 保存
+    submit = SubmitField(
+        label=u'查询',
+        render_kw={
+            'class': 'btn btn-primary pull-left',
+            #'data-dismiss' : 'modal', ## 这里如果触发关闭时间，form表单不会提交
+        }
+    )

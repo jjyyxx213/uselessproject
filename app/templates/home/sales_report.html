@@ -105,54 +105,56 @@
                         </button>
                         <h4 class="modal-title" id="salesModalLabel"> 高级查询</h4>
                     </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label>订单号</label>
-                                <input type="text" class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <label>客户</label>
-                                <input type="text" class="form-control">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label>商品/服务</label>
-                                <input type="text" class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <label>工作人员</label>
-                                <input type="text" class="form-control">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label for="">开始时间</label>
-                                <div class="input-group">
-                                    <div class="input-group-addon">
-                                            <i class="fa fa-calendar"></i>
-                                        </div>
-                                        <input type="text" class="form-control date-choice" id="date_from"
-                                               data-date-format="yyyy-mm-dd">
+                    <form role="form" method="post">
+                        <!--启动CSRF-->
+                        {{ form.hidden_tag() }}
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>订单号</label>
+                                    {{ form.order_id }}
+                                </div>
+                                <div class="col-md-6">
+                                    <label>客户</label>
+                                    {{ form.customer_name }}
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <label for="">结束时间</label>
-                                <div class="input-group">
-                                    <div class="input-group-addon">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>商品/服务</label>
+                                    {{ form.item_name }}
+                                </div>
+                                <div class="col-md-6">
+                                    <label>工作人员</label>
+                                    {{ form.users }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="">开始时间</label>
+                                    <div class="input-group">
+                                        <div class="input-group-addon">
                                             <i class="fa fa-calendar"></i>
                                         </div>
-                                        <input type="text" class="form-control date-choice" id="date_to"
-                                               data-date-format="yyyy-mm-dd">
+                                        {{ form.date_from }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="">结束时间</label>
+                                    <div class="input-group">
+                                        <div class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </div>
+                                        {{ form.date_to }}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary pull-left" data-dismiss="modal"> 查询</button>
-                        <button type="button" class="btn btn-default" data-dismiss="modal"> 关闭</button>
-                    </div>
+                        <div class="modal-footer">
+                            {{ form.submit }}
+                            <button type="button" class="btn btn-default" data-dismiss="modal"> 关闭</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

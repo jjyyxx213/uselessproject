@@ -3,7 +3,7 @@ from . import home
 from flask import render_template, session, redirect, request, url_for, flash, current_app
 from forms import LoginForm, PwdForm, CustomerForm, CusVipForm, CusVipDepositForm, StockBuyForm, StockBuyListForm, StockBuyDebtForm, \
     StockOutListForm, StockOutForm, StockAllotListForm, StockAllotForm, StockLossListForm, StockLossForm, StockReturnListForm, \
-    StockReturnForm, StockReturnDebtForm, OrderListForm, OrderForm, OrderDebtForm
+    StockReturnForm, StockReturnDebtForm, OrderListForm, OrderForm, OrderDebtForm, SalesAdvancedForm
 from app.models import User, Userlog, Oplog, Item, Supplier, Customer, Stock, Porder, Podetail, Kvp, Mscard, Msdetail, Vip, Vipdetail, Order, Odetail, Billing
 from app import db
 from werkzeug.security import generate_password_hash
@@ -2295,7 +2295,7 @@ def order_billing(id=None):
                error_out=False)
     return render_template('home/order_billing.html', pagination=pagination, id=id)
 
-@home.route('/sales/report/', methods=['GET'])
+@home.route('/sales/report/', methods=['GET', 'POST'])
 def sales_report():
     # 收银报表
     page = request.args.get('page', 1, type=int)
@@ -2318,4 +2318,7 @@ def sales_report():
     ).paginate(page=page,
                per_page=current_app.config['POSTS_PER_PAGE'],
                error_out=False)
-    return render_template('home/sales_report.html', pagination=pagination, key=key)
+    form = SalesAdvancedForm()
+    if form.validate_on_submit():
+        pass
+    return render_template('home/sales_report.html', form=form, pagination=pagination, key=key)
