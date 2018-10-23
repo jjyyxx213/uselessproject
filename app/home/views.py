@@ -2300,25 +2300,53 @@ def sales_report():
     # 收银报表
     page = request.args.get('page', 1, type=int)
     key = request.args.get('key', '')
-    pagination = db.session.query(Order, Odetail, Customer, Item).filter(
-        Order.id == Odetail.order_id,
-        Order.customer_id == Customer.id,
-        Odetail.item_id == Item.id)
-    # 条件查询
-    if key:
-        # 单号/车牌/姓名/手机/备注/日期
-        pagination = pagination.filter(
-            or_(Order.id.ilike('%' + key + '%'),
-                Customer.name.ilike('%' + key + '%'),
-                Item.name.ilike('%' + key + '%'),
-                Odetail.users.ilike('%' + key + '%'))
-        )
-    pagination = pagination.order_by(
-        Order.addtime.desc(), Odetail.id.asc()
-    ).paginate(page=page,
-               per_page=current_app.config['POSTS_PER_PAGE'],
-               error_out=False)
     form = SalesAdvancedForm()
+    pagination = None
     if form.validate_on_submit():
-        pass
+        pagination = db.session.query(Order, Odetail, Customer, Item).filter(
+            Order.id == Odetail.order_id,
+            Order.customer_id == Customer.id,
+            Odetail.item_id == Item.id)
+        if form.order_id.data:
+            search_key = form.order_id.data
+            pagination = pagination.filter(Order.id.ilike('%' + search_key + '%'))
+        if form.customer_name.data:
+            search_key = form.customer_name.data
+            pagination = pagination.filter(Customer.name.ilike('%' + search_key + '%'))
+        if form.item_name.data:
+            search_key = form.item_name.data
+            pagination = pagination.filter(Item.name.ilike('%' + search_key + '%'))
+        if form.users.data:
+            search_key = form.users.data
+            pagination = pagination.filter(Odetail.users.ilike('%' + search_key + '%'))
+        if form.date_from.data:
+            search_key = datetime.strptime(form.date_from.data, '%Y-%m-%d')
+            pagination = pagination.filter(Order.addtime >= search_key)
+        if form.date_to.data:
+            search_key = datetime.strptime(form.date_to.data, '%Y-%m-%d') + timedelta(days=1)
+            pagination = pagination.filter(Order.addtime < search_key)
+        pagination = pagination.order_by(
+            Order.addtime.desc(), Odetail.id.asc()
+        ).paginate(page=page,
+                   per_page=current_app.config['POSTS_PER_PAGE'],
+                   error_out=False)
+    else:
+        pagination = db.session.query(Order, Odetail, Customer, Item).filter(
+            Order.id == Odetail.order_id,
+            Order.customer_id == Customer.id,
+            Odetail.item_id == Item.id)
+        # 条件查询
+        if key:
+            # 单号/车牌/姓名/手机/备注/日期
+            pagination = pagination.filter(
+                or_(Order.id.ilike('%' + key + '%'),
+                    Customer.name.ilike('%' + key + '%'),
+                    Item.name.ilike('%' + key + '%'),
+                    Odetail.users.ilike('%' + key + '%'))
+            )
+        pagination = pagination.order_by(
+            Order.addtime.desc(), Odetail.id.asc()
+        ).paginate(page=page,
+                   per_page=current_app.config['POSTS_PER_PAGE'],
+                   error_out=False)
     return render_template('home/sales_report.html', form=form, pagination=pagination, key=key)
