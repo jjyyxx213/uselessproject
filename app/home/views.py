@@ -2293,3 +2293,28 @@ def order_billing(id=None):
                per_page=current_app.config['POSTS_PER_PAGE'],
                error_out=False)
     return render_template('home/order_billing.html', pagination=pagination, id=id)
+
+@home.route('/sales/report/', methods=['GET'])
+def sales_report():
+    # 收银报表
+    page = request.args.get('page', 1, type=int)
+    key = request.args.get('key', '')
+    pagination = db.session.query(Order, Odetail, Customer, Item).filter(
+        Order.id == Odetail.order_id,
+        Order.customer_id == Customer.id,
+        Odetail.item_id == Item.id)
+    # 条件查询
+    if key:
+        # 单号/车牌/姓名/手机/备注/日期
+        pagination = pagination.filter(
+            or_(Order.id.ilike('%' + key + '%'),
+                Customer.name.ilike('%' + key + '%'),
+                Item.name.ilike('%' + key + '%'),
+                Odetail.users.ilike('%' + key + '%'))
+        )
+    pagination = pagination.order_by(
+        Order.addtime.desc(), Odetail.id.asc()
+    ).paginate(page=page,
+               per_page=current_app.config['POSTS_PER_PAGE'],
+               error_out=False)
+    return render_template('home/sales_report.html', pagination=pagination, key=key)

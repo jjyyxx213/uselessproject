@@ -513,6 +513,8 @@ class Order(db.Model):
     # 添加时间
     addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
+    # 销售订单明细表外键
+    odetails = db.relationship('Odetail', backref='order')
     # 客户消费流水外键
     billings = db.relationship('Billing', backref='order')
 

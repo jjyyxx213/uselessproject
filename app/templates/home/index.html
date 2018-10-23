@@ -36,7 +36,7 @@
                                         <i class="fa fa-calendar"></i>
                                     </div>
                                     <input type="text" class="form-control pull-right" id="datepicker_from"
-                                           data-date-format="yyyy/mm/dd">
+                                           data-date-format="yyyy-mm-dd">
 
                                     <span class="input-group-addon">至</span>
 
@@ -44,7 +44,7 @@
                                         <i class="fa fa-calendar"></i>
                                     </div>
                                     <input type="text" class="form-control pull-right" id="datepicker_to"
-                                           data-date-format="yyyy/mm/dd">
+                                           data-date-format="yyyy-mm-dd">
                                     <span class="input-group-btn">
                                             <button class="btn btn-primary" type="button">查询</button>
                                         </span>
@@ -219,12 +219,12 @@
             "autoclose": true,
             "language": "zh-CN",
         })
-        $('#datepicker_from').val(moment().startOf('month').format("YYYY/MM/DD"))
+        $('#datepicker_from').val(moment().startOf('month').format("YYYY-MM-DD"))
         $('#datepicker_to').datepicker({
             "autoclose": true,
             "language": "zh-CN",
         })
-        $('#datepicker_to').val(moment().format("YYYY/MM/DD"))
+        $('#datepicker_to').val(moment().format("YYYY-MM-DD"))
     </script>
     <script>
         $(document).ready(function () {
