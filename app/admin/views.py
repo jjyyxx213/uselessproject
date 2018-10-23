@@ -420,7 +420,7 @@ def mscard_add():
         db.session.add_all(objects)
         db.session.commit()
         flash(u'会员卡添加成功', 'ok')
-        return redirect(url_for('admin.mscard_add'))
+        return redirect(url_for('admin.mscard_list'))
     return render_template('admin/mscard_add.html', form=form)
 
 
@@ -1158,7 +1158,6 @@ def modal_item():
     }
     return dumps(res)
 
-
 #20181022 liuqq  数据字典查询
 @admin.route('/kvp/list', methods=['GET'])
 def kvp_list():
@@ -1177,6 +1176,6 @@ def kvp_list():
     pagination = pagination.order_by(
         Kvp.type.desc()
     ).paginate(page=page,
-               per_page=15,
+               per_page=current_app.config['POSTS_PER_PAGE'],
                error_out=False)
     return render_template('admin/kvp_list.html', type=type, pagination=pagination, key=key)

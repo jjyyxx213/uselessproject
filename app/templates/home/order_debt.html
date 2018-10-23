@@ -112,7 +112,7 @@
                         </div>
                         <div class="box-body">
                             <div class="row">
-                                <div class="col-md-9 padding-defined pull-left">
+                                <div class="col-md-11 padding-defined pull-left">
                                     <div class="input-group">
                                         <span class="input-group-btn">
                                                 <button class="btn btn-default" type="button"> 应付金额</button>
@@ -132,16 +132,18 @@
                                         </span>
                                         {{ form.score }}
                                         <span class="input-group-btn">
-                                            <button class="btn btn-default" type="button"> 本次付款</button>
+                                            <button class="btn btn-default" type="button"> 实际付款</button>
                                         </span>
                                         {{ form.payment }}
                                         <span class="input-group-btn">
-                                            <button class="btn btn-default" type="button"> 本次欠款</button>
+                                            <button class="btn btn-default" type="button"> 实际欠款</button>
                                         </span>
                                         {{ form.debt }}
                                     </div>
                                 </div>
-                                <div class="col-md-5 padding-defined pull-left">
+                            </div>
+                            <div class="row">
+                                <div class="col-md-11 padding-defined pull-left">
                                         {% for err in form.discount.errors %}
                                             <p style="color: red" class="small">{{ err }}</p>
                                         {% endfor %}

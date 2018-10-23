@@ -642,12 +642,12 @@ class StockBuyDebtForm(FlaskForm):
     )
     # 实际付款金额
     payment = StringField(
-        label=u'本次付款',
+        label=u'实际付款',
         validators=[
-            DataRequired(message=u'请输入本次付款金额'),
+            DataRequired(message=u'请输入实际付款金额'),
             Regexp('[\d+\.\d]', message=u'请输入数字'),
         ],
-        description=u'本次付款',
+        description=u'实际付款',
         render_kw={
             'class': 'form-control',
             #'placeholder': u'请输入本次付款金额',
@@ -655,8 +655,8 @@ class StockBuyDebtForm(FlaskForm):
     )
     # 欠款
     debt = StringField(
-        label=u'本次欠款',
-        description=u'本次欠款',
+        label=u'实际欠款',
+        description=u'实际欠款',
         validators=[
             Regexp('^[+]{0,1}(\d+)$|^[+]{0,1}(\d+\.\d+)$', message=u'欠款不能为负数'),
         ],
@@ -1316,12 +1316,12 @@ class StockReturnDebtForm(FlaskForm):
     )
     # 实际退款金额
     payment = StringField(
-        label=u'本次退款',
+        label=u'实际退款',
         validators=[
-            DataRequired(message=u'请输入本次退款金额'),
+            DataRequired(message=u'请输入实际退款金额'),
             Regexp('[\d+\.\d]', message=u'请输入数字'),
         ],
-        description=u'本次退款',
+        description=u'实际退款',
         render_kw={
             'class': 'form-control',
             #'placeholder': u'请输入本次付款金额',
@@ -1329,8 +1329,8 @@ class StockReturnDebtForm(FlaskForm):
     )
     # 欠款
     debt = StringField(
-        label=u'本次欠款',
-        description=u'本次欠款',
+        label=u'实际欠款',
+        description=u'实际欠款',
         validators=[
             Regexp('^[+]{0,1}(\d+)$|^[+]{0,1}(\d+\.\d+)$', message=u'欠款不能为负数'),
         ],
@@ -1768,10 +1768,10 @@ class OrderDebtForm(FlaskForm):
     )
     # 实际付款金额
     payment = StringField(
-        label=u'本次付款',
+        label=u'实际付款',
         validators=[
             DataRequired(message=u'请输入付款金额'),
-            Regexp('[\d+\.\d]', message=u'本次付款请输入数字'),
+            Regexp('[\d+\.\d]', message=u'实际付款请输入数字'),
         ],
         description=u'本次付款',
         render_kw={
@@ -1803,8 +1803,8 @@ class OrderDebtForm(FlaskForm):
     )
     # 欠款
     debt = StringField(
-        label=u'本次欠款',
-        description=u'本次欠款',
+        label=u'实际欠款',
+        description=u'实际欠款',
         validators=[
             Regexp('^[+]{0,1}(\d+)$|^[+]{0,1}(\d+\.\d+)$', message=u'欠款不为负数'),
         ],

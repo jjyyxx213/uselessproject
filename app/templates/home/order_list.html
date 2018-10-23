@@ -84,6 +84,10 @@
                                     <td>
                                         <a href="{{ url_for('home.order_view', id=v.id) }}" name="btn-detail"
                                            class="label label-info">明细</a>&nbsp
+                                        {% if v.status == 1%}
+                                        <a href="{{ url_for('home.order_billing', id=v.id) }}" name="btn-billing"
+                                           class="label label-default">历史</a>&nbsp
+                                        {% endif %}
                                         {% if v.status == 1 and v.user_id == user.id %}
                                         <a href="{{ url_for('home.order_debt', id=v.id) }}" name="btn-detail"
                                            class="label label-warning">结款</a>&nbsp

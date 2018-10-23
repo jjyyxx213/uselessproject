@@ -33,7 +33,7 @@
                         </div>
                         <div class="box-body">
                             <div class="row">
-                                <div class="col-md-7 padding-defined pull-left">
+                                <div class="col-md-9 padding-defined pull-left">
                                     <div class="input-group">
                                         <span class="input-group-btn">
                                                 <button class="btn btn-default" type="button"> 应退金额</button>
@@ -44,16 +44,18 @@
                                         </span>
                                         {{ form.discount }}
                                         <span class="input-group-btn">
-                                            <button class="btn btn-default" type="button"> 本次退款</button>
+                                            <button class="btn btn-default" type="button"> 实际退款</button>
                                         </span>
                                         {{ form.payment }}
                                         <span class="input-group-btn">
-                                            <button class="btn btn-default" type="button"> 本次欠款</button>
+                                            <button class="btn btn-default" type="button"> 实际欠款</button>
                                         </span>
                                         {{ form.debt }}
                                     </div>
                                 </div>
-                                <div class="col-md-5 padding-defined pull-left">
+                            </div>
+                            <div class="row">
+                                <div class="col-md-9 padding-defined pull-left">
                                         {% for err in form.discount.errors %}
                                             <p style="color: red" class="small">{{ err }}</p>
                                         {% endfor %}
@@ -66,7 +68,7 @@
                                 </div>
                             </div>
                             <div class="row" style="margin-top: 10px">
-                                <div class="col-md-7 padding-defined pull-left">
+                                <div class="col-md-9 padding-defined pull-left">
                                     <div class="input-group">
                                         <span class="input-group-btn">
                                                 <button class="btn btn-default" type="button"> 备注</button>

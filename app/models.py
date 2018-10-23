@@ -465,12 +465,16 @@ class Billing(db.Model):
     paywith = db.Column(db.String(100), nullable=False)
     # 订单id
     order_id = db.Column(db.String(20), db.ForeignKey('tb_order.id'), nullable=False)
+    # 应付金额
+    amount = db.Column(db.Float, default=0, nullable=False)
     # 支付金额
     payment = db.Column(db.Float, default=0, nullable=False)
     # 积分抵扣
     score = db.Column(db.Float, default=0, nullable=False)
     # 余额抵扣
     balance = db.Column(db.Float, default=0, nullable=False)
+    # 欠款
+    debt = db.Column(db.Float, default=0, nullable=False)
     # 支付时间
     addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
@@ -509,6 +513,8 @@ class Order(db.Model):
     # 添加时间
     addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
+    # 销售订单明细表外键
+    odetails = db.relationship('Odetail', backref='order')
     # 客户消费流水外键
     billings = db.relationship('Billing', backref='order')
 
