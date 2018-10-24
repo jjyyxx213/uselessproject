@@ -1,10 +1,11 @@
 # -*- coding:utf-8 -*-
 from . import admin
 from flask import render_template, url_for, redirect, flash, session, request, current_app, abort
-from forms import UserForm, AuthForm, RoleForm, MscardForm, MsdetailForm, MsdetailListForm, CategoryForm, ItemForm, SupplierForm
-from app.models import User, Auth, Role, Oplog, Userlog, Mscard, Msdetail, Item, Customer, Category, Supplier, Kvp
+from forms import LoginForm, UserForm, AuthForm, RoleForm, MscardForm, MsdetailForm, MsdetailListForm, CategoryForm, ItemForm, SupplierForm
+from app.models import Admin, User, Auth, Role, Oplog, Userlog, Mscard, Msdetail, Item, Customer, Category, Supplier, Kvp
 from werkzeug.security import generate_password_hash
 from app import db
+from app.decorators import permission_required, login_required
 import os, stat, uuid, xlrd, xlwt, collections
 from datetime import datetime
 from json import dumps
@@ -31,7 +32,21 @@ def index():
 
 @admin.route("/login", methods=["GET", "POST"])
 def login():
-    return redirect(url_for('home.login'))
+    # 超管登录
+    form = LoginForm()
+    if form.validate_on_submit():
+        # 验证密码
+        admin = Admin.query.filter_by(name=form.name.data).first()
+        if admin is not None and admin.verify_password(form.pwd.data):
+            session['user_id'] = admin.id
+            session['user'] = admin.name
+            session['is_admin'] = '1'
+            # 不记录超管登录日志了
+            db.session.commit()
+            return redirect(request.args.get('next') or url_for('home.index'))
+        flash(u'账户或密码错误', 'err')
+        return redirect(url_for('admin.login'))
+    return render_template('admin/login.html', form=form)
 
 
 @admin.route('/auth/add', methods=['GET', 'POST'])
@@ -61,8 +76,9 @@ def auth_add():
         return redirect(url_for('admin.auth_add'))
     return render_template('admin/auth_add.html', form=form)
 
-
 @admin.route('/auth/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required
 def auth_edit(id=None):
     # 权限修改
     form = AuthForm()
@@ -107,6 +123,8 @@ def auth_del(id=None):
 
 
 @admin.route('/auth/list', methods=['GET'])
+@login_required
+@permission_required
 def auth_list():
     # 权限列表
     key = request.args.get('key', '')
@@ -341,12 +359,13 @@ def user_frozen():
 #     data = {"unfrozen": 1}
 #     return dumps(data)
 
+# 20181024 取消user外键，改变查询方式。超级管理员操作也记录，内连接不会进行查询....
 @admin.route('/oplog/list', methods=['GET'])
 def oplog_list():
     # 操作日志
     page = request.args.get('page', 1, type=int)
     key = request.args.get('key', '')
-    pagination = Oplog.query.join(User).filter(Oplog.user_id == User.id)
+    pagination = db.session.query(User, Oplog).filter(Oplog.user_id == User.id)
     # 如果查询了增加查询条件
     if key:
         print key

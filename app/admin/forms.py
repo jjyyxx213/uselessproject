@@ -5,6 +5,35 @@ from wtforms import StringField, PasswordField, SubmitField, FileField, TextArea
 from wtforms.validators import DataRequired, EqualTo, Regexp, Length
 from app.models import User, Auth, Role, Kvp, Category
 
+class LoginForm(FlaskForm):
+    # 超管登录表单
+    name = StringField(
+        label=u'账号',
+        validators=[
+            DataRequired(message=u'请输入管理员账号'),
+        ],
+        description=u'账号',
+        render_kw={
+            'class': 'form-control input-lg',
+            'placeholder': u'请输入管理员账号',
+        }
+    )
+    pwd = PasswordField(
+        label=u'密码',
+        validators=[DataRequired(message=u'请输入管理员密码')],
+        description=u'密码',
+        render_kw={
+            'class': 'form-control input-lg',
+            'placeholder': u'请输入管理员密码',
+            # 'required': 'required'
+        }
+    )
+    submit = SubmitField(
+        label=u'登录',
+        render_kw={
+            'class': 'btn btn-primary btn-block btn-flat'
+        }
+    )
 
 class AuthForm(FlaskForm):
     name = StringField(
