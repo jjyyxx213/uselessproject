@@ -3,8 +3,7 @@ import os
 from app import create_app, db
 from flask_script import Manager, Command
 from flask_migrate import Migrate, MigrateCommand
-from app.models import Auth, Role, User, Kvp
-import uuid
+from app.models import Admin, Kvp
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 
@@ -23,9 +22,7 @@ def dbinit():
     from werkzeug.security import generate_password_hash
     password = generate_password_hash('superadmin')
     objects = []
-    objects.append(Auth(id=1, name=u'超级管理员权限', url='/'))
-    objects.append(Role(id=1, name=u'超级管理员', auths='1'))
-    objects.append(User(id=1, name='admin', pwd=password, phone='18888888888', uuid=uuid.uuid4().hex))
+    objects.append(Admin(id=-1, name='admin', pwd=password))
     # unit
     objects.append(Kvp(type='unit', value=u'套'))
     objects.append(Kvp(type='unit', value=u'张'))

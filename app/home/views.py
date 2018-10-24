@@ -47,6 +47,7 @@ def logout():
     # 用户登出
     session.pop('user', None)
     session.pop('user_id', None)
+    session.pop('is_admin', None)
     return redirect(url_for('home.login'))
 
 # 20180913 liuqq 修改密码

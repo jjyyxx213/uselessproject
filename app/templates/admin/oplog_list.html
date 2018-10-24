@@ -40,11 +40,11 @@
                             </tr>
                             {% for v in pagination.items %}
                                 <tr>
-                                    <td>{{ v.id }}</td>
-                                    <td>{{ v.user.name }}</td>
-                                    <td>{{ v.addtime }}</td>
-                                    <td>{{ v.reason }}</td>
-                                    <td>{{ v.ip }}</td>
+                                    <td>{{ v.Oplog.id }}</td>
+                                    <td>{{ v.User.name }}</td>
+                                    <td>{{ v.Oplog.addtime }}</td>
+                                    <td>{{ v.Oplog.reason }}</td>
+                                    <td>{{ v.Oplog.ip }}</td>
                                 </tr>
                             {% endfor %}
                             </tbody>
