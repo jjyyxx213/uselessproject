@@ -139,9 +139,9 @@ def customer_list():
         # 姓名/手机/邮箱/车牌号查询
         pagination = pagination.filter(
             or_(Customer.name.ilike('%' + key + '%'),
-            Customer.phone.ilike('%' + key + '%'),
-            Customer.email.ilike('%' + key + '%'),
-            Customer.pnumber.ilike('%' + key + '%'))
+                Customer.phone.ilike('%' + key + '%'),
+                Customer.email.ilike('%' + key + '%'),
+                Customer.pnumber.ilike('%' + key + '%'))
         )
     pagination = pagination.join(User).filter(
         User.id == Customer.user_id
@@ -260,12 +260,13 @@ def cus_vip_add(id=None):
         obj_vip = Vip(
             id = max_vip_id,
             name=obj_mscard.name,  # 名称
-            balance=form.payment.data,  # 余额
+            # balance=form.payment.data,  # 余额
             scorerule=form.scorerule.data,  # 积分规则
             scorelimit=form.scorelimit.data,  # 积分限制提醒
             addtime=add_time,  # 办理时间
             endtime=end_time,  # 截止时间 = 办理时间 + 有效期
         )
+
         obj_oplog_vip = Oplog(
             user_id=session['user_id'],
             ip=request.remote_addr,
@@ -278,12 +279,21 @@ def cus_vip_add(id=None):
 
         # 保存客户与vip—id关系
         obj_customer.vip_id = max_vip_id
+        obj_customer.balance = form.payment.data #20181024 余额记录在客户表中
         obj_oplog_cus = Oplog(
             user_id=session['user_id'],
             ip=request.remote_addr,
             reason=u'添加客户与vip卡关系及明细:%s' % max_vip_id
         )
-        objects = [obj_customer, obj_oplog_cus]
+        # 20181024 liuqq 客户消费流水
+        obj_billing = Billing(
+            cust_id=obj_customer.id,  # 客户id
+            paywith=form.paywith.data,  # 支付方式
+            vip_id=max_vip_id, # 会员卡号
+            amount=form.payment.data,  # 应付金额
+            payment=form.payment.data  # 支付金额
+        )
+        objects = [obj_customer, obj_oplog_cus, obj_billing]
         db.session.add_all(objects)
 
         # 保存vip明细内容
@@ -349,10 +359,20 @@ def cus_vip_list(vip_id=None):
         return render_template('home/cus_vip_list.html', obj_vip=obj_vip, obj_vip_details=obj_vip_details)
     if request.method == 'POST':
         obj_customer.vip_id = None
+        obj_customer.balance = 0  # 20181024 余额清空
+        obj_customer.score = 0  # 20181024 积分清空
         db.session.add(obj_customer)
         db.session.flush()
         db.session.query(Vipdetail).filter(Vipdetail.vip_id == vip_id).delete()
+        db.session.query(Billing).filter(Billing.vip_id == vip_id).delete() #20181024 删除消费流水
         db.session.delete(obj_vip)
+        # 20181024 记录日志
+        obj_oplog = Oplog(
+            user_id=session['user_id'],
+            ip=request.remote_addr,
+            reason=u'注销客户会员卡:%s' % obj_customer.name
+        )
+        db.session.add(obj_oplog)
         db.session.commit()
         flash(u'会员卡注销成功', 'ok')
         return redirect(url_for('home.customer_list'))
@@ -362,19 +382,30 @@ def cus_vip_list(vip_id=None):
 def cus_vip_deposit(vip_id=None):
     form = CusVipDepositForm()
     obj_vip = Vip.query.filter_by(id=vip_id).first()
+    obj_customer = Customer.query.filter_by(vip_id=vip_id).first()
     if form.validate_on_submit():
         if form.deposit.data != form.re_deposit.data:
             flash(u'充值金额与确认充值金额不一致！', 'err')
             return render_template('home/cus_vip_deposit.html', obj_vip=obj_vip, form=form)
 
-        obj_vip.balance = float(form.sum_deposit.data)
+        obj_customer.balance = float(form.sum_deposit.data)
         obj_oplog_vip = Oplog(
             user_id=session['user_id'],
             ip=request.remote_addr,
-            reason=u'充值vip卡:%s 金额:%s' % (obj_vip.id, form.deposit.data)
+            reason=u'充值vip卡:%s 会员:%s 金额:%s' % (obj_vip.id,obj_customer.name, form.deposit.data)
         )
+
+        # 20181024 liuqq 客户消费流水
+        obj_billing = Billing(
+            cust_id=obj_customer.id,  # 客户id
+            paywith=form.paywith.data,  # 支付方式
+            vip_id=obj_vip.id, # 会员卡号
+            amount=float(form.re_deposit.data),  # 应付金额
+            payment=float(form.re_deposit.data)  # 支付金额
+        )
+
         # 数据提交
-        objects = [obj_vip, obj_oplog_vip]
+        objects = [obj_customer, obj_oplog_vip, obj_billing]
         db.session.add_all(objects)
         db.session.flush()
 
@@ -1076,7 +1107,7 @@ def stock_out_edit(id=None):
         Podetail.porder_id == id,
         Podetail.item_id == Stock.item_id,
         Podetail.nstore == Stock.store,
-    ).order_by(Podetail.id.asc()).all()
+        ).order_by(Podetail.id.asc()).all()
     if request.method == 'GET':
         # porder赋值
         if porder:
@@ -1163,7 +1194,7 @@ def stock_out_edit(id=None):
                         Podetail.porder_id == porder.id,
                         Podetail.item_id == Stock.item_id,
                         Podetail.nstore == Stock.store,
-                    ).order_by(Podetail.id.asc()).all()
+                        ).order_by(Podetail.id.asc()).all()
                     # 减少库存数量
                     for iter in checklists:
                         iter.Stock.qty -= iter.Podetail.qty
@@ -1184,7 +1215,7 @@ def stock_out_edit(id=None):
                     oplog = Oplog(
                         user_id=session['user_id'],
                         ip=request.remote_addr,
-                         reason=u'结算出库单:%s失败' % porder.id
+                        reason=u'结算出库单:%s失败' % porder.id
                     )
                     db.session.add(oplog)
                     db.session.commit()
@@ -1271,7 +1302,7 @@ def stock_allot_edit(id=None):
         Podetail.porder_id == id,
         Podetail.item_id == Stock.item_id,
         Podetail.ostore == Stock.store,
-    ).order_by(Podetail.id.asc()).all()
+        ).order_by(Podetail.id.asc()).all()
     if request.method == 'GET':
         # porder赋值
         if porder:
@@ -1369,7 +1400,7 @@ def stock_allot_edit(id=None):
                         Podetail.porder_id == porder.id,
                         Podetail.item_id == Stock.item_id,
                         Podetail.ostore == Stock.store,
-                    ).order_by(Podetail.id.asc()).all()
+                        ).order_by(Podetail.id.asc()).all()
                     for iter in checklists:
                         # 减少原库存数量
                         iter.Stock.qty -= iter.Podetail.qty
@@ -1406,7 +1437,7 @@ def stock_allot_edit(id=None):
                     oplog = Oplog(
                         user_id=session['user_id'],
                         ip=request.remote_addr,
-                         reason=u'结算调拨单:%s失败' % porder.id
+                        reason=u'结算调拨单:%s失败' % porder.id
                     )
                     db.session.add(oplog)
                     db.session.commit()
@@ -1493,7 +1524,7 @@ def stock_loss_edit(id=None):
         Podetail.porder_id == id,
         Podetail.item_id == Stock.item_id,
         Podetail.ostore == Stock.store,
-    ).order_by(Podetail.id.asc()).all()
+        ).order_by(Podetail.id.asc()).all()
     if request.method == 'GET':
         # porder赋值
         if porder:
@@ -1580,7 +1611,7 @@ def stock_loss_edit(id=None):
                         Podetail.porder_id == porder.id,
                         Podetail.item_id == Stock.item_id,
                         Podetail.ostore == Stock.store,
-                    ).order_by(Podetail.id.asc()).all()
+                        ).order_by(Podetail.id.asc()).all()
                     for iter in checklists:
                         # 减少原库存数量
                         iter.Stock.qty -= iter.Podetail.qty
@@ -1603,7 +1634,7 @@ def stock_loss_edit(id=None):
                     oplog = Oplog(
                         user_id=session['user_id'],
                         ip=request.remote_addr,
-                         reason=u'结算报损单:%s失败' % porder.id
+                        reason=u'结算报损单:%s失败' % porder.id
                     )
                     db.session.add(oplog)
                     db.session.commit()
@@ -1693,7 +1724,7 @@ def stock_return_edit(id=None):
         Podetail.porder_id == id,
         Podetail.item_id == Stock.item_id,
         Podetail.ostore == Stock.store,
-    ).order_by(Podetail.id.asc()).all()
+        ).order_by(Podetail.id.asc()).all()
     if request.method == 'GET':
         # porder赋值
         if porder:
@@ -1794,7 +1825,7 @@ def stock_return_edit(id=None):
                         Podetail.porder_id == porder.id,
                         Podetail.item_id == Stock.item_id,
                         Podetail.ostore == Stock.store,
-                    ).order_by(Podetail.id.asc()).all()
+                        ).order_by(Podetail.id.asc()).all()
                     for iter in checklists:
                         # 减少原库存数量
                         iter.Stock.qty -= iter.Podetail.qty
@@ -1903,7 +1934,7 @@ def stock_list_history(id=None):
         Porder.id == Podetail.porder_id,
         Porder.status == 1,
         Podetail.item_id == id,
-    )
+        )
     # 条件查询
     if key:
         # 单号/备注
@@ -1930,7 +1961,7 @@ def order_list():
     pagination = Order.query.join(Customer).filter(
         Order.type == 0,
         Order.customer_id == Customer.id,
-    )
+        )
     # 条件查询
     if key:
         # 单号/车牌/姓名/手机/备注/日期
@@ -2109,7 +2140,7 @@ def order_edit(id=None):
                     stocklist = db.session.query(Odetail, Stock).filter(
                         Odetail.order_id == order.id,
                         Odetail.stock_id == Stock.id,
-                    ).order_by(Odetail.id.asc()).all()
+                        ).order_by(Odetail.id.asc()).all()
                     for iter in stocklist:
                         ## 减少库存数量
                         iter.Stock.qty -= iter.Odetail.qty
@@ -2118,7 +2149,7 @@ def order_edit(id=None):
                     viplist = db.session.query(Odetail, Vipdetail).filter(
                         Odetail.order_id == order.id,
                         Odetail.vipdetail_id == Vipdetail.id,
-                    ).order_by(Odetail.id.asc()).all()
+                        ).order_by(Odetail.id.asc()).all()
                     for iter in viplist:
                         ## 减少VIP使用次数
                         iter.Vipdetail.quantity -= iter.Odetail.qty

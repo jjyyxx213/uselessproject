@@ -350,6 +350,20 @@ class CusVipForm(FlaskForm):
         FormField(VipdetailListForm), min_entries=0
     )
 
+    # 20181024 add 支付方式
+    paywith = SelectField(
+        label=u'支付方式',
+        coerce=unicode,
+        validators=[
+            DataRequired(message=u'请选择支付方式'),
+        ],
+        choices=[],
+        render_kw={
+            "class": "form-control select2",
+            "data-placeholder": u"请选择支付方式",
+        }
+    )
+
     submit = SubmitField(
         label=u'添加',
         render_kw={
@@ -361,6 +375,7 @@ class CusVipForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(CusVipForm, self).__init__(*args, **kwargs)
         self.name.choices = [(v.id, v.name) for v in Mscard.query.filter_by(valid=1).order_by(Mscard.name).all()]
+        self.paywith.choices = [(v.value, v.value) for v in Kvp.query.filter_by(type='paywith').order_by(Kvp.value).all()]
 
 
 # 20180920 liuqq 客户-会员卡表单
@@ -420,10 +435,25 @@ class CusVipDepositForm(FlaskForm):
         default=0
     )
 
+    # 20181024 add 支付方式
+    paywith = SelectField(
+        label=u'支付方式',
+        coerce=unicode,
+        validators=[
+            DataRequired(message=u'请选择支付方式'),
+        ],
+        choices=[],
+        render_kw={
+            "class": "form-control select2",
+            "data-placeholder": u"请选择支付方式",
+        }
+    )
+
     # 如果需要从数据库取值，一定要重写__init__方法，因为db对象不是全局的
     def __init__(self, *args, **kwargs):
         kwargs['csrf_enabled'] = False
         FlaskForm.__init__(self, *args, **kwargs)
+        self.paywith.choices = [(v.value, v.value) for v in Kvp.query.filter_by(type='paywith').order_by(Kvp.value).all()]
 
 class StockBuyListForm(FlaskForm):
     item_id = HiddenField(

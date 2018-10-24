@@ -39,6 +39,12 @@
                                     {{ form.name.label }}
                                     {{ form.name }}
                                 </div>
+
+                                <div class="form-group">
+                                    <label for="input_name" style="color: red">*</label>
+                                    {{ form.paywith.label }}
+                                    {{ form.paywith }}
+                                </div>
                             </div>
                             <div class="col-xs-4 col-sm-4">
                                 <div class="form-group">
@@ -66,110 +72,110 @@
                                     {{ form.scorelimit }}
                                 </div>
                             </div>
-                            <div class="box-body" id="inputs">
-                                {% if form.inputrows %}
-                                    <div class="row" style="margin-bottom: 5px">
-                                        <div class="col-md-3 padding-defined">
-                                            <label for="input_url" style="color: red">*</label>
-                                            <label> 商品/服务</label>
-                                        </div>
-                                        <div class="col-md-2 padding-defined">
-                                            <label> 原售价</label>
-                                        </div>
-                                        <div class="col-md-2 padding-defined">
-                                            <label for="input_url" style="color: red">*</label>
-                                            <label> 优惠价</label>
-                                        </div>
-                                        <div class="col-md-2 padding-defined">
-                                            <label for="input_url" style="color: red">*</label>
-                                            <label> 次数</label>
-                                        </div>
-                                        <div class="col-md-2 padding-defined">
-                                            <label for="input_url" style="color: red">*</label>
-                                            <label> 有效期</label>
-                                            <label for="input_interval" class="badge bg-green" data-toggle="tooltip"
-                                                   title="月">?</label>
-                                        </div>
-                                        <div class="col-md-1" style="padding-left: 5px">
-                                            <button type="button" class="btn btn-box-tool" data-widget="collapse" id="row-plus">
-                                                <i class="fa fa-plus-square fa-lg"></i>
-                                            </button>
+                        </div>
+                        <div class="box-body" id="inputs">
+                            {% if form.inputrows %}
+                                <div class="row" style="margin-bottom: 5px">
+                                    <div class="col-md-3 padding-defined">
+                                        <label for="input_url" style="color: red">*</label>
+                                        <label> 商品/服务</label>
+                                    </div>
+                                    <div class="col-md-2 padding-defined">
+                                        <label> 原售价</label>
+                                    </div>
+                                    <div class="col-md-2 padding-defined">
+                                        <label for="input_url" style="color: red">*</label>
+                                        <label> 优惠价</label>
+                                    </div>
+                                    <div class="col-md-2 padding-defined">
+                                        <label for="input_url" style="color: red">*</label>
+                                        <label> 次数</label>
+                                    </div>
+                                    <div class="col-md-2 padding-defined">
+                                        <label for="input_url" style="color: red">*</label>
+                                        <label> 有效期</label>
+                                        <label for="input_interval" class="badge bg-green" data-toggle="tooltip"
+                                               title="月">?</label>
+                                    </div>
+                                    <div class="col-md-1" style="padding-left: 5px">
+                                        <button type="button" class="btn btn-box-tool" data-widget="collapse" id="row-plus">
+                                            <i class="fa fa-plus-square fa-lg"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            {% for v in form.inputrows %}
+                                <div class="row">
+                                    <div class="col-md-3 padding-defined">
+                                        <input id="inputrows-{{ loop.index0 }}-item_id"
+                                               name="inputrows-{{ loop.index0 }}-item_id" type="hidden"
+                                               value="{{ v.data.item_id or '' }}">
+                                        <input id="inputrows-{{ loop.index0 }}-item_name"
+                                               name="inputrows-{{ loop.index0 }}-item_name" type="hidden"
+                                               value="{{ v.data.item_name or '' }}">
+                                        <select class="form-control select2 item-choice"
+                                                id="inputrows-{{ loop.index0 }}-item"
+                                                name="inputrows-{{ loop.index0 }}-item"
+                                                data-placeholder="请选择商品或服务">
+                                        </select>
+                                        {% for err in v.item_id.errors %}
+                                            <div class="col-md-12">
+                                                <p style="color: red" class="small">{{ err }}</p>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="col-md-2 padding-defined">
+                                        <div class="form-group">
+                                            <input id="inputrows-{{ loop.index0 }}-salesprice"
+                                                   name="inputrows-{{ loop.index0 }}-salesprice" class="form-control"
+                                                   placeholder="原售价" type="text" value="{{ v.data.salesprice or '' }}"
+                                                   readonly>
                                         </div>
                                     </div>
-                                {% endif %}
-                                {% for v in form.inputrows %}
-                                    <div class="row">
-                                        <div class="col-md-3 padding-defined">
-                                            <input id="inputrows-{{ loop.index0 }}-item_id"
-                                                   name="inputrows-{{ loop.index0 }}-item_id" type="hidden"
-                                                   value="{{ v.data.item_id or '' }}">
-                                            <input id="inputrows-{{ loop.index0 }}-item_name"
-                                                   name="inputrows-{{ loop.index0 }}-item_name" type="hidden"
-                                                   value="{{ v.data.item_name or '' }}">
-                                            <select class="form-control select2 item-choice"
-                                                    id="inputrows-{{ loop.index0 }}-item"
-                                                    name="inputrows-{{ loop.index0 }}-item"
-                                                    data-placeholder="请选择商品或服务">
-                                            </select>
-                                            {% for err in v.item_id.errors %}
+                                    <div class="col-md-2 padding-defined">
+                                        <div class="form-group">
+                                            <input id="inputrows-{{ loop.index0 }}-discountprice"
+                                                   name="inputrows-{{ loop.index0 }}-discountprice" class="form-control"
+                                                   placeholder="优惠价" type="text" value="{{ v.data.discountprice or '' }}">
+                                            {% for err in v.discountprice.errors %}
                                                 <div class="col-md-12">
                                                     <p style="color: red" class="small">{{ err }}</p>
                                                 </div>
                                             {% endfor %}
                                         </div>
-                                        <div class="col-md-2 padding-defined">
-                                            <div class="form-group">
-                                                <input id="inputrows-{{ loop.index0 }}-salesprice"
-                                                       name="inputrows-{{ loop.index0 }}-salesprice" class="form-control"
-                                                       placeholder="原售价" type="text" value="{{ v.data.salesprice or '' }}"
-                                                       readonly>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-2 padding-defined">
-                                            <div class="form-group">
-                                                <input id="inputrows-{{ loop.index0 }}-discountprice"
-                                                       name="inputrows-{{ loop.index0 }}-discountprice" class="form-control"
-                                                       placeholder="优惠价" type="text" value="{{ v.data.discountprice or '' }}">
-                                                {% for err in v.discountprice.errors %}
-                                                    <div class="col-md-12">
-                                                        <p style="color: red" class="small">{{ err }}</p>
-                                                    </div>
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                        <div class="col-md-2 padding-defined">
-                                            <div class="form-group">
-                                                <input id="inputrows-{{ loop.index0 }}-quantity"
-                                                       name="inputrows-{{ loop.index0 }}-quantity" class="form-control"
-                                                       placeholder="次数" type="text" value="{{ v.data.quantity or '' }}">
-                                                {% for err in v.quantity.errors %}
-                                                    <div class="col-md-12">
-                                                        <p style="color: red" class="small">{{ err }}</p>
-                                                    </div>
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                        <div class="col-md-2 padding-defined">
-                                            <div class="form-group">
-                                                <input id="inputrows-{{ loop.index0 }}-interval"
-                                                       name="inputrows-{{ loop.index0 }}-interval" class="form-control"
-                                                       placeholder="有效期(月)" type="text" value="{{ v.data.interval or '' }}">
-                                                {% for err in v.interval.errors %}
-                                                    <div class="col-md-12">
-                                                        <p style="color: red" class="small">{{ err }}</p>
-                                                    </div>
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                        <div class="col-md-1" style="padding-left: 5px">
-                                            <button type="button" class="btn btn-box-tool" data-widget="collapse"
-                                                    name="row-minus">
-                                                <i class="fa fa-minus-square fa-lg" aria-hidden="true"></i>
-                                            </button>
+                                    </div>
+                                    <div class="col-md-2 padding-defined">
+                                        <div class="form-group">
+                                            <input id="inputrows-{{ loop.index0 }}-quantity"
+                                                   name="inputrows-{{ loop.index0 }}-quantity" class="form-control"
+                                                   placeholder="次数" type="text" value="{{ v.data.quantity or '' }}">
+                                            {% for err in v.quantity.errors %}
+                                                <div class="col-md-12">
+                                                    <p style="color: red" class="small">{{ err }}</p>
+                                                </div>
+                                            {% endfor %}
                                         </div>
                                     </div>
-                                {% endfor %}
-                            </div>
+                                    <div class="col-md-2 padding-defined">
+                                        <div class="form-group">
+                                            <input id="inputrows-{{ loop.index0 }}-interval"
+                                                   name="inputrows-{{ loop.index0 }}-interval" class="form-control"
+                                                   placeholder="有效期(月)" type="text" value="{{ v.data.interval or '' }}">
+                                            {% for err in v.interval.errors %}
+                                                <div class="col-md-12">
+                                                    <p style="color: red" class="small">{{ err }}</p>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-1" style="padding-left: 5px">
+                                        <button type="button" class="btn btn-box-tool" data-widget="collapse"
+                                                name="row-minus">
+                                            <i class="fa fa-minus-square fa-lg" aria-hidden="true"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endfor %}
                         </div>
                         <div class="box-footer">
                             {{ form.submit }}

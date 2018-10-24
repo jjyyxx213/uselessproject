@@ -209,9 +209,9 @@ class Vip(db.Model):
     # 名称
     name = db.Column(db.String(100), nullable=False)
     # 余额
-    balance = db.Column(db.Float, default=0, nullable=False)
+    #balance = db.Column(db.Float, default=0, nullable=False)
     # 积分余额
-    score = db.Column(db.Float, default=0, nullable=False)
+    #score = db.Column(db.Float, default=0, nullable=False)
     # 积分规则(积分=消费金额*积分规则)
     scorerule = db.Column(db.Float, default=1, nullable=False)
     # 积分限制提醒(到达额度后，提醒会员升级)
@@ -475,7 +475,9 @@ class Billing(db.Model):
     # 支付方式
     paywith = db.Column(db.String(100), nullable=False)
     # 订单id
-    order_id = db.Column(db.String(20), db.ForeignKey('tb_order.id'), nullable=False)
+    order_id = db.Column(db.String(20), db.ForeignKey('tb_order.id'))
+    # 20181024 会员卡号
+    vip_id = db.Column(db.Integer, db.ForeignKey('tb_vip.id'))
     # 应付金额
     amount = db.Column(db.Float, default=0, nullable=False)
     # 支付金额
