@@ -5,6 +5,7 @@ from forms import UserForm, AuthForm, RoleForm, MscardForm, MsdetailForm, Msdeta
 from app.models import User, Auth, Role, Oplog, Userlog, Mscard, Msdetail, Item, Customer, Category, Supplier, Kvp
 from werkzeug.security import generate_password_hash
 from app import db
+from app.decorators import permission_required, login_required
 import os, stat, uuid, xlrd, xlwt, collections
 from datetime import datetime
 from json import dumps
@@ -61,8 +62,9 @@ def auth_add():
         return redirect(url_for('admin.auth_add'))
     return render_template('admin/auth_add.html', form=form)
 
-
 @admin.route('/auth/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required
 def auth_edit(id=None):
     # 权限修改
     form = AuthForm()
@@ -107,6 +109,8 @@ def auth_del(id=None):
 
 
 @admin.route('/auth/list', methods=['GET'])
+@login_required
+@permission_required
 def auth_list():
     # 权限列表
     key = request.args.get('key', '')
