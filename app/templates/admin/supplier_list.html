@@ -16,10 +16,11 @@
                 <div class="box box-primary">
                     <div class="box-header">
                         <h3 class="box-title">
-                        供应商列表
+                            供应商列表
                         </h3>
                         <div class="box-tools">
                             <div class="pull-left border-right">
+                                <input type="button" id="exportData" class="btn btn-primary btn-sm" value="导出"/>
                                 <a href="{{ url_for('admin.supplier_add') }}" class="btn btn-primary btn-sm" role="button">
                                     添加</a>&nbsp;&nbsp;&nbsp;
                             </div>
@@ -60,9 +61,9 @@
                                     <td>{{ v.qq }}</td>
                                     <td>{{ v.address }}</td>
                                     {% if v.valid == 1 %}
-                                    <td id="{{ v.id }}"> 有效</td>
+                                        <td id="{{ v.id }}"> 有效</td>
                                     {% else %}
-                                    <td id="{{ v.id }}" style="color: red"> 无效</td>
+                                        <td id="{{ v.id }}" style="color: red"> 无效</td>
                                     {% endif %}
                                     <td>{{ v.remarks }}</td>
                                     <td>
@@ -134,6 +135,27 @@
                     }
                 })
             })
+
+            $("#exportData").click(function(){
+                //后台请求返回供应商列表
+                $.ajax({
+                    type:'POST',
+                    url:'{{ url_for('admin.supplier_get') }}',
+                    data:'',
+                    contentType:'application/json; charset=UTF-8',
+                    dataType: 'json',
+                    success:function(res){
+                        if(res == null){
+                            return;
+                        }
+                        else {
+                            {#var dataJson = JSON.parse(res);#}
+                            JSONToExcelConvertor("供应商列表",res);
+                        }
+                    },
+                })
+
+            });
         })
     </script>
 {% endblock %}

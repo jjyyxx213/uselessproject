@@ -5,7 +5,7 @@ from forms import UserForm, AuthForm, RoleForm, MscardForm, MsdetailForm, Msdeta
 from app.models import User, Auth, Role, Oplog, Userlog, Mscard, Msdetail, Item, Customer, Category, Supplier, Kvp
 from werkzeug.security import generate_password_hash
 from app import db
-import os, stat, uuid, xlrd, xlwt
+import os, stat, uuid, xlrd, xlwt, collections
 from datetime import datetime
 from json import dumps
 from sqlalchemy import or_
@@ -568,9 +568,9 @@ def customer_list():
         # 姓名/手机/邮箱/车牌号查询
         pagination = pagination.filter(
             or_(Customer.name.ilike('%' + key + '%'),
-            Customer.phone.ilike('%' + key + '%'),
-            Customer.email.ilike('%' + key + '%'),
-            Customer.pnumber.ilike('%' + key + '%'))
+                Customer.phone.ilike('%' + key + '%'),
+                Customer.email.ilike('%' + key + '%'),
+                Customer.pnumber.ilike('%' + key + '%'))
         )
     pagination = pagination.join(User).filter(
         User.id == Customer.user_id
@@ -903,6 +903,38 @@ def supplier_block():
     db.session.commit()
     data = {"valid": 0}
     return dumps(data)
+
+
+# 20181023 liuqq 获取供应商信息
+@admin.route('/supplier/get', methods=['GET', 'POST'])
+def supplier_get():
+    # 获取供应商信息
+    if request.method == 'POST':
+        # 获取json数据
+        obj_suppliers = Supplier.query.order_by(Supplier.id)
+        if obj_suppliers:
+            s_json = []
+            valid = ''
+            for v in obj_suppliers:
+                dic = collections.OrderedDict()
+                if v.valid == 1:
+                    valid = '有效'
+                else:
+                    valid = '无效'
+                dic[u"编号"] = v.id
+                dic[u"名称"] = v.name
+                dic[u"联络人"] = v.contact
+                dic[u"手机"] = v.phone
+                dic[u"联系电话"] = v.tel
+                dic[u"QQ"] = v.qq
+                dic[u"地址"] = v.address
+                dic[u"状态"] = valid
+                dic[u"备注"] = v.remarks
+                dic[u"添加时间"] = str(v.addtime)
+                s_json.append(dic)
+            return (dumps(s_json))
+        else:
+            return (None)
 
 
 # liuqq Excel打开
