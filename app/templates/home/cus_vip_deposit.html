@@ -41,7 +41,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="payment">卡内余额</label>
-                                <input class="form-control" id="balance" name="balance" readonly="readonly" type="text" value={{ obj_vip.balance }}>
+                                <input class="form-control" id="balance" name="balance" readonly="readonly" type="text" value={{ obj_vip.customer[0].balance }}>
                             </div>
 
                         </div>
@@ -60,7 +60,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="payment">卡内积分</label>
-                                <input class="form-control" id="balance" name="balance" readonly="readonly" type="text" value={{ obj_vip.score }}>
+                                <input class="form-control" id="balance" name="balance" readonly="readonly" type="text" value={{ obj_vip.customer[0].score }}>
                             </div>
 
                         </div>
@@ -80,7 +80,17 @@
                     <form role="form" method="post">
                         {{ form.hidden_tag() }}
                         <div class="box-body">
-                            <div class="form-group col-xs-3 col-sm-3">
+                            <div class="form-group col-xs-2 col-sm-2">
+                                <label for="input_name" style="color: red">*</label>
+                                {{ form.paywith.label }}
+                                {{ form.paywith }}
+                                {% for err in form.paywith.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="form-group col-xs-2 col-sm-2">
                                 <label for="input_name" style="color: red">*</label>
                                 {{ form.deposit.label }}
                                 {{ form.deposit }}
@@ -90,7 +100,7 @@
                                     </div>
                                 {% endfor %}
                             </div>
-                            <div class="form-group col-xs-3 col-sm-3">
+                            <div class="form-group col-xs-2 col-sm-2">
                                 <label for="input_name" style="color: red">*</label>
                                 {{ form.re_deposit.label }}
                                 {{ form.re_deposit }}
@@ -100,7 +110,7 @@
                                     </div>
                                 {% endfor %}
                             </div>
-                            <div class="form-group col-xs-3 col-sm-3">
+                            <div class="form-group col-xs-2 col-sm-2">
                                 {{ form.sum_deposit.label }}
                                 {{ form.sum_deposit }}
                                 {% for err in form.sum_deposit.errors %}
@@ -109,7 +119,7 @@
                                     </div>
                                 {% endfor %}
                             </div>
-                            <div class="form-group col-xs-3 col-sm-3">
+                            <div class="form-group col-xs-2 col-sm-2">
                                 <div>
                                     <label for="input_name" style="color: red">*</label>
                                     <label for="input_name">套餐充值 </label>

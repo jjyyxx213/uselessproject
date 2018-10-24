@@ -41,7 +41,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="payment">卡内余额</label>
-                                <input class="form-control" id="balance" name="balance" readonly="readonly" type="text" value={{ obj_vip.balance }}>
+                                <input class="form-control" id="balance" name="balance" readonly="readonly" type="text" value={{ obj_vip.customer[0].balance }}>
                             </div>
 
                         </div>
@@ -60,7 +60,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="payment">卡内积分</label>
-                                <input class="form-control" id="balance" name="balance" readonly="readonly" type="text" value={{ obj_vip.score }}>
+                                <input class="form-control" id="balance" name="balance" readonly="readonly" type="text" value={{ obj_vip.customer[0].score }}>
                             </div>
 
                         </div>
@@ -120,7 +120,7 @@
                                                 &times;
                                             </button>
                                             <h4 class="modal-title" id="myModalLabel">
-                                                提示：注销会员后会解绑会员卡及相关套餐，是否继续？
+                                                提示：注销会员后会解绑会员卡及相关套餐，并且积分和余额会清空，是否继续？
                                             </h4>
                                         </div>
 
