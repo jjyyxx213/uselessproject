@@ -2182,6 +2182,7 @@ def order_edit(id=None):
                         balance=order.balance,
                         score=order.score,
                         debt=order.debt,
+                        paytype=u'收银付款',
                     )
                     db.session.add(billing)
                     # 订单状态更新 tb_order
@@ -2305,6 +2306,7 @@ def order_debt(id=None):
             balance=order.balance,
             score=order.score,
             debt=order.debt,
+            paytype=u'收银结款',
         )
         db.session.add(new_billing)
         oplog = Oplog(
