@@ -490,6 +490,8 @@ class Billing(db.Model):
     debt = db.Column(db.Float, default=0, nullable=False)
     # 支付时间
     addtime = db.Column(db.DateTime, index=True, default=datetime.now)
+    # 20181025 支付分类 如:会员充值
+    paytype = db.Column(db.String(100))
 
     def __repr__(self):
         return '<Billing %r>' % self.paywith
