@@ -291,7 +291,8 @@ def cus_vip_add(id=None):
             paywith=form.paywith.data,  # 支付方式
             vip_id=max_vip_id, # 会员卡号
             amount=form.payment.data,  # 应付金额
-            payment=form.payment.data  # 支付金额
+            payment=form.payment.data,  # 支付金额
+            paytype=u'客户办卡'
         )
         objects = [obj_customer, obj_oplog_cus, obj_billing]
         db.session.add_all(objects)
@@ -401,7 +402,8 @@ def cus_vip_deposit(vip_id=None):
             paywith=form.paywith.data,  # 支付方式
             vip_id=obj_vip.id, # 会员卡号
             amount=float(form.re_deposit.data),  # 应付金额
-            payment=float(form.re_deposit.data)  # 支付金额
+            payment=float(form.re_deposit.data),  # 支付金额
+            paytype=u'会员充值'
         )
 
         # 数据提交
