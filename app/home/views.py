@@ -474,18 +474,21 @@ def cus_vip_update(vip_id=None):
         db.session.add_all(objects)
 
         # 保存vip明细内容
-        db.session.query(Vipdetail).filter(Vipdetail.vip_id == vip_id).delete()
-        for iter_add in form.inputrows:
-            interval_day = int(iter_add.interval.data) * 30  # 卡的有效期*30天
-            obj_vip_detail = Vipdetail(
-                vip_id=vip_id,  # 客户会员卡号
-                item_id=iter_add.item_id.data,  # 服务/项目id
-                discountprice=iter_add.discountprice.data,  # 优惠后销售价
-                quantity=iter_add.quantity.data,  # 使用次数
-                addtime=add_time,  # 优惠开始时间
-                endtime=add_time + timedelta(days=interval_day)  # 优惠结束时间 = 优惠开始时间 + 有效期
-            )
-            db.session.add(obj_vip_detail)
+        meal = form.meal.data
+        # 若是保留原套餐
+        if meal == 0:
+            db.session.query(Vipdetail).filter(Vipdetail.vip_id == vip_id).delete()
+            for iter_add in form.inputrows:
+                interval_day = int(iter_add.interval.data) * 30  # 卡的有效期*30天
+                obj_vip_detail = Vipdetail(
+                    vip_id=vip_id,  # 客户会员卡号
+                    item_id=iter_add.item_id.data,  # 服务/项目id
+                    discountprice=iter_add.discountprice.data,  # 优惠后销售价
+                    quantity=iter_add.quantity.data,  # 使用次数
+                    addtime=add_time,  # 优惠开始时间
+                    endtime=add_time + timedelta(days=interval_day)  # 优惠结束时间 = 优惠开始时间 + 有效期
+                )
+                db.session.add(obj_vip_detail)
 
         db.session.commit()
         flash(u'客户-会员卡升级成功', 'ok')

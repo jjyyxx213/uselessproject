@@ -364,6 +364,15 @@ class CusVipForm(FlaskForm):
         }
     )
 
+    # 20181025 add 升级方式
+    meal = RadioField(
+        label=u'升级方式',
+        description=u'升级方式',
+        coerce=int,
+        choices=[(0, u'使用新套餐'), (1, u'保留原套餐')],
+        default=0
+    )
+
     submit = SubmitField(
         label=u'添加',
         render_kw={

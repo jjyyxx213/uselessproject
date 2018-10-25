@@ -114,14 +114,14 @@
                             <h3 class="box-title">升级卡项选择</h3>
                         </div>
                         <div class="box-body">
-                            <div class="col-xs-3 col-sm-3">
+                            <div class="col-xs-2 col-sm-2">
                                 <div class="form-group">
                                     <label for="input_name" style="color: red">*</label>
                                     {{ form.name.label }}
                                     {{ form.name }}
                                 </div>
                             </div>
-                            <div class="col-xs-3 col-sm-3">
+                            <div class="col-xs-2 col-sm-2">
                                 <div class="form-group">
                                     {{ form.interval.label }}
                                     <label for="input_interval" class="badge bg-green" data-toggle="tooltip"
@@ -129,7 +129,7 @@
                                     {{ form.interval }}
                                 </div>
                             </div>
-                            <div class="col-xs-3 col-sm-3">
+                            <div class="col-xs-2 col-sm-2">
                                 <div class="form-group">
                                     {{ form.scorerule.label }}
                                     <label for="input_scorerule" class="badge bg-green" data-toggle="tooltip"
@@ -137,7 +137,7 @@
                                     {{ form.scorerule }}
                                 </div>
                             </div>
-                            <div class="col-xs-3 col-sm-3">
+                            <div class="col-xs-2 col-sm-2">
                                 <div class="form-group">
                                     {{ form.scorelimit.label }}
                                     <label for="input_scorerule" class="badge bg-green" data-toggle="tooltip"
@@ -145,6 +145,26 @@
                                     {{ form.scorelimit }}
                                 </div>
                             </div>
+                            <div class="form-group col-xs-2 col-sm-2">
+                                <div>
+                                    <label for="input_name" style="color: red">*</label>
+                                    <label for="input_name">升级方式 </label>
+                                </div>
+                                {% for meal in form.meal %}
+                                    {{ meal }}
+                                    {% if meal.data == 0 %}
+                                        <label for="input_meal">使用新套餐</label>
+                                    {% else %}
+                                        <label for="input_meal">保留原套餐</label>
+                                    {% endif %}
+                                {% endfor %}
+                                {% for err in form.meal.errors %}
+                                    <div class="col-md-12">
+                                        <p style="color: red">{{ err }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+
                         </div>
                         <div class="box-body" id="inputs">
                             {% if form.inputrows %}
