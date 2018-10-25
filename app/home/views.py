@@ -430,6 +430,70 @@ def cus_vip_deposit(vip_id=None):
         return redirect(url_for('home.customer_list'))
     return render_template('home/cus_vip_deposit.html', obj_vip=obj_vip, form=form)
 
+
+# 20181025 会员卡升级
+@home.route('/customer/cus_vip_update/<int:vip_id>', methods=['GET', 'POST'])
+def cus_vip_update(vip_id=None):
+    form = CusVipForm()
+    # 明细查看
+    obj_customer = Customer.query.filter_by(vip_id=vip_id).first()
+    obj_vip = Vip.query.filter_by(id=vip_id).first()
+    obj_vip_details = Vipdetail.query.filter_by(vip_id=vip_id).order_by(Vipdetail.id.asc()).all()
+    if request.method == 'POST':
+        # 计算截止日期
+        interval_day = int(form.interval.data) * 30  # 卡的有效期*30天
+        add_time = datetime.now()
+        end_time = add_time + timedelta(days=interval_day)
+
+        # 计算引用vip卡的名称
+        obj_mscard = Mscard.query.filter_by(id=form.name.data).first()
+        # 修改VIP主表对象
+        obj_vip.name = obj_mscard.name
+        obj_vip.scorerule = form.scorerule.data # 积分规则
+        obj_vip.scorelimit = form.scorelimit.data # 积分限制提醒
+        obj_vip.addtime = add_time # 办理时间
+        obj_vip.endtime = end_time # 截止时间 = 办理时间 + 有效期
+
+        obj_oplog_vip = Oplog(
+            user_id=session['user_id'],
+            ip=request.remote_addr,
+            reason=u'升级客户:%s的vip卡:%s' % (obj_customer.name, vip_id)
+        )
+        # 数据提交
+        objects = [obj_vip, obj_oplog_vip]
+        db.session.add_all(objects)
+
+        # 客户积分清零
+        obj_customer.score = 0
+        obj_oplog_cus = Oplog(
+            user_id=session['user_id'],
+            ip=request.remote_addr,
+            reason=u'客户:%s会员卡:%s升级积分清零' % (obj_customer.name, vip_id)
+        )
+        objects = [obj_customer, obj_oplog_cus]
+        db.session.add_all(objects)
+
+        # 保存vip明细内容
+        db.session.query(Vipdetail).filter(Vipdetail.vip_id == vip_id).delete()
+        for iter_add in form.inputrows:
+            interval_day = int(iter_add.interval.data) * 30  # 卡的有效期*30天
+            obj_vip_detail = Vipdetail(
+                vip_id=vip_id,  # 客户会员卡号
+                item_id=iter_add.item_id.data,  # 服务/项目id
+                discountprice=iter_add.discountprice.data,  # 优惠后销售价
+                quantity=iter_add.quantity.data,  # 使用次数
+                addtime=add_time,  # 优惠开始时间
+                endtime=add_time + timedelta(days=interval_day)  # 优惠结束时间 = 优惠开始时间 + 有效期
+            )
+            db.session.add(obj_vip_detail)
+
+        db.session.commit()
+        flash(u'客户-会员卡升级成功', 'ok')
+        return redirect(url_for('home.customer_list'))
+    if request.method == 'GET':
+        return render_template('home/cus_vip_update.html', obj_vip=obj_vip, obj_vip_details=obj_vip_details, form=form)
+
+
 @home.route('/modal/customer', methods=['GET'])
 def modal_customer():
     # 获取客户弹出框数据
