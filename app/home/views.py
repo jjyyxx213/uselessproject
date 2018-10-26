@@ -21,6 +21,8 @@ def change_filename(filename):
 @home.route('/', methods=['GET', 'POST'])
 def index():
     form = IndexForm()
+    # 收入总额
+    sum_payment = ''
     # 会员数量
     vip_count = ''
     # 散客数量
@@ -48,11 +50,18 @@ def index():
         sql_result = db.session.execute(text(sql_text))
         for iter in sql_result:
             nvip_count = iter.nvip_count
-    # todo 实收金额
+        # 实收金额
+        sql_text = 'select sum(t.payment) as sum_payment from (select o.payment, o.addtime from tb_order o ' \
+                   'where o.type = 0 and o.status = 1 union all select b.payment, b.addtime from tb_billing b ' \
+                   'where b.vip_id is not null) t where t.addtime >= \'%s\' and t.addtime < \'%s\' ' % (date_from, date_to)
+        sql_result = db.session.execute(text(sql_text))
+        for iter in sql_result:
+            sum_payment = iter.sum_payment
     # bill vip_id不为空取客户充卡
 
 
     context = {
+        'sum_payment': sum_payment,
         'vip_count': vip_count,
         'nvip_count': nvip_count,
     }
