@@ -3,13 +3,13 @@ from . import home
 from flask import render_template, session, redirect, request, url_for, flash, current_app
 from forms import LoginForm, PwdForm, CustomerForm, CusVipForm, CusVipDepositForm, StockBuyForm, StockBuyListForm, StockBuyDebtForm, \
     StockOutListForm, StockOutForm, StockAllotListForm, StockAllotForm, StockLossListForm, StockLossForm, StockReturnListForm, \
-    StockReturnForm, StockReturnDebtForm, OrderListForm, OrderForm, OrderDebtForm, SalesAdvancedForm
+    StockReturnForm, StockReturnDebtForm, OrderListForm, OrderForm, OrderDebtForm, SalesAdvancedForm, IndexForm
 from app.models import User, Userlog, Oplog, Item, Supplier, Customer, Stock, Porder, Podetail, Kvp, Mscard, Msdetail, Vip, Vipdetail, Order, Odetail, Billing
 from app import db
 from werkzeug.security import generate_password_hash
 from sqlalchemy import or_, and_, func, text
 from json import dumps
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import os, random, uuid
 
 def change_filename(filename):
@@ -18,9 +18,54 @@ def change_filename(filename):
     filename = datetime.now().strftime('%Y%m%d%H%M%S') + str(uuid.uuid4().hex) + fileinfo[-1]
     return filename
 
-@home.route('/', methods=['GET'])
+@home.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template("home/index.html")
+    form = IndexForm()
+    # 收入总额
+    sum_payment = ''
+    # 会员数量
+    vip_count = ''
+    # 散客数量
+    nvip_count = ''
+    if request.method == 'GET':
+        # 本月第一天
+        form.date_from.data = date(date.today().year,date.today().month,1)
+        form.date_to.data = date.today()
+    if form.validate_on_submit():
+        date_from = datetime.strptime(form.date_from.data, '%Y-%m-%d')
+        date_to = datetime.strptime(form.date_to.data, '%Y-%m-%d') + timedelta(days=1)
+        # 获取会员数量
+        sql_text = 'select count(id) as vip_count from tb_customer c where exists ( '\
+    	           'select o.id from tb_order o where o.customer_id = c.id and o.type = 0 '\
+                   'and o.status = 1 and addtime >= \'%s\' and addtime < \'%s\' '\
+                   ') and c.vip_id is not null' % (date_from, date_to)
+        sql_result = db.session.execute(text(sql_text))
+        for iter in sql_result:
+            vip_count = iter.vip_count
+        # 获取散客数量
+        sql_text = 'select count(id) as nvip_count from tb_customer c where exists ( ' \
+                   'select o.id from tb_order o where o.customer_id = c.id and o.type = 0 ' \
+                   'and o.status = 1 and addtime >= \'%s\' and addtime < \'%s\' ' \
+                   ') and c.vip_id is null' % (date_from, date_to)
+        sql_result = db.session.execute(text(sql_text))
+        for iter in sql_result:
+            nvip_count = iter.nvip_count
+        # 实收金额
+        sql_text = 'select sum(t.payment) as sum_payment from (select o.payment, o.addtime from tb_order o ' \
+                   'where o.type = 0 and o.status = 1 union all select b.payment, b.addtime from tb_billing b ' \
+                   'where b.vip_id is not null) t where t.addtime >= \'%s\' and t.addtime < \'%s\' ' % (date_from, date_to)
+        sql_result = db.session.execute(text(sql_text))
+        for iter in sql_result:
+            sum_payment = iter.sum_payment
+    # bill vip_id不为空取客户充卡
+
+
+    context = {
+        'sum_payment': sum_payment,
+        'vip_count': vip_count,
+        'nvip_count': nvip_count,
+    }
+    return render_template("home/index.html", form=form, **context)
 
 @home.route('/login', methods=['GET', 'POST'])
 def login():

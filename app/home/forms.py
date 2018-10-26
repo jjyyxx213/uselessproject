@@ -6,7 +6,41 @@ from flask import session
 from app.utils.baseforms import NoValidateSelectField
 from wtforms.validators import DataRequired, Regexp, Length
 from app.models import User, Kvp, Supplier, Mscard
+from datetime import date
 
+class IndexForm(FlaskForm):
+    # 开始时间
+    date_from = StringField(
+        label=u'开始时间',
+        validators=[
+            DataRequired(message=u'请选择开始时间'),
+        ],
+        description=u'开始时间',
+        render_kw={
+            'class': 'form-control date-choice',
+            'data-date-format': 'yyyy-mm-dd',
+        }
+    )
+    # 结束时间
+    date_to = StringField(
+        label=u'结束时间',
+        validators=[
+            DataRequired(message=u'请选择结束时间'),
+        ],
+        description=u'结束时间',
+        render_kw={
+            'class': 'form-control date-choice',
+            'data-date-format': 'yyyy-mm-dd',
+        }
+    )
+    # 查询
+    submit = SubmitField(
+        label=u'查询',
+        render_kw={
+            'class': 'btn btn-primary',
+            # 'data-dismiss' : 'modal', ## 这里如果触发关闭时间，form表单不会提交
+        }
+    )
 
 class LoginForm(FlaskForm):
     # 用户登录表单
