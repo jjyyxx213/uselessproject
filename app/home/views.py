@@ -62,15 +62,6 @@ def index():
         sql_result = db.session.execute(text(sql_text))
         for iter in sql_result:
             nvip_count = iter.nvip_count
-        # 实收金额
-        '''
-        sql_text = 'select sum(t.payment) as sum_payment from (select o.payment, o.addtime from tb_order o ' \
-                   'where o.type = 0 and o.status = 1 union all select b.payment, b.addtime from tb_billing b ' \
-                   'where b.vip_id is not null) t where t.addtime >= \'%s\' and t.addtime < \'%s\' ' % (date_from, date_to)
-        sql_result = db.session.execute(text(sql_text))
-        for iter in sql_result:
-            sum_payment = iter.sum_payment
-        '''
         # 销售金额
         sql_text = 'select sum(o.payment) as sum_order_payment from tb_order o where o.type = 0 and o.status = 1  ' \
                    'and o.addtime >= \'%s\' and o.addtime < \'%s\' ' % (date_from, date_to)
@@ -88,11 +79,12 @@ def index():
             elif iter.paytype == u'客户办卡':
                 sum_vip = iter.sum_vip_payment
         # 实收金额 = 销售金额 + 办卡/充值金额
-        sum_payment = sum_order + sum_recharge + sum_vip
+        sum_payment = float(sum_order) + float(sum_recharge) + float(sum_vip)
         # 销售金额比例/办卡金额比例/充值金额比例
-        per_order = format(sum_order / sum_payment, '.0%')
-        per_vip = format(sum_vip / sum_payment, '.0%')
-        per_recharge = format(sum_recharge / sum_payment, '.0%')
+        if float(sum_payment) != 0:
+            per_order = format(float(sum_order) / float(sum_payment), '.0%')
+            per_vip = format(float(sum_vip) / float(sum_payment), '.0%')
+            per_recharge = format(float(sum_recharge) / float(sum_payment), '.0%')
 
 
 
