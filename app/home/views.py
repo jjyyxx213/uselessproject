@@ -10,7 +10,7 @@ from werkzeug.security import generate_password_hash
 from sqlalchemy import or_, and_, func, text
 from json import dumps
 from datetime import datetime, timedelta, date
-import os, random, uuid
+import os, random, uuid, collections
 
 def change_filename(filename):
     # 修改文件名称
@@ -63,9 +63,9 @@ def index():
         date_from = datetime.strptime(form.date_from.data, '%Y-%m-%d')
         date_to = datetime.strptime(form.date_to.data, '%Y-%m-%d') + timedelta(days=1)
         # 获取会员数量
-        sql_text = 'select count(id) as vip_count from tb_customer c where exists ( '\
-    	           'select o.id from tb_order o where o.customer_id = c.id and o.type = 0 '\
-                   'and o.status = 1 and addtime >= \'%s\' and addtime < \'%s\' '\
+        sql_text = 'select count(id) as vip_count from tb_customer c where exists ( ' \
+                   'select o.id from tb_order o where o.customer_id = c.id and o.type = 0 ' \
+                   'and o.status = 1 and addtime >= \'%s\' and addtime < \'%s\' ' \
                    ') and c.vip_id is not null' % (date_from, date_to)
         sql_result = db.session.execute(text(sql_text))
         for iter in sql_result:
@@ -327,6 +327,7 @@ def customer_edit(id=None):
     if request.method == 'GET':
         # get时进行赋值。应对SelectField无法模板中赋初值
         form.sex.data = int(obj_customer.sex)
+        form.user_id.data = obj_customer.user_id
     if form.validate_on_submit():
         if obj_customer.pnumber != form.pnumber.data and Customer.query.filter_by(pnumber=form.pnumber.data).first():
             flash(u'您输入的车牌号已存在', 'err')
@@ -2578,3 +2579,60 @@ def sales_report():
                    per_page=current_app.config['POSTS_PER_PAGE'],
                    error_out=False)
     return render_template('home/sales_report.html', form=form, pagination=pagination, key=key)
+
+
+#20181027 会员充值报表
+@home.route('/vips/report/', methods=['GET', 'POST'])
+def vips_report():
+    # 收银报表
+    page = request.args.get('page', 1, type=int)
+    key = request.args.get('key', '')
+    pagination = None
+    pagination = db.session.query(Customer, Billing).filter(
+        Customer.vip_id == Billing.vip_id)
+    # 条件查询
+    if key:
+        # 客户姓名/车牌/手机
+        pagination = pagination.filter(
+            or_(Customer.name.ilike('%' + key + '%'),
+                Customer.pnumber.ilike('%' + key + '%'),
+                Customer.phone.ilike('%' + key + '%'))
+        )
+    pagination = pagination.order_by(
+        Billing.addtime.desc(), Customer.name.asc()
+    ).paginate(page=page,
+               per_page=current_app.config['POSTS_PER_PAGE'],
+               error_out=False)
+    return render_template('home/cus_vip_report.html', pagination=pagination, key=key)
+
+
+#20181027 会员充值信息
+@home.route('/vips/report_list/', methods=['GET', 'POST'])
+def vips_report_list():
+    # 获取会员充值信息
+    if request.method == 'POST':
+        # 获取json数据
+        obj_vips_report = db.session.query(Customer, Billing).filter(Customer.vip_id == Billing.vip_id).order_by(Billing.addtime.desc(), Customer.name.asc())
+        if obj_vips_report:
+            s_json = []
+            i = 1
+            for v in obj_vips_report:
+                dic = collections.OrderedDict()
+                dic[u"编号"] = i
+                dic[u"姓名"] = v.Customer.name
+                dic[u"手机号"] = v.Customer.phone
+                dic[u"品牌类型"] = v.Customer.brand
+                dic[u"车牌号"] = v.Customer.pnumber
+                dic[u"余额"] = v.Customer.balance
+                dic[u"积分余额"] = v.Customer.score
+                dic[u"支付方式"] = v.Billing.paytype
+                dic[u"应付金额"] = v.Billing.paywith
+                dic[u"支付金额"] = v.Billing.amount
+                dic[u"支付方式"] = v.Billing.payment
+                dic[u"欠款"] = v.Billing.debt
+                dic[u"支付时间"] = str( v.Billing.addtime)
+                s_json.append(dic)
+                i = i + 1
+            return (dumps(s_json))
+        else:
+            return (None)
