@@ -22,11 +22,39 @@ def change_filename(filename):
 def index():
     form = IndexForm()
     # 收入总额
-    sum_payment = ''
+    sum_payment = '0'
     # 会员数量
-    vip_count = ''
+    vip_count = '0'
     # 散客数量
-    nvip_count = ''
+    nvip_count = '0'
+    # 销售金额
+    sum_order = '0'
+    # 会员充值金额
+    sum_recharge = '0'
+    # 客户办卡金额
+    sum_vip = '0'
+    # 销售金额比例
+    per_order = '0%'
+    # 办卡金额比例
+    per_vip = '0%'
+    # 充值金额比例
+    per_recharge = '0%'
+    ###################
+    # 现金支付
+    type_cash = '0'
+    per_cash = '0%'
+    # 银行卡支付
+    type_card = '0'
+    per_card = '0%'
+    # 支付宝
+    type_ali = '0'
+    per_ali = '0%'
+    # 微信
+    type_wechat = '0'
+    per_wechat = '0%'
+    # 其他
+    type_other = '0'
+    per_other = '0%'
     if request.method == 'GET':
         # 本月第一天
         form.date_from.data = date(date.today().year,date.today().month,1)
@@ -50,20 +78,72 @@ def index():
         sql_result = db.session.execute(text(sql_text))
         for iter in sql_result:
             nvip_count = iter.nvip_count
-        # 实收金额
-        sql_text = 'select sum(t.payment) as sum_payment from (select o.payment, o.addtime from tb_order o ' \
-                   'where o.type = 0 and o.status = 1 union all select b.payment, b.addtime from tb_billing b ' \
-                   'where b.vip_id is not null) t where t.addtime >= \'%s\' and t.addtime < \'%s\' ' % (date_from, date_to)
+        # 销售金额
+        sql_text = 'select sum(o.payment) as sum_order_payment from tb_order o where o.type = 0 and o.status = 1  ' \
+                   'and o.addtime >= \'%s\' and o.addtime < \'%s\' ' % (date_from, date_to)
         sql_result = db.session.execute(text(sql_text))
         for iter in sql_result:
-            sum_payment = iter.sum_payment
-    # bill vip_id不为空取客户充卡
+            if iter.sum_order_payment:
+                sum_order = iter.sum_order_payment
+        # 办卡充值金额
+        sql_text = 'select paytype, sum(payment) as sum_vip_payment from tb_billing b where b.vip_id is not null ' \
+                   'and b.addtime >= \'%s\' and b.addtime < \'%s\' group by paytype' % (date_from, date_to)
+        sql_result = db.session.execute(text(sql_text))
+        for iter in sql_result:
+            if iter.paytype == u'会员充值':
+                sum_recharge = iter.sum_vip_payment
+            elif iter.paytype == u'客户办卡':
+                sum_vip = iter.sum_vip_payment
+        # 实收金额 = 销售金额 + 办卡/充值金额
+        sum_payment = float(sum_order) + float(sum_recharge) + float(sum_vip)
+        # 销售金额比例/办卡金额比例/充值金额比例
+        if float(sum_payment) != 0:
+            per_order = format(float(sum_order) / float(sum_payment), '.0%')
+            per_vip = format(float(sum_vip) / float(sum_payment), '.0%')
+            per_recharge = format(float(sum_recharge) / float(sum_payment), '.0%')
 
+        # 获取结算方式
+        sql_text = 'select paywith, sum(payment) as sum_payment from ( select o.payment, o.paywith, o.addtime from tb_order o where o.type = 0 and o.status = 1 ' \
+                   'union all select b.payment, b.paywith, b.addtime from tb_billing b where b.vip_id is not null) t where ' \
+                   't.addtime >= \'%s\' and t.addtime < \'%s\' group by paywith ' % (date_from, date_to)
+        sql_result = db.session.execute(text(sql_text))
+        for iter in sql_result:
+            if iter.paywith == u'现金':
+                type_cash = iter.sum_payment
+                per_cash = format(float(type_cash) / float(sum_payment), '.0%')
+            elif iter.paywith == u'银行卡':
+                type_card = iter.sum_payment
+                per_card = format(float(type_card) / float(sum_payment), '.0%')
+            elif iter.paywith == u'支付宝':
+                type_ali = iter.sum_payment
+                per_ali = format(float(type_ali) / float(sum_payment), '.0%')
+            elif iter.paywith == u'微信':
+                type_wechat = iter.sum_payment
+                per_wechat = format(float(type_wechat) / float(sum_payment), '.0%')
+            elif iter.paywith == u'其他':
+                type_other = iter.sum_payment
+                per_other = format(float(type_other) / float(sum_payment), '.0%')
 
     context = {
         'sum_payment': sum_payment,
         'vip_count': vip_count,
         'nvip_count': nvip_count,
+        'sum_order': sum_order,
+        'sum_recharge': sum_recharge,
+        'sum_vip': sum_vip,
+        'per_order': per_order,
+        'per_recharge': per_recharge,
+        'per_vip': per_vip,
+        'type_cash': type_cash,
+        'per_cash': per_cash,
+        'type_card': type_card,
+        'per_card': per_card,
+        'type_ali': type_ali,
+        'per_ali': per_ali,
+        'type_wechat': type_wechat,
+        'per_wechat': per_wechat,
+        'type_other': type_other,
+        'per_other': per_other,
     }
     return render_template("home/index.html", form=form, **context)
 

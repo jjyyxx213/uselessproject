@@ -56,7 +56,7 @@ def dbinit():
     objects.append(Kvp(type='paywith', value=u'银行卡'))
     objects.append(Kvp(type='paywith', value=u'支付宝'))
     objects.append(Kvp(type='paywith', value=u'微信'))
-
+    objects.append(Kvp(type='paywith', value=u'其他'))
     db.session.add_all(objects)
     db.session.commit()
 
