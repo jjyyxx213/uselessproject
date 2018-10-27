@@ -163,24 +163,75 @@
                             <table class="table">
                                 <tbody>
                                 <tr>
-                                    <td> 现金: 1000</td>
-                                    <td> 储值卡扣： 2000</td>
+                                    <th style="width: 5%">#</th>
+                                    <th style="width: 40%">结算方式</th>
+                                    <th style="width: 25%">实收金额</th>
+                                    <th style="width: 30%">占比</th>
                                 </tr>
                                 <tr>
-                                    <td> 刷银行卡: 2000</td>
-                                    <td> 计次卡扣： 2000</td>
+                                    <td>1.</td>
+                                    <td> 现金</td>
+                                    <td>
+                                        {{ type_cash }}
+                                    </td>
+                                    <td>
+                                        <div class="progress progress-xs">
+                                            <div class="progress-bar progress-bar-danger"
+                                                 style="width: {{ per_cash }}"></div>
+                                        </div>
+                                    </td>
                                 </tr>
                                 <tr>
-                                    <td> 支付宝: 1000</td>
-                                    <td> 售卡优惠： 2000</td>
+                                    <td>2.</td>
+                                    <td> 银行卡</td>
+                                    <td>
+                                        {{ type_card }}
+                                    </td>
+                                    <td>
+                                        <div class="progress progress-xs">
+                                            <div class="progress-bar progress-bar-info"
+                                                 style="width: {{ per_card }}"></div>
+                                        </div>
+                                    </td>
                                 </tr>
                                 <tr>
-                                    <td> 微信: 1000</td>
-                                    <td> 消费优惠： 2000</td>
+                                    <td>3.</td>
+                                    <td> 支付宝</td>
+                                    <td>
+                                        {{ type_ali }}
+                                    </td>
+                                    <td>
+                                        <div class="progress progress-xs">
+                                            <div class="progress-bar progress-bar-light-green"
+                                                 style="width: {{ per_ali }}"></div>
+                                        </div>
+                                    </td>
                                 </tr>
                                 <tr>
-                                    <td> 挂账: 1000</td>
-                                    <td> 折扣金额： 2000</td>
+                                    <td>4.</td>
+                                    <td> 微信</td>
+                                    <td>
+                                        {{ type_wechat }}
+                                    </td>
+                                    <td>
+                                        <div class="progress progress-xs">
+                                            <div class="progress-bar progress-bar-warning"
+                                                 style="width: {{ per_wechat }}"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>4.</td>
+                                    <td> 其他</td>
+                                    <td>
+                                        {{ type_other }}
+                                    </td>
+                                    <td>
+                                        <div class="progress progress-xs">
+                                            <div class="progress-bar progress-bar-light-blue"
+                                                 style="width: {{ per_other }}"></div>
+                                        </div>
+                                    </td>
                                 </tr>
                                 </tbody>
                             </table>

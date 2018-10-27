@@ -39,6 +39,22 @@ def index():
     per_vip = '0%'
     # 充值金额比例
     per_recharge = '0%'
+    ###################
+    # 现金支付
+    type_cash = '0'
+    per_cash = '0%'
+    # 银行卡支付
+    type_card = '0'
+    per_card = '0%'
+    # 支付宝
+    type_ali = '0'
+    per_ali = '0%'
+    # 微信
+    type_wechat = '0'
+    per_wechat = '0%'
+    # 其他
+    type_other = '0'
+    per_other = '0%'
     if request.method == 'GET':
         # 本月第一天
         form.date_from.data = date(date.today().year,date.today().month,1)
@@ -86,10 +102,27 @@ def index():
             per_vip = format(float(sum_vip) / float(sum_payment), '.0%')
             per_recharge = format(float(sum_recharge) / float(sum_payment), '.0%')
 
-
-
-    # bill vip_id不为空取客户充卡
-
+        # 获取结算方式
+        sql_text = 'select paywith, sum(payment) as sum_payment from ( select o.payment, o.paywith, o.addtime from tb_order o where o.type = 0 and o.status = 1 ' \
+                   'union all select b.payment, b.paywith, b.addtime from tb_billing b where b.vip_id is not null) t where ' \
+                   't.addtime >= \'%s\' and t.addtime < \'%s\' group by paywith ' % (date_from, date_to)
+        sql_result = db.session.execute(text(sql_text))
+        for iter in sql_result:
+            if iter.paywith == u'现金':
+                type_cash = iter.sum_payment
+                per_cash = format(float(type_cash) / float(sum_payment), '.0%')
+            elif iter.paywith == u'银行卡':
+                type_card = iter.sum_payment
+                per_card = format(float(type_card) / float(sum_payment), '.0%')
+            elif iter.paywith == u'支付宝':
+                type_ali = iter.sum_payment
+                per_ali = format(float(type_ali) / float(sum_payment), '.0%')
+            elif iter.paywith == u'微信':
+                type_wechat = iter.sum_payment
+                per_wechat = format(float(type_wechat) / float(sum_payment), '.0%')
+            elif iter.paywith == u'其他':
+                type_other = iter.sum_payment
+                per_other = format(float(type_other) / float(sum_payment), '.0%')
 
     context = {
         'sum_payment': sum_payment,
@@ -101,6 +134,16 @@ def index():
         'per_order': per_order,
         'per_recharge': per_recharge,
         'per_vip': per_vip,
+        'type_cash': type_cash,
+        'per_cash': per_cash,
+        'type_card': type_card,
+        'per_card': per_card,
+        'type_ali': type_ali,
+        'per_ali': per_ali,
+        'type_wechat': type_wechat,
+        'per_wechat': per_wechat,
+        'type_other': type_other,
+        'per_other': per_other,
     }
     return render_template("home/index.html", form=form, **context)
 
