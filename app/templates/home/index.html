@@ -58,9 +58,7 @@
                             <div class="row">
                                 <div class="col-sm-4 col-xs-6">
                                     <div class="description-block border-right">
-                                    <span class="description-percentage text-green"><i
-                                            class="fa fa-caret-up"></i> 15%</span>
-                                        <h5 class="description-header">{{ sum_payment }}</h5>
+                                            <h5 class="description-header text-green">{{ sum_payment }}</h5>
                                         <span class="description-text">实收金额</span>
                                     </div>
                                     <!-- /.description-block -->
@@ -68,8 +66,6 @@
                                 <!-- /.col -->
                                 <div class="col-sm-4 col-xs-6">
                                     <div class="description-block border-right">
-                                            <span class="description-percentage text-yellow"><i
-                                                    class="fa fa-caret-left"></i> 0%</span>
                                         <h5 class="description-header">{{ vip_count }}</h5>
                                         <span class="description-text">会员车辆</span>
                                     </div>
@@ -78,8 +74,6 @@
                                 <!-- /.col -->
                                 <div class="col-sm-4 col-xs-6">
                                     <div class="description-block border-right">
-                                    <span class="description-percentage text-green"><i
-                                            class="fa fa-caret-up"></i> 20%</span>
                                         <h5 class="description-header">{{ nvip_count }}</h5>
                                         <span class="description-text">散客车辆</span>
                                     </div>
@@ -116,51 +110,38 @@
                                     <td>1.</td>
                                     <td> 会员售卡</td>
                                     <td>
-                                        1000
+                                        {{ sum_vip }}
                                     </td>
                                     <td>
                                         <div class="progress progress-xs">
                                             <div class="progress-bar progress-bar-danger"
-                                                 style="width: 50%"></div>
+                                                 style="width: {{ per_vip }}"></div>
                                         </div>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>2.</td>
-                                    <td>会员续费</td>
+                                    <td>会员充值</td>
                                     <td>
-                                        200
+                                        {{ sum_recharge }}
                                     </td>
                                     <td>
                                         <div class="progress progress-xs">
                                             <div class="progress-bar progress-bar-info"
-                                                 style="width: 20%"></div>
+                                                 style="width: {{ per_recharge }}"></div>
                                         </div>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>3.</td>
-                                    <td>挂账还款</td>
-                                    <td>
-                                        100
-                                    </td>
-                                    <td>
-                                        <div class="progress progress-xs">
-                                            <div class="progress-bar progress-bar-blue"
-                                                 style="width: 10%"></div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>4.</td>
                                     <td>服务项目/产品销售</td>
                                     <td>
-                                        300
+                                        {{ sum_order }}
                                     </td>
                                     <td>
                                         <div class="progress progress-xs">
                                             <div class="progress-bar progress-bar-light-green"
-                                                 style="width: 20%"></div>
+                                                 style="width: {{ per_order }}"></div>
                                         </div>
                                     </td>
                                 </tr>

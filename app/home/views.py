@@ -22,11 +22,23 @@ def change_filename(filename):
 def index():
     form = IndexForm()
     # 收入总额
-    sum_payment = ''
+    sum_payment = '0'
     # 会员数量
-    vip_count = ''
+    vip_count = '0'
     # 散客数量
-    nvip_count = ''
+    nvip_count = '0'
+    # 销售金额
+    sum_order = '0'
+    # 会员充值金额
+    sum_recharge = '0'
+    # 客户办卡金额
+    sum_vip = '0'
+    # 销售金额比例
+    per_order = '0%'
+    # 办卡金额比例
+    per_vip = '0%'
+    # 充值金额比例
+    per_recharge = '0%'
     if request.method == 'GET':
         # 本月第一天
         form.date_from.data = date(date.today().year,date.today().month,1)
@@ -51,12 +63,39 @@ def index():
         for iter in sql_result:
             nvip_count = iter.nvip_count
         # 实收金额
+        '''
         sql_text = 'select sum(t.payment) as sum_payment from (select o.payment, o.addtime from tb_order o ' \
                    'where o.type = 0 and o.status = 1 union all select b.payment, b.addtime from tb_billing b ' \
                    'where b.vip_id is not null) t where t.addtime >= \'%s\' and t.addtime < \'%s\' ' % (date_from, date_to)
         sql_result = db.session.execute(text(sql_text))
         for iter in sql_result:
             sum_payment = iter.sum_payment
+        '''
+        # 销售金额
+        sql_text = 'select sum(o.payment) as sum_order_payment from tb_order o where o.type = 0 and o.status = 1  ' \
+                   'and o.addtime >= \'%s\' and o.addtime < \'%s\' ' % (date_from, date_to)
+        sql_result = db.session.execute(text(sql_text))
+        for iter in sql_result:
+            if iter.sum_order_payment:
+                sum_order = iter.sum_order_payment
+        # 办卡充值金额
+        sql_text = 'select paytype, sum(payment) as sum_vip_payment from tb_billing b where b.vip_id is not null ' \
+                   'and b.addtime >= \'%s\' and b.addtime < \'%s\' group by paytype' % (date_from, date_to)
+        sql_result = db.session.execute(text(sql_text))
+        for iter in sql_result:
+            if iter.paytype == u'会员充值':
+                sum_recharge = iter.sum_vip_payment
+            elif iter.paytype == u'客户办卡':
+                sum_vip = iter.sum_vip_payment
+        # 实收金额 = 销售金额 + 办卡/充值金额
+        sum_payment = sum_order + sum_recharge + sum_vip
+        # 销售金额比例/办卡金额比例/充值金额比例
+        per_order = format(sum_order / sum_payment, '.0%')
+        per_vip = format(sum_vip / sum_payment, '.0%')
+        per_recharge = format(sum_recharge / sum_payment, '.0%')
+
+
+
     # bill vip_id不为空取客户充卡
 
 
@@ -64,6 +103,12 @@ def index():
         'sum_payment': sum_payment,
         'vip_count': vip_count,
         'nvip_count': nvip_count,
+        'sum_order': sum_order,
+        'sum_recharge': sum_recharge,
+        'sum_vip': sum_vip,
+        'per_order': per_order,
+        'per_recharge': per_recharge,
+        'per_vip': per_vip,
     }
     return render_template("home/index.html", form=form, **context)
 
