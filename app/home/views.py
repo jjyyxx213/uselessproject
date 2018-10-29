@@ -2636,3 +2636,40 @@ def vips_report_list():
             return (dumps(s_json))
         else:
             return (None)
+
+
+#20181029 收银报表信息
+@home.route('/sales/report_list/', methods=['GET', 'POST'])
+def sales_report_list():
+    # 获取收银报表信息
+    if request.method == 'POST':
+
+        obj_sales_report = db.session.query(Order, Odetail, Customer, Item).filter(
+            Order.id == Odetail.order_id, Order.customer_id == Customer.id,
+            Odetail.item_id == Item.id).order_by(Order.addtime.desc(), Odetail.id.asc())
+
+        if obj_sales_report:
+            s_json = []
+            i = 1
+            for v in obj_sales_report:
+                dic = collections.OrderedDict()
+                dic[u"编号"] = i
+                dic[u"订单号"] = str(v.Order.id)
+                dic[u"应收"] = v.Order.amount
+                dic[u"优惠后"] = v.Order.discount
+                dic[u"实收"] = v.Order.payment
+                dic[u"欠款"] = v.Order.debt
+                dic[u"客户"] = v.Customer.name
+                dic[u"时间"] = str(v.Order.addtime)
+                dic[u"商品 / 服务"] = v.Item.name
+                dic[u"单价"] = v.Odetail.salesprice
+                dic[u"折扣价"] = v.Odetail.discount
+                dic[u"提成"] = v.Item.rewardprice
+                dic[u"数量"] = v.Odetail.qty
+                dic[u"合计"] = v.Odetail.rowamount
+                dic[u"工作人员"] = v.Odetail.users
+                s_json.append(dic)
+                i = i + 1
+            return (dumps(s_json))
+        else:
+            return (None)
