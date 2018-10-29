@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+{% block page_content %}
+    <section class="content-header">
+        <h1> 门店管理系统</h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> 报表查询</a></li>
+            <li class="active"> 汇总报告</li>
+        </ol>
+    </section>
+
+    <section class="content container-fluid">
+        <form role="form" method="post">
+            <!--启动CSRF-->
+            {{ form.hidden_tag() }}
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">汇总报告</h3>
+                            <div class="box-tools pull-right">
+                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i
+                                        class="fa fa-minus"></i>
+                                </button>
+
+                                <button type="button" class="btn btn-box-tool" data-widget="remove"><i
+                                        class="fa fa-times"></i></button>
+                            </div>
+                        </div>
+                        <!-- /.box-header -->
+
+                        <div class="box-body">
+                            <div class="row">
+                                <div class="col-md-6 col-md-offset-3">
+                                    <div class="input-group">
+                                        <div class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </div>
+                                        {{ form.date_from }}
+                                        <span class="input-group-addon">至</span>
+                                        <div class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </div>
+                                        {{ form.date_to }}
+                                        <span class="input-group-btn">
+                                            {{ form.submit }}
+                                        </span>
+                                    </div>
+
+                                    <!-- /.input group -->
+                                </div>
+                            </div>
+                            <!-- /.row -->
+                        </div>
+                        <!-- ./box-body -->
+                        <div class="box-footer">
+                            <div class="row">
+                                <div class="col-sm-4 col-xs-6">
+                                    <div class="description-block border-right">
+                                            <h5 class="description-header text-green">{{ sum_payment }}</h5>
+                                        <span class="description-text">实收金额</span>
+                                    </div>
+                                    <!-- /.description-block -->
+                                </div>
+                                <!-- /.col -->
+                                <div class="col-sm-4 col-xs-6">
+                                    <div class="description-block border-right">
+                                        <h5 class="description-header">{{ vip_count }}</h5>
+                                        <span class="description-text">会员车辆</span>
+                                    </div>
+                                    <!-- /.description-block -->
+                                </div>
+                                <!-- /.col -->
+                                <div class="col-sm-4 col-xs-6">
+                                    <div class="description-block border-right">
+                                        <h5 class="description-header">{{ nvip_count }}</h5>
+                                        <span class="description-text">散客车辆</span>
+                                    </div>
+                                    <!-- /.description-block -->
+                                </div>
+
+                            </div>
+                            <!-- /.row -->
+                        </div>
+                        <!-- /.box-footer -->
+                    </div>
+
+                    <!-- /.box -->
+                </div>
+                <!-- /.col -->
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="box">
+                        <div class="box-header">
+                            <h3 class="box-title">销售金额占比</h3>
+                        </div>
+                        <!-- /.box-header -->
+                        <div class="box-body no-padding">
+                            <table class="table">
+                                <tbody>
+                                <tr>
+                                    <th style="width: 5%">#</th>
+                                    <th style="width: 40%">实收项目</th>
+                                    <th style="width: 25%">实收金额</th>
+                                    <th style="width: 30%">占比</th>
+                                </tr>
+                                <tr>
+                                    <td>1.</td>
+                                    <td> 会员售卡</td>
+                                    <td>
+                                        {{ sum_vip }}
+                                    </td>
+                                    <td>
+                                        <div class="progress progress-xs">
+                                            <div class="progress-bar progress-bar-danger"
+                                                 style="width: {{ per_vip }}"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2.</td>
+                                    <td>会员充值</td>
+                                    <td>
+                                        {{ sum_recharge }}
+                                    </td>
+                                    <td>
+                                        <div class="progress progress-xs">
+                                            <div class="progress-bar progress-bar-info"
+                                                 style="width: {{ per_recharge }}"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>3.</td>
+                                    <td>服务项目/产品销售</td>
+                                    <td>
+                                        {{ sum_order }}
+                                    </td>
+                                    <td>
+                                        <div class="progress progress-xs">
+                                            <div class="progress-bar progress-bar-light-green"
+                                                 style="width: {{ per_order }}"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- /.box-body -->
+                    </div>
+
+                </div>
+
+                <div class="col-md-6">
+                    <div class="box">
+                        <div class="box-header">
+                            <h3 class="box-title">客户结算方式</h3>
+                        </div>
+                        <!-- /.box-header -->
+                        <div class="box-body no-padding">
+                            <table class="table">
+                                <tbody>
+                                <tr>
+                                    <th style="width: 5%">#</th>
+                                    <th style="width: 40%">结算方式</th>
+                                    <th style="width: 25%">实收金额</th>
+                                    <th style="width: 30%">占比</th>
+                                </tr>
+                                <tr>
+                                    <td>1.</td>
+                                    <td> 现金</td>
+                                    <td>
+                                        {{ type_cash }}
+                                    </td>
+                                    <td>
+                                        <div class="progress progress-xs">
+                                            <div class="progress-bar progress-bar-danger"
+                                                 style="width: {{ per_cash }}"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2.</td>
+                                    <td> 银行卡</td>
+                                    <td>
+                                        {{ type_card }}
+                                    </td>
+                                    <td>
+                                        <div class="progress progress-xs">
+                                            <div class="progress-bar progress-bar-info"
+                                                 style="width: {{ per_card }}"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>3.</td>
+                                    <td> 支付宝</td>
+                                    <td>
+                                        {{ type_ali }}
+                                    </td>
+                                    <td>
+                                        <div class="progress progress-xs">
+                                            <div class="progress-bar progress-bar-light-green"
+                                                 style="width: {{ per_ali }}"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>4.</td>
+                                    <td> 微信</td>
+                                    <td>
+                                        {{ type_wechat }}
+                                    </td>
+                                    <td>
+                                        <div class="progress progress-xs">
+                                            <div class="progress-bar progress-bar-warning"
+                                                 style="width: {{ per_wechat }}"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>4.</td>
+                                    <td> 其他</td>
+                                    <td>
+                                        {{ type_other }}
+                                    </td>
+                                    <td>
+                                        <div class="progress progress-xs">
+                                            <div class="progress-bar progress-bar-light-blue"
+                                                 style="width: {{ per_other }}"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- /.box-body -->
+                    </div>
+                </div>
+            </div>
+        </form>
+    </section>
+
+{% endblock %}
+
+{% block js %}
+    <script>
+        $('.date-choice').datepicker({
+            "autoclose": true,
+            "language": "zh-CN",
+        })
+        //$('#date_from').val(moment().startOf('month').format("YYYY-MM-DD"))
+        //$('#date_to').val(moment().format("YYYY-MM-DD"))
+    </script>
+    <script>
+        $(document).ready(function () {
+            $("#g-report").addClass("active");
+            $("#g-summary-report").addClass("active");
+        })
+    </script>
+{% endblock %}

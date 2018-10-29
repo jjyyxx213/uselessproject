@@ -20,6 +20,10 @@ def change_filename(filename):
 
 @home.route('/', methods=['GET', 'POST'])
 def index():
+    return render_template('home/index.html')
+
+@home.route('/summary/report', methods=['GET', 'POST'])
+def summary_report():
     form = IndexForm()
     # 收入总额
     sum_payment = '0'
@@ -145,7 +149,7 @@ def index():
         'type_other': type_other,
         'per_other': per_other,
     }
-    return render_template("home/index.html", form=form, **context)
+    return render_template("home/summary_report.html", form=form, **context)
 
 @home.route('/login', methods=['GET', 'POST'])
 def login():
