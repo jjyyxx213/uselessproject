@@ -3,7 +3,7 @@ from . import home
 from flask import render_template, session, redirect, request, url_for, flash, current_app
 from forms import LoginForm, PwdForm, CustomerForm, CusVipForm, CusVipDepositForm, StockBuyForm, StockBuyListForm, StockBuyDebtForm, \
     StockOutListForm, StockOutForm, StockAllotListForm, StockAllotForm, StockLossListForm, StockLossForm, StockReturnListForm, \
-    StockReturnForm, StockReturnDebtForm, OrderListForm, OrderForm, OrderDebtForm, SalesAdvancedForm, IndexForm
+    StockReturnForm, StockReturnDebtForm, OrderListForm, OrderForm, OrderDebtForm, SalesAdvancedForm, IndexForm, VipsAdvancedForm
 from app.models import User, Userlog, Oplog, Item, Supplier, Customer, Stock, Porder, Podetail, Kvp, Mscard, Msdetail, Vip, Vipdetail, Order, Odetail, Billing
 from app import db
 from werkzeug.security import generate_password_hash
@@ -2591,23 +2591,43 @@ def vips_report():
     # 收银报表
     page = request.args.get('page', 1, type=int)
     key = request.args.get('key', '')
+    form = VipsAdvancedForm()
     pagination = None
     pagination = db.session.query(Customer, Billing).filter(
         Customer.vip_id == Billing.vip_id)
-    # 条件查询
-    if key:
-        # 客户姓名/车牌/手机
-        pagination = pagination.filter(
-            or_(Customer.name.ilike('%' + key + '%'),
-                Customer.pnumber.ilike('%' + key + '%'),
-                Customer.phone.ilike('%' + key + '%'))
-        )
-    pagination = pagination.order_by(
-        Billing.addtime.desc(), Customer.name.asc()
-    ).paginate(page=page,
-               per_page=current_app.config['POSTS_PER_PAGE'],
-               error_out=False)
-    return render_template('home/cus_vip_report.html', pagination=pagination, key=key)
+    if form.validate_on_submit():
+        if form.customer_name.data:
+            search_key = form.customer_name.data
+            pagination = pagination.filter(Customer.name.ilike('%' + search_key + '%'))
+        if form.phone.data:
+            search_key = form.phone.data
+            pagination = pagination.filter(Customer.phone.ilike('%' + search_key + '%'))
+        if form.date_from.data:
+            search_key = datetime.strptime(form.date_from.data, '%Y-%m-%d')
+            pagination = pagination.filter(Billing.addtime >= search_key)
+        if form.date_to.data:
+            search_key = datetime.strptime(form.date_to.data, '%Y-%m-%d') + timedelta(days=1)
+            pagination = pagination.filter(Billing.addtime < search_key)
+        pagination = pagination.order_by(
+            Billing.addtime.desc(), Customer.name.asc()
+        ).paginate(page=page,
+                   per_page=current_app.config['POSTS_PER_PAGE'],
+                   error_out=False)
+    else:
+        # 条件查询
+        if key:
+            # 客户姓名/车牌/手机
+            pagination = pagination.filter(
+                or_(Customer.name.ilike('%' + key + '%'),
+                    Customer.pnumber.ilike('%' + key + '%'),
+                    Customer.phone.ilike('%' + key + '%'))
+            )
+        pagination = pagination.order_by(
+            Billing.addtime.desc(), Customer.name.asc()
+        ).paginate(page=page,
+                   per_page=current_app.config['POSTS_PER_PAGE'],
+                   error_out=False)
+    return render_template('home/cus_vip_report.html', form=form, pagination=pagination, key=key)
 
 
 #20181027 会员充值信息
