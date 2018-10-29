@@ -25,6 +25,7 @@
                         <div class="box-tools">
                             <div class="pull-left border-right">
                                 <input type="button" id="exportData" class="btn btn-primary btn-sm" value="导出"/>&nbsp;
+                                <button class="btn btn-default btn-sm" id="sales">高级查询</button>
                             </div>
                             <div class="input-group input-group-sm" style="width: 300px;">
                                 <input type="text" name="table_search" class="form-control"
@@ -87,6 +88,59 @@
                 </div>
             </div>
         </div>
+        <!-- 高级查询模态框!-->
+        <div class="modal fade" id="salesModal" tabindex="-1" role="dialog" aria-labelledby="salesModalLabel">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                        <h4 class="modal-title" id="salesModalLabel"> 高级查询</h4>
+                    </div>
+                    <form role="form" method="post">
+                        <!--启动CSRF-->
+                        {{ form.hidden_tag() }}
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>客户姓名</label>
+                                    {{ form.customer_name }}
+                                </div>
+                                <div class="col-md-6">
+                                    <label>手机号</label>
+                                    {{ form.phone }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="">开始时间</label>
+                                    <div class="input-group">
+                                        <div class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </div>
+                                        {{ form.date_from }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="">结束时间</label>
+                                    <div class="input-group">
+                                        <div class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </div>
+                                        {{ form.date_to }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            {{ form.submit }}
+                            <button type="button" class="btn btn-default" data-dismiss="modal"> 关闭</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </section>
 {% endblock %}
 
@@ -111,6 +165,12 @@
             $('.date-choice').datepicker({
                 "autoclose": true,
                 "language": "zh-CN",
+            });
+
+            //高级查询模态框
+            $("#sales").on("click", function () {
+                //显示modal
+                $('#salesModal').modal();
             });
 
             $("#exportData").click(function(){

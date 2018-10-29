@@ -1969,3 +1969,49 @@ class SalesAdvancedForm(FlaskForm):
             #'data-dismiss' : 'modal', ## 这里如果触发关闭时间，form表单不会提交
         }
     )
+
+
+class VipsAdvancedForm(FlaskForm):
+    # 充值报表高级查询
+    customer_name = StringField(
+        label=u'客户姓名',
+        description=u'客户姓名',
+        render_kw={
+            'class': 'form-control',
+        }
+    )
+    # 手机号
+    phone = StringField(
+        label=u'手机号',
+        description=u'手机号',
+        render_kw={
+            'class': 'form-control',
+        }
+    )
+
+    # 开始时间
+    date_from = StringField(
+        label=u'开始时间',
+        description=u'开始时间',
+        render_kw={
+            'class': 'form-control date-choice',
+            'data-date-format': 'yyyy-mm-dd',
+        }
+    )
+    # 结束时间
+    date_to = StringField(
+        label=u'结束时间',
+        description=u'结束时间',
+        render_kw={
+            'class': 'form-control date-choice',
+            'data-date-format': 'yyyy-mm-dd',
+        }
+    )
+    # 保存
+    submit = SubmitField(
+        label=u'查询',
+        render_kw={
+            'class': 'btn btn-primary pull-left',
+            #'data-dismiss' : 'modal', ## 这里如果触发关闭时间，form表单不会提交
+        }
+    )
