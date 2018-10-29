@@ -24,7 +24,7 @@
                         <h3 class="box-title"> 收银报表</h3>
                         <div class="box-tools">
                             <div class="pull-left border-right">
-                                <a href="#" class="btn btn-primary btn-sm" id="export">导出</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                <input type="button" id="exportData" class="btn btn-primary btn-sm" value="导出"/>&nbsp;
                                 <button class="btn btn-default btn-sm" id="sales">高级查询</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                             </div>
                             <div class="input-group input-group-sm" style="width: 300px;">
@@ -190,6 +190,27 @@
             $("#sales").on("click", function () {
                 //显示modal
                 $('#salesModal').modal();
+            });
+
+            $("#exportData").click(function(){
+                //后台请求返回供应商列表
+                $.ajax({
+                    type:'POST',
+                    url:'{{ url_for('home.sales_report_list') }}',
+                    data:'',
+                    contentType:'application/json; charset=UTF-8',
+                    dataType: 'json',
+                    success:function(res){
+                        if(res == null){
+                            return;
+                        }
+                        else {
+                            {#var dataJson = JSON.parse(res);#}
+                            JSONToExcelConvertor("收银报表",res);
+                        }
+                    },
+                })
+
             });
 
         })
