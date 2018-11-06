@@ -32,10 +32,11 @@ def inject_admininfo():
             )
     except:
         user = None
+        roles = None
     context = {
         'user': user,
         'online_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        'role': roles
+        'roles': roles
     }
     return context
 

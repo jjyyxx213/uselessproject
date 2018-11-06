@@ -55,6 +55,8 @@
                         </div>
                         <div class="box-footer">
                             {{ form.submit }}
+                            <a href="{{ url_for('admin.category_list', type=type) }}" class="btn btn-default pull-right"
+                               role="button"> 返回</a>
                         </div>
                     </form>
                 </div>

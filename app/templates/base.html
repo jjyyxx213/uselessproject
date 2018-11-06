@@ -212,11 +212,16 @@
     $(document).ready(function () {
         var tree = $(".treeview");
         var id,dd;
-        {% for v in role %}
-             id = "{{ v.id }}";
-             dd = $("#"+id);
-             dd.removeClass("hide");
-        {% endfor %}
+        {% if roles %}
+            tree.removeClass("hide");
+            {% for v in roles %}
+                 id = "{{ v.id }}";
+                 dd = $("#"+id);
+                 dd.removeClass("hide");
+            {% endfor %}
+        {% else %}
+            tree.removeClass("hide");
+        {% endif %}
     })
 </script>
 {% block js %}{% endblock %}
