@@ -59,6 +59,19 @@ class AuthForm(FlaskForm):
         }
     )
 
+    # 20181106 元素标识
+    html_id = StringField(
+        label=u'元素标识',
+        validators=[
+            DataRequired(message=u'请输入元素标识')
+        ],
+        description=u'元素标识',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入元素标识',
+        }
+    )
+
     submit = SubmitField(
         label=u'添加',
         render_kw={

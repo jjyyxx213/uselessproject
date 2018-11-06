@@ -208,6 +208,17 @@
 {# 20181009 liuqq #}
 <script src="{{ url_for('static', filename='bower_components/bootstrap-fileinput/js/fileinput.min.js') }}"></script>
 <script src="{{ url_for('static', filename='bower_components/bootstrap-fileinput/js/locales/zh.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        var tree = $(".treeview");
+        var id,dd;
+        {% for v in role %}
+             id = "{{ v.id }}";
+             dd = $("#"+id);
+             dd.removeClass("hide");
+        {% endfor %}
+    })
+</script>
 {% block js %}{% endblock %}
 <!-- Page script -->
 

@@ -98,6 +98,8 @@ class Auth(db.Model):
     name = db.Column(db.String(100), unique=True)
     # 地址
     url = db.Column(db.String(255), unique=True)
+    # 20181106 元素标识
+    html_id = db.Column(db.String(200))
     # 添加时间
     addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 

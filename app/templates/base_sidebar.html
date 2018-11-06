@@ -1,7 +1,7 @@
 <ul class="sidebar-menu" data-widget="tree">
     <!--<li class="header"> 管理菜单</li>-->
     <li id="g-index"><a href="{{ url_for('home.index') }}"><i class="fa fa-home"></i> <span> 首页</span></a></li>
-    <li class="treeview" id="g-order">
+    <li class="treeview hide" id="g-order">
         <a href="#"><i class="fa fa-money"></i> <span> 收银管理</span>
             <span class="pull-right-container">
                             <i class="fa fa-angle-left pull-right"></i>
@@ -11,7 +11,7 @@
             <li id="g-order-list"><a href="{{ url_for('home.order_list') }}"><i class="fa fa-circle-o"></i> 收银单列表</a></li>
         </ul>
     </li>
-    <li class="treeview" id="g-stock">
+    <li class="treeview hide" id="g-stock">
         <a href="#"><i class="fa fa-th-list"></i> <span> 库存管理</span>
             <span class="pull-right-container">
                             <i class="fa fa-angle-left pull-right"></i>
@@ -26,7 +26,7 @@
             <li id="g-stock-return-list"><a href="{{ url_for('home.stock_return_list') }}"><i class="fa fa-circle-o"></i> 采购退货</a></li>
         </ul>
     </li>
-    <li class="treeview" id="g-customer">
+    <li class="treeview hide" id="g-customer">
         <a href="#"><i class="fa fa-briefcase"></i> <span> 客户管理</span>
             <span class="pull-right-container">
                             <i class="fa fa-angle-left pull-right"></i>
@@ -37,7 +37,7 @@
             </li>
         </ul>
     </li>
-    <li class="treeview" id="g-is">
+    <li class="treeview hide" id="g-is">
         <a href="#"><i class="fa fa-handshake-o"></i> <span> 商品/服务管理</span>
             <span class="pull-right-container">
                 <i class="fa fa-angle-left pull-right"></i>
@@ -55,7 +55,7 @@
             </li>
         </ul>
     </li>
-    <li class="treeview" id="g-report">
+    <li class="treeview hide" id="g-report">
         <a href="#"><i class="fa fa-wpforms"></i> <span> 报表查询</span>
             <span class="pull-right-container">
                             <i class="fa fa-angle-left pull-right"></i>
@@ -70,7 +70,7 @@
             </li>
         </ul>
     </li>
-    <li class="treeview" id="g-option">
+    <li class="treeview hide" id="g-option">
         <a href="#"><i class="fa fa-cog"></i> <span> 基础设置</span>
             <span class="pull-right-container">
                             <i class="fa fa-angle-left pull-right"></i>
@@ -106,7 +106,7 @@
             </li>
         </ul>
     </li>
-    <li class="treeview" id="g-user">
+    <li class="treeview hide" id="g-user">
         <a href="#"><i class="fa fa-users"></i> <span> 员工管理</span>
             <span class="pull-right-container">
                             <i class="fa fa-angle-left pull-right"></i>
@@ -117,7 +117,7 @@
             <li id="g-user-list"><a href="{{ url_for('admin.user_list') }}"><i class="fa fa-circle-o"></i> 员工列表</a></li>
         </ul>
     </li>
-    <li class="treeview" id="g-log">
+    <li class="treeview hide" id="g-log">
         <a href="#"><i class="fa fa-file-text"></i> <span> 日志管理</span>
             <span class="pull-right-container">
                             <i class="fa fa-angle-left pull-right"></i>
@@ -129,7 +129,7 @@
                 员工登录日志列表</a></li>
         </ul>
     </li>
-    <li class="treeview" id="g-auth">
+    <li class="treeview hide" id="g-auth">
         <a href="#"><i class="fa fa-lock"></i> <span> 权限管理</span>
             <span class="pull-right-container">
                             <i class="fa fa-angle-left pull-right"></i>
@@ -140,7 +140,7 @@
             <li id="g-auth-list"><a href="{{ url_for('admin.auth_list') }}"><i class="fa fa-circle-o"></i> 权限列表</a></li>
         </ul>
     </li>
-    <li class="treeview" id="g-role">
+    <li class="treeview hide" id="g-role">
         <a href="#"><i class="fa fa-user-secret"></i> <span> 角色管理</span>
             <span class="pull-right-container">
                             <i class="fa fa-angle-left pull-right"></i>
