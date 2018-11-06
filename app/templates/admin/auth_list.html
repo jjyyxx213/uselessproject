@@ -35,6 +35,7 @@
                                 <th> 编号</th>
                                 <th> 名称</th>
                                 <th> 地址</th>
+                                <th> 元素标识</th>
                                 <th> 添加时间</th>
                                 <th> 操作事项</th>
                             </tr>
@@ -43,6 +44,7 @@
                                     <td>{{ v.id }}</td>
                                     <td>{{ v.name }}</td>
                                     <td>{{ v.url }}</td>
+                                    <td>{{ v.html_id }}</td>
                                     <td>{{ v.addtime }}</td>
                                     <td>
                                         <a href="{{ url_for('admin.auth_edit', id=v.id) }}" class="label label-success">编辑</a>

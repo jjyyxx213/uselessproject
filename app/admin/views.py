@@ -17,11 +17,25 @@ from xlrd import open_workbook
 def inject_admininfo():
     try:
         user = User.query.filter_by(id=int(session['user_id'])).first()
+        auths = user.role.auths
+        # 权限列表编码
+        auths_list = list(map(lambda v: int(v), auths.split(',')))
+        # 遍历权限
+        roles = []
+        for i, val in enumerate(auths_list):
+            auth = Auth.query.filter_by(id=val).first()
+            roles.append(
+                {
+                    "id": auth.html_id,
+                    "name": auth.name,
+                }
+            )
     except:
         user = None
     context = {
         'user': user,
-        'online_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        'online_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        'role': roles
     }
     return context
 
@@ -62,7 +76,8 @@ def auth_add():
             return redirect(url_for('admin.auth_add'))
         auth = Auth(
             name=form.name.data,
-            url=form.url.data
+            url=form.url.data,
+            html_id=form.html_id.data
         )
         oplog = Oplog(
             user_id=session['user_id'],
@@ -93,6 +108,7 @@ def auth_edit(id=None):
             return redirect(url_for('admin.auth_edit', id=auth.id))
         auth.name = form.name.data
         auth.url = form.url.data
+        auth.html_id = form.html_id.data
         db.session.add(auth)
         oplog = Oplog(
             user_id=session['user_id'],
