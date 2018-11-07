@@ -5,6 +5,7 @@ class Config:
     POSTS_PER_PAGE = 5
     UPLOAD_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'app/static/uploads/')
     USER_UPLOAD_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'app/static/uploads/users/')
+    WECHAT_TOKEN = 'uselessproject'
 
     @staticmethod
     def init_app(app):
@@ -12,7 +13,7 @@ class Config:
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://dev:6Jn,+nHpZnUr[AFX@localhost:3306/db_auto_sys'
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:root@localhost:3306/db_auto_sys'
 
 class TestingConfig(Config):
     TESTING = True

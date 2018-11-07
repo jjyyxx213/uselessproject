@@ -10,7 +10,7 @@ from werkzeug.security import generate_password_hash
 from sqlalchemy import or_, and_, func, text
 from json import dumps
 from datetime import datetime, timedelta, date
-import os, random, uuid, collections
+import os, random, uuid, collections, hashlib
 
 def change_filename(filename):
     # 修改文件名称
@@ -21,6 +21,27 @@ def change_filename(filename):
 @home.route('/', methods=['GET', 'POST'])
 def index():
     return render_template('home/index.html')
+
+@home.route('/wechat', methods=['GET', 'POST'])
+def wechat():
+    signature = request.args.get('signature')
+    timestamp = request.args.get('timestamp')
+    nonce = request.args.get('nonce')
+    echostr = request.args.get('echostr')
+    # 将token、timestamp、nonce三个参数进行字典序排序
+    temp = [current_app.config['WECHAT_TOKEN'], timestamp, nonce]
+    temp.sort()
+    # 将三个参数字符串拼接成一个字符串进行sha1加密
+    temp = "".join(temp)
+    # sig是计算出来的签名结果
+    sig = hashlib.sha1(temp).hexdigest()
+    # 开发者获得加密后的字符串可与signature对比，标识该请求来源于微信
+    if sig == signature:
+        # 根据请求方式.返回不同的内容 ,get代表是验证服务器有效性
+        if request.method == "GET":
+            return echostr # 将验证结果返给微信服务器
+    else:
+        return 'errno', 403
 
 @home.route('/summary/report', methods=['GET', 'POST'])
 def summary_report():
