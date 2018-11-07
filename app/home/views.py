@@ -287,15 +287,16 @@ def customer_list():
 def customer_add():
     form = CustomerForm()
     if form.validate_on_submit():
-        if Customer.query.filter_by(pnumber=form.pnumber.data).first():
+        province = request.form.get('province')
+        pnumber = province + form.pnumber.data
+        if Customer.query.filter_by(pnumber=pnumber).first():
             flash(u'您输入的车牌号已存在', 'err')
-            return redirect(url_for('home.customer_add'))
+            # return redirect(url_for('home.customer_add'))
+            return render_template('home/customer_add.html', form=form)
         if Customer.query.filter_by(phone=form.phone.data).first():
             flash(u'您输入的手机号已存在', 'err')
-            return redirect(url_for('home.customer_add'))
-
-        province = request.form.get('province')
-
+            # return redirect(url_for('home.customer_add'))
+            return render_template('home/customer_add.html', form=form)
         obj_customer = Customer(
             name=form.name.data,
             name_wechat=form.name_wechat.data,
