@@ -68,13 +68,16 @@ def login():
 def auth_add():
     # 权限添加
     form = AuthForm()
+    is_flag = True
     if form.validate_on_submit():
         if Auth.query.filter_by(name=form.name.data).first():
+            is_flag = False
             flash(u'您输入的权限已存在', 'err')
-            return redirect(url_for('admin.auth_add'))
         if Auth.query.filter_by(url=form.url.data).first():
+            is_flag = False
             flash(u'您输入的路由已存在', 'err')
-            return redirect(url_for('admin.auth_add'))
+        if is_flag==False:
+            return render_template('admin/auth_add.html', form=form)
         auth = Auth(
             name=form.name.data,
             url=form.url.data,
@@ -100,13 +103,21 @@ def auth_edit(id=None):
     form = AuthForm()
     form.submit.label.text = u'修改'
     auth = Auth.query.filter_by(id=id).first_or_404()
+    is_flag = True
+    if request.method == 'GET':
+        form.name.data = auth.name
+        form.url.data = auth.url
+        form.html_id.data = auth.html_id
     if form.validate_on_submit():
         if auth.name != form.name.data and Auth.query.filter_by(name=form.name.data).first():
+            is_flag = False
             flash(u'您输入的权限已存在', 'err')
-            return redirect(url_for('admin.auth_edit', id=auth.id))
         if auth.url != form.url.data and Auth.query.filter_by(url=form.url.data).first():
+            is_flag = False
             flash(u'您输入的路由已存在', 'err')
-            return redirect(url_for('admin.auth_edit', id=auth.id))
+        if is_flag == False:
+            return render_template('admin/auth_edit.html', form=form)
+
         auth.name = form.name.data
         auth.url = form.url.data
         auth.html_id = form.html_id.data
@@ -120,7 +131,7 @@ def auth_edit(id=None):
         db.session.commit()
         flash(u'权限修改成功', 'ok')
         return redirect(url_for('admin.auth_list'))
-    return render_template('admin/auth_edit.html', form=form, auth=auth)
+    return render_template('admin/auth_edit.html', form=form)
 
 
 @admin.route('/auth/del/<int:id>', methods=['GET', 'POST'])
@@ -162,10 +173,13 @@ def auth_list():
 def role_add():
     # 角色添加
     form = RoleForm()
+    is_flag = True
     if form.validate_on_submit():
         if Role.query.filter_by(name=form.name.data).first():
+            is_flag = False
             flash(u'您输入的角色已存在', 'err')
-            return redirect(url_for('admin.role_add'))
+        if is_flag == False:
+            return render_template('admin/role_add.html', form=form)
         role = Role(
             name=form.name.data,
             # lambda v: str(v) 匿名函数，将v转换为字符串
@@ -191,14 +205,18 @@ def role_edit(id=None):
     form = RoleForm()
     form.submit.label.text = u'修改'
     role = Role.query.get_or_404(id)
+    is_flag = True
     if request.method == 'GET':
         auths = role.auths
         # get时进行赋值。应对无法模板中赋初值
+        form.name.data = role.name
         form.auths.data = list(map(lambda v: int(v), auths.split(",")))
     if form.validate_on_submit():
         if role.name != form.name.data and Role.query.filter_by(name=form.name.data).first():
+            is_flag = False
             flash(u'您输入的角色已存在', 'err')
-            return redirect(url_for('admin.role_edit', id=role.id))
+        if is_flag == False:
+            return render_template('admin/role_edit.html', form=form)
         role.name = form.name.data
         role.auths = ','.join(map(lambda v: str(v), form.auths.data))
         db.session.add(role)
@@ -211,7 +229,7 @@ def role_edit(id=None):
         db.session.commit()
         flash(u'角色修改成功', 'ok')
         return redirect(url_for('admin.role_list'))
-    return render_template('admin/role_edit.html', form=form, role=role)
+    return render_template('admin/role_edit.html', form=form)
 
 
 @admin.route("/role/del/<int:id>/", methods=['GET', 'POST'])
@@ -251,13 +269,16 @@ def role_list():
 def user_add():
     # 员工添加
     form = UserForm()
+    is_flag = True
     if form.validate_on_submit():
         if User.query.filter_by(phone=form.phone.data).first():
+            is_flag = False
             flash(u'您输入的手机已存在', 'err')
-            return redirect(url_for('admin.user_add'))
         if User.query.filter_by(id_card=form.id_card.data).first():
+            is_flag = False
             flash(u'您输入的身份证已存在', 'err')
-            return redirect(url_for('admin.user_add'))
+        if is_flag == False:
+            return render_template('admin/user_add.html', form=form)
         user = User(
             name=form.name.data,
             phone=form.phone.data,
@@ -288,17 +309,24 @@ def user_edit(id=None):
     form = UserForm()
     form.submit.label.text = u'修改'
     user = User.query.get_or_404(id)
+    is_flag = True
     if request.method == 'GET':
         # get时进行赋值。应对SelectField无法模板中赋初值
         form.role_id.data = user.role_id
         form.frozen.data = user.frozen
+        form.name.data = user.name
+        form.phone.data = user.phone
+        form.id_card.data = user.id_card
+        form.salary.data = user.salary
     if form.validate_on_submit():
         if user.phone != form.phone.data and User.query.filter_by(phone=form.phone.data).first():
+            is_flag = False
             flash(u'您输入的手机已存在', 'err')
-            return redirect(url_for('admin.user_edit', id=user.id))
         if user.id_card != form.id_card.data and User.query.filter_by(id_card=form.id_card.data).first():
+            is_flag = False
             flash(u'您输入的身份证已存在', 'err')
-            return redirect(url_for('admin.user_edit', id=user.id))
+        if is_flag == False:
+            return render_template('admin/user_edit.html', form=form)
 
         user.name = form.name.data
         user.phone = form.phone.data
@@ -319,7 +347,7 @@ def user_edit(id=None):
         db.session.commit()
         flash(u'修改员工成功', 'ok')
         return redirect(url_for('admin.user_list'))
-    return render_template('admin/user_edit.html', form=form, user=user)
+    return render_template('admin/user_edit.html', form=form)
 
 
 @admin.route('/user/list', methods=['GET'])
@@ -435,10 +463,13 @@ def mscard_list():
 def mscard_add():
     # 添加会员卡
     form = MscardForm()
+    is_flag = True
     if form.validate_on_submit():
         if Mscard.query.filter_by(name=form.name.data).first():
+            is_flag = False
             flash(u'您输入的会员卡已存在', 'err')
-            return redirect(url_for('admin.mscard_add'))
+        if is_flag == False:
+            return render_template('admin/mscard_add.html', form=form)
         mscard = Mscard(
             name=form.name.data,
             payment=float(form.payment.data),
@@ -466,13 +497,21 @@ def mscard_edit(id=None):
     form = MscardForm()
     form.submit.label.text = u'修改'
     mscard = Mscard.query.filter_by(id=id).first_or_404()
+    is_flag = True
     if request.method == 'GET':
         # get时进行赋值。应对RadioField无法模板中赋初值
         form.valid.data = mscard.valid
+        form.name.data = mscard.name
+        form.payment.data = mscard.payment
+        form.interval.data = mscard.interval
+        form.scorerule.data = mscard.scorerule
+        form.scorelimit.data = mscard.scorelimit
     if form.validate_on_submit():
         if mscard.name != form.name.data and Mscard.query.filter_by(name=form.name.data).first():
+            is_flag = False
             flash(u'您输入的会员卡已存在', 'err')
-            return redirect(url_for('admin.mscard_edit', id=mscard.id))
+        if is_flag == False:
+            return render_template('admin/mscard_edit.html', form=form)
         mscard.name = form.name.data
         mscard.payment = form.payment.data
         mscard.interval = form.interval.data
@@ -489,7 +528,7 @@ def mscard_edit(id=None):
         db.session.commit()
         flash(u'会员卡修改成功', 'ok')
         return redirect(url_for('admin.mscard_list'))
-    return render_template('admin/mscard_edit.html', form=form, mscard=mscard)
+    return render_template('admin/mscard_edit.html', form=form)
 
 
 @admin.route('/mscard/block', methods=['GET'])
@@ -642,10 +681,13 @@ def category_list(type=0):
 def category_add(type=0):
     # 商品/服务分类添加
     form = CategoryForm()
+    is_flag = True
     if form.validate_on_submit():
         if Category.query.filter_by(name=form.name.data, type=type).first():
+            is_flag = False
             flash(u'您输入的分类已存在', 'err')
-            return redirect(url_for('admin.category_add', type=type))
+        if is_flag == False:
+            return render_template('admin/category_add.html', form=form, type=type)
         category = Category(
             name=form.name.data,
             remarks=form.remarks.data,
@@ -669,16 +711,19 @@ def category_edit(type=0, id=None, name=None):
     form = CategoryForm()
     form.submit.label.text = u'修改'
     category = Category.query.filter_by(id=id).first_or_404()
+    is_flag = True
     if request.method == 'GET':
         form.name.data = category.name
         form.remarks.data = category.remarks
     if form.validate_on_submit():
         if category.name != form.name.data and Item.query.filter_by(cate=name).first():
+            is_flag = False
             flash(u'您选择的分类已被商品/服务项目使用，不能修改名称', 'err')
-            return redirect(url_for('admin.category_edit', type=type, id=category.id, name=category.name))
         if category.name != form.name.data and Category.query.filter_by(name=form.name.data).first():
+            is_flag = False
             flash(u'您输入的分类已存在，名称不能重复', 'err')
-            return redirect(url_for('admin.category_edit', type=type, id=category.id, name=category.name))
+        if is_flag == False:
+            return render_template('admin/category_edit.html', form=form, type=type)
         category.name = form.name.data
         category.remarks = form.remarks.data
         db.session.add(category)
@@ -856,10 +901,13 @@ def supplier_list():
 def supplier_add():
     # 供应商添加
     form = SupplierForm()
+    is_flag = True
     if form.validate_on_submit():
         if Supplier.query.filter_by(name=form.name.data).first():
+            is_flag = False
             flash(u'您输入的名称已存在', 'err')
-            return redirect(url_for('admin.supplier_add'))
+        if is_flag == False:
+            return render_template('admin/supplier_add.html', form=form)
         supplier = Supplier(
             name=form.name.data,
             contact=form.contact.data,
@@ -888,6 +936,7 @@ def supplier_edit(id=None):
     form = SupplierForm()
     form.submit.label.text = u'修改'
     supplier = Supplier.query.filter_by(id=id).first_or_404()
+    is_flag = True
     if request.method == 'GET':
         form.name.data = supplier.name
         form.contact.data = supplier.contact
@@ -899,8 +948,10 @@ def supplier_edit(id=None):
         form.remarks.data = supplier.remarks
     if form.validate_on_submit():
         if supplier.name != form.name.data and Supplier.query.filter_by(name=form.name.data).first():
+            is_flag = False
             flash(u'您输入的供应商已存在', 'err')
-            return redirect(url_for('admin.supplier_edit', id=supplier.id))
+        if is_flag == False:
+            return render_template('admin/supplier_edit.html', form=form)
         supplier.name = form.name.data
         supplier.contact = form.contact.data
         supplier.phone = form.phone.data
