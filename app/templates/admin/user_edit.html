@@ -22,7 +22,7 @@
                             <div class="form-group">
                                 <label for="input_name" style="color: red">*</label>
                                 {{ form.name.label }}
-                                {{ form.name(value=user.name) }}
+                                {{ form.name }}
                                 {% for err in form.name.errors %}
                                     <div class="col-md-12">
                                         <p style="color: red">{{ err }}</p>
@@ -32,7 +32,7 @@
                             <div class="form-group">
                                 <label for="input_phone" style="color: red">*</label>
                                 {{ form.phone.label }}
-                                {{ form.phone(value=user.phone) }}
+                                {{ form.phone }}
                                 {% for err in form.phone.errors %}
                                     <div class="col-md-12">
                                         <p style="color: red">{{ err }}</p>
@@ -64,7 +64,7 @@
                             <div class="form-group">
                                 <label for="input_id_card" style="color: red">*</label>
                                 {{ form.id_card.label }}
-                                {{ form.id_card(value=user.id_card) }}
+                                {{ form.id_card }}
                                 {% for err in form.id_card.errors %}
                                     <div class="col-md-12">
                                         <p style="color: red">{{ err }}</p>
@@ -83,7 +83,7 @@
                             {#                            </div>#}
                             <div class="form-group">
                                 {{ form.salary.label }}
-                                {{ form.salary(value=user.salary) }}
+                                {{ form.salary }}
                                 {% for err in form.salary.errors %}
                                     <div class="col-md-12">
                                         <p style="color: red">{{ err }}</p>
