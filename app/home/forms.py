@@ -175,6 +175,7 @@ class CustomerForm(FlaskForm):
         description=u'车牌号',
         render_kw={
             'class': 'form-control',
+            'style': 'text-transform:uppercase',
             'placeholder': u'请输入车牌号',
             'maxlength': '6'
         }

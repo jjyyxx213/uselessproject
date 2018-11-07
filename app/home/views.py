@@ -334,20 +334,20 @@ def customer_edit(id=None):
         form.sex.data = int(obj_customer.sex)
         form.user_id.data = obj_customer.user_id
     if form.validate_on_submit():
-        if obj_customer.pnumber != form.pnumber.data and Customer.query.filter_by(pnumber=form.pnumber.data).first():
+        province = request.form.get('province')
+        pnumber = province + form.pnumber.data
+        if obj_customer.pnumber != form.pnumber.data and Customer.query.filter_by(pnumber=pnumber).first():
             flash(u'您输入的车牌号已存在', 'err')
             return redirect(url_for('home.customer_edit', id=obj_customer.id))
         if obj_customer.phone != form.phone.data and Customer.query.filter_by(phone=form.phone.data).first():
             flash(u'您输入的手机号已存在', 'err')
             return redirect(url_for('home.customer_edit', id=obj_customer.id))
 
-        province = request.form.get('province')
-
         obj_customer.name = form.name.data,
         obj_customer.name_wechat = form.name_wechat.data,
         obj_customer.sex = int(form.sex.data),
         obj_customer.phone = form.phone.data,
-        obj_customer.pnumber = province + form.pnumber.data,
+        obj_customer.pnumber = pnumber,
         obj_customer.vin = form.vin.data,
         obj_customer.brand = form.brand.data,
         obj_customer.email = form.email.data,

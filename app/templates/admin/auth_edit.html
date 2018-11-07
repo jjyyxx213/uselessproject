@@ -22,7 +22,7 @@
                             <div class="form-group">
                                 <label for="input_name" style="color: red">*</label>
                                 {{ form.name.label }}
-                                {{ form.name(value=auth.name) }}
+                                {{ form.name }}
                                 {% for err in form.name.errors %}
                                     <div class="col-md-12">
                                         <p style="color: red">{{ err }}</p>
@@ -32,7 +32,7 @@
                             <div class="form-group">
                                 <label for="input_url" style="color: red">*</label>
                                 {{ form.url.label }}
-                                {{ form.url(value=auth.url) }}
+                                {{ form.url }}
                                 {% for err in form.url.errors %}
                                     <div class="col-md-12">
                                         <p style="color: red">{{ err }}</p>

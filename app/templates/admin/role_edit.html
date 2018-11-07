@@ -30,7 +30,7 @@
                             <div class="form-group">
                                 <label for="input_name" style="color: red">*</label>
                                 <label for="input_name">{{ form.name.label }}</label>
-                                {{ form.name(value=role.name) }}
+                                {{ form.name }}
                                 {% for err in form.name.errors %}
                                     <div class="col-md-12">
                                         <p style="color: red">{{ err }}</p>
