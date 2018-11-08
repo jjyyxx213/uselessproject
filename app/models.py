@@ -94,10 +94,14 @@ class Auth(db.Model):
     __tablename__ = "tb_auth"
     # 编号
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    # 权限等级
+    level = db.Column(db.Integer)
     # 名称
     name = db.Column(db.String(100), unique=True)
     # 地址
     url = db.Column(db.String(255), unique=True)
+    # 20181108 上级id
+    p_id = db.Column(db.Integer)
     # 20181106 元素标识
     html_id = db.Column(db.String(200))
     # 添加时间
