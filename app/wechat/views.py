@@ -1,9 +1,13 @@
 # -*- coding:utf-8 -*-
 from . import wechat
+from app.utils.utils import AccessToken
 from hashlib import sha1
 from xmltodict import parse, unparse
 from time import time
+from urllib2 import urlopen
+from json import dumps, loads
 from flask import render_template, session, redirect, request, make_response, url_for, flash, current_app
+
 
 @wechat.route('/', methods=['GET', 'POST'])
 def index():
@@ -22,7 +26,7 @@ def index():
     if sig == signature:
         # 根据请求方式.返回不同的内容 ,get代表是验证服务器有效性
         if request.method == "GET":
-            return echostr # 将验证结果返给微信服务器
+            return echostr  # 将验证结果返给微信服务器
         # post代表微信服务器发来的消息
         else:
             resp_data = request.data
@@ -79,3 +83,25 @@ def index():
 
     else:
         return 'errno', 403
+
+
+@wechat.route('/get_qrcode', methods=['GET'])
+def get_qrcode():
+    # 场景值ID，临时二维码时为32位非0整型，永久二维码时最大值为100000（目前参数只支持1--100000）
+    scene_id = request.args.get('id')
+    access_token = AccessToken.get_access_token()
+    url = "https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=%s" % access_token
+    params = {
+                 "expire_seconds": 604800,
+                 "action_name": "QR_SCENE",
+                 "action_info": {"scene": {"scene_id": scene_id}}
+             },
+    response = urlopen(url, data=dumps(params)).read()
+    # 转换成字典
+    resp_json = loads(response)
+
+    ticket = resp_json.get('ticket')
+    if ticket:
+        return '<img src="https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=%s">' % ticket
+    else:
+        return redirect(url_for('home.index'))
