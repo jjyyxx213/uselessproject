@@ -2,7 +2,8 @@
 from . import wechat
 from hashlib import sha1
 from xmltodict import parse, unparse
-from flask import render_template, session, redirect, request, url_for, flash, current_app
+from time import time
+from flask import render_template, session, redirect, request, make_response, url_for, flash, current_app
 
 @wechat.route('/', methods=['GET', 'POST'])
 def index():
@@ -22,21 +23,59 @@ def index():
         # 根据请求方式.返回不同的内容 ,get代表是验证服务器有效性
         if request.method == "GET":
             return echostr # 将验证结果返给微信服务器
+        # post代表微信服务器发来的消息
+        else:
+            resp_data = request.data
+            resp_dict = parse(resp_data).get('xml')
+            #### 测试消息接口
+            # 如果是文本消息
+            if resp_dict.get('MsgType') == 'text':
+                response = {
+                    "ToUserName": resp_dict.get('FromUserName'),
+                    "FromUserName": resp_dict.get('ToUserName'),
+                    "CreateTime": int(time()),
+                    "MsgType": "text",
+                    "Content": resp_dict.get('Content'),
+                }
+            elif resp_dict.get('MsgType') == 'voice':
+                if resp_dict.get('Recognition'):
+                    Recognition = resp_dict.get('Recognition')
+                else:
+                    Recognition = u"大声点,几把！"
+                response = {
+                    "ToUserName": resp_dict.get('FromUserName'),
+                    "FromUserName": resp_dict.get('ToUserName'),
+                    "CreateTime": int(time()),
+                    "MsgType": "text",
+                    "Content": Recognition,  # 把语音的消息转换成文字返回
+                }
+            elif resp_dict.get('MsgType') == "event":
+                # subscribe订阅 unsubscribe取消订阅
+                if "subscribe" == resp_dict.get("Event"):
+                    response = {
+                        "ToUserName": resp_dict.get("FromUserName", ""),
+                        "FromUserName": resp_dict.get("ToUserName", ""),
+                        "CreateTime": int(time()),
+                        "MsgType": "text",
+                        "Content": u"感谢您的关注！"
+                    }
+                else:
+                    response = None
+            else:
+                response = {
+                    "ToUserName": resp_dict.get('FromUserName'),
+                    "FromUserName": resp_dict.get('ToUserName'),
+                    "CreateTime": int(time()),
+                    "MsgType": "text",
+                    "Content": u"你说什么几把？说话！打字！",
+                }
+
+            if response:
+                response = {"xml": response}
+                response = unparse(response)
+            else:
+                response = ''
+            return make_response(response)
+
     else:
         return 'errno', 403
-
-@wechat.route('/example', methods=['GET'])
-def example():
-    xml_str =  """
-             <xml>
-             <ToUserName><![CDATA[gh_866835093fea]]></ToUserName>
-             <FromUserName><![CDATA[ogdotwSc_MmEEsJs9-ABZ1QL_4r4]]></FromUserName>
-             <CreateTime>1478317060</CreateTime>
-             <MsgType><![CDATA[text]]></MsgType>
-             <Content><![CDATA[你好]]></Content>
-             <MsgId>6349323426230210995</MsgId>
-             </xml>
-             """
-    xml_dict = parse(xml_str).get('xml')
-    print xml_dict.get('MsgType')
-    return render_template('home/index.html')
