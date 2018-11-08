@@ -19,4 +19,7 @@ def create_app(config_name):
     from app.admin import admin as admin_blueprint
     app.register_blueprint(admin_blueprint, url_prefix='/admin')
 
+    from app.wechat import wechat as wechat_blueprint
+    app.register_blueprint(wechat_blueprint, url_prefix='/wechat')
+
     return app
