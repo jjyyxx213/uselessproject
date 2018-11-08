@@ -63,6 +63,18 @@ def index():
                         "MsgType": "text",
                         "Content": u"感谢您的关注！"
                     }
+                    if resp_dict.get('EventKey'):
+                        response["Content"] += u"场景值是:"
+                        response["Content"] += resp_dict.get('EventKey')
+                elif 'SCAN' == resp_dict.get('Event'):
+                    # 当用户关注过又扫描二维码的时候,会进入到这儿
+                    response = {
+                        "ToUserName": resp_dict.get("FromUserName", ""),
+                        "FromUserName": resp_dict.get("ToUserName", ""),
+                        "CreateTime": int(time()),
+                        "MsgType": "text",
+                        "Content": resp_dict.get('EventKey')
+                    }
                 else:
                     response = None
             else:
