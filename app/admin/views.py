@@ -17,19 +17,22 @@ from xlrd import open_workbook
 def inject_admininfo():
     try:
         user = User.query.filter_by(id=int(session['user_id'])).first()
-        auths = user.role.auths
-        # 权限列表编码
-        auths_list = list(map(lambda v: int(v), auths.split(',')))
-        # 遍历权限
-        roles = []
-        for i, val in enumerate(auths_list):
-            auth = Auth.query.filter_by(id=val).first()
-            roles.append(
-                {
-                    "id": auth.html_id,
-                    "name": auth.name,
-                }
-            )
+        try:
+            auths = user.role.auths
+            # 权限列表编码
+            auths_list = list(map(lambda v: int(v), auths.split(',')))
+            # 遍历权限
+            roles = []
+            for i, val in enumerate(auths_list):
+                auth = Auth.query.filter_by(id=val).first()
+                roles.append(
+                    {
+                        "id": auth.html_id,
+                        "name": auth.name,
+                    }
+                )
+        except:
+            roles = None
     except:
         user = None
         roles = None
@@ -80,6 +83,7 @@ def auth_add():
             return render_template('admin/auth_add.html', form=form)
         auth = Auth(
             name=form.name.data,
+            level=1,
             url=form.url.data,
             html_id=form.html_id.data
         )
@@ -132,6 +136,40 @@ def auth_edit(id=None):
         flash(u'权限修改成功', 'ok')
         return redirect(url_for('admin.auth_list'))
     return render_template('admin/auth_edit.html', form=form)
+
+
+# 2/3级权限添加
+@admin.route('/auth/detail_add/<int:id><int:level>', methods=['GET', 'POST'])
+def auth_detail_add(id=None, level=None):
+    form = AuthForm()
+    is_flag = True
+    if form.validate_on_submit():
+        if Auth.query.filter_by(name=form.name.data).first():
+            is_flag = False
+            flash(u'您输入的权限已存在', 'err')
+        if Auth.query.filter_by(url=form.url.data).first():
+            is_flag = False
+            flash(u'您输入的路由已存在', 'err')
+        if is_flag==False:
+            return render_template('admin/auth_add.html', form=form)
+        auth = Auth(
+            p_id=id,
+            level=level,
+            name=form.name.data,
+            url=form.url.data,
+            html_id=form.html_id.data
+        )
+        oplog = Oplog(
+            user_id=session['user_id'],
+            ip=request.remote_addr,
+            reason=u'添加权限:%s' % form.name.data
+        )
+        objects = [auth, oplog]
+        db.session.add_all(objects)
+        db.session.commit()
+        flash(u'权限添加成功', 'ok')
+        return redirect(url_for('admin.auth_list'))
+    return render_template('admin/auth_add.html', form=form)
 
 
 @admin.route('/auth/del/<int:id>', methods=['GET', 'POST'])
