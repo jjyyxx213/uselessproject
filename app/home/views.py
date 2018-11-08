@@ -204,18 +204,21 @@ def logout():
 @home.route('/user/pwd', methods=['GET', 'POST'])
 def pwd():
     form = PwdForm()
+    is_flag = True
     if form.validate_on_submit():
         # 验证密码
         user = User.query.filter_by(id=session.get('user_id')).first()
         if user.verify_password(form.old_pwd.data) != 1:
+            is_flag = False
             flash(u'旧密码输入错误', 'err')
-            return redirect(url_for('home.pwd'))
         if form.new_pwd.data != form.re_pwd.data:
+            is_flag = False
             flash(u'您两次输入的密码不一致!', 'err')
-            return redirect(url_for('home.pwd'))
         if form.new_pwd.data == form.old_pwd.data:
+            is_flag = False
             flash(u'新密码与旧密码一致！', 'err')
-            return redirect(url_for('home.pwd'))
+        if is_flag == False:
+            return render_template('home/pwd.html', form=form)
         new_pwd = generate_password_hash(form.new_pwd.data)
         user.pwd = new_pwd
         db.session.add(user)
@@ -307,16 +310,17 @@ def customer_list():
 @home.route('/customer/cus_add', methods=['GET', 'POST'])
 def customer_add():
     form = CustomerForm()
+    is_flag = True
     if form.validate_on_submit():
         province = request.form.get('province')
         pnumber = province + form.pnumber.data
         if Customer.query.filter_by(pnumber=pnumber).first():
+            is_flag = False
             flash(u'您输入的车牌号已存在', 'err')
-            # return redirect(url_for('home.customer_add'))
-            return render_template('home/customer_add.html', form=form)
         if Customer.query.filter_by(phone=form.phone.data).first():
+            is_flag = False
             flash(u'您输入的手机号已存在', 'err')
-            # return redirect(url_for('home.customer_add'))
+        if is_flag == False:
             return render_template('home/customer_add.html', form=form)
         obj_customer = Customer(
             name=form.name.data,
@@ -350,19 +354,31 @@ def customer_edit(id=None):
     form = CustomerForm()
     form.submit.label.text = u'修改'
     obj_customer = Customer.query.filter_by(id=id).first_or_404()
+    is_flag = True
     if request.method == 'GET':
-        # get时进行赋值。应对SelectField无法模板中赋初值
+        province = obj_customer.pnumber[0:1]
+        form.name.data = obj_customer.name
+        form.name_wechat.data = obj_customer.name_wechat
         form.sex.data = int(obj_customer.sex)
+        form.phone.data = obj_customer.phone
+        form.pnumber.data = obj_customer.pnumber[1:]
+        form.vin.data = obj_customer.vin
+        form.brand.data = obj_customer.brand
+        form.email.data = obj_customer.email
+        form.id_card.data = obj_customer.id_card
         form.user_id.data = obj_customer.user_id
+
     if form.validate_on_submit():
         province = request.form.get('province')
         pnumber = province + form.pnumber.data
         if obj_customer.pnumber != form.pnumber.data and Customer.query.filter_by(pnumber=pnumber).first():
+            is_flag = False
             flash(u'您输入的车牌号已存在', 'err')
-            return redirect(url_for('home.customer_edit', id=obj_customer.id))
         if obj_customer.phone != form.phone.data and Customer.query.filter_by(phone=form.phone.data).first():
+            is_flag = False
             flash(u'您输入的手机号已存在', 'err')
-            return redirect(url_for('home.customer_edit', id=obj_customer.id))
+        if is_flag == False:
+            return render_template('home/customer_edit.html', form=form, province=province)
 
         obj_customer.name = form.name.data,
         obj_customer.name_wechat = form.name_wechat.data,
@@ -385,7 +401,7 @@ def customer_edit(id=None):
         db.session.commit()
         flash(u'客户信息修改成功', 'ok')
         return redirect(url_for('home.customer_list'))
-    return render_template('home/customer_edit.html', form=form, customer=obj_customer)
+    return render_template('home/customer_edit.html', form=form, province=province)
 
 # 20180920 liuqq 新增客户-会员卡
 @home.route('/customer/cus_vip_add/<int:id>', methods=['GET', 'POST'])

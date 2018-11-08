@@ -22,7 +22,7 @@
                                 <div class="form-group">
                                     <label for="input_name" style="color: red">*</label>
                                     {{ form.name.label }}
-                                    {{ form.name(value=customer.name) }}
+                                    {{ form.name }}
                                     {% for err in form.name.errors %}
                                         <div class="col-md-12">
                                             <p style="color: red">{{ err }}</p>
@@ -36,7 +36,8 @@
                                     <div class="input-group">
                                         <div class="input-group-btn">
                                             <select name="province" id="my_jc_select1" class="btn btn-default dropdown-toggle" style="height: 34px;background-color: white">
-                                                <option selected="selected" value="鄂">{{ customer.pnumber[0:1] }}</option>
+                                                <option selected="selected" value="鄂">{{ province }}</option>
+                                                <option value="鄂">鄂</option>
                                                 <option value="浙">浙</option>
                                                 <option value="京">京</option>
                                                 <option value="沪">沪</option>
@@ -69,7 +70,7 @@
                                                 <option value="晋">晋</option>
                                             </select>
                                         </div>
-                                        {{ form.pnumber(value=customer.pnumber[1:]) }}
+                                        {{ form.pnumber }}
                                     </div>
                                     {% for err in form.pnumber.errors %}
                                         <div class="col-md-12">
@@ -82,7 +83,7 @@
                                 <div class="form-group">
                                     <label for="input_name" style="color: red">*</label>
                                     {{ form.brand.label }}
-                                    {{ form.brand(value=customer.brand) }}
+                                    {{ form.brand }}
                                     {% for err in form.brand.errors %}
                                         <div class="col-md-12">
                                             <p style="color: red">{{ err }}</p>
@@ -91,7 +92,7 @@
                                 </div>
                                 <div class="form-group">
                                     {{ form.name_wechat.label }}
-                                    {{ form.name_wechat(value=customer.name_wechat) }}
+                                    {{ form.name_wechat }}
                                     {% for err in form.name_wechat.errors %}
                                         <div class="col-md-12">
                                             <p style="color: red">{{ err }}</p>
@@ -100,7 +101,7 @@
                                 </div>
                                 <div class="form-group">
                                     {{ form.vin.label }}
-                                    {{ form.vin(value=customer.vin) }}
+                                    {{ form.vin }}
                                     {% for err in form.vin.errors %}
                                         <div class="col-md-12">
                                             <p style="color: red">{{ err }}</p>
@@ -123,7 +124,7 @@
                                 <div class="form-group">
                                     <label for="input_name" style="color: red">*</label>
                                     {{ form.phone.label }}
-                                    {{ form.phone(value=customer.phone) }}
+                                    {{ form.phone }}
                                     {% for err in form.phone.errors %}
                                         <div class="col-md-12">
                                             <p style="color: red">{{ err }}</p>
@@ -133,7 +134,7 @@
                                 <div class="form-group">
                                     <label for="input_name" style="color: red">*</label>
                                     {{ form.email.label }}
-                                    {{ form.email(value=customer.email) }}
+                                    {{ form.email }}
                                     {% for err in form.email.errors %}
                                         <div class="col-md-12">
                                             <p style="color: red">{{ err }}</p>
@@ -142,7 +143,7 @@
                                 </div>
                                 <div class="form-group">
                                     {{ form.id_card.label }}
-                                    {{ form.id_card(value=customer.id_card) }}
+                                    {{ form.id_card }}
                                     {% for err in form.id_card.errors %}
                                         <div class="col-md-12">
                                             <p style="color: red">{{ err }}</p>
