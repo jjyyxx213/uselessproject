@@ -25,12 +25,7 @@ def inject_admininfo():
             roles = []
             for i, val in enumerate(auths_list):
                 auth = Auth.query.filter_by(id=val).first()
-                roles.append(
-                    {
-                        "id": auth.html_id,
-                        "name": auth.name,
-                    }
-                )
+                roles.append(auth.to_json())
         except:
             roles = None
     except:
