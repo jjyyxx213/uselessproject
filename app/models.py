@@ -107,6 +107,16 @@ class Auth(db.Model):
     # 添加时间
     addtime = db.Column(db.DateTime, index=True, default=datetime.now)
 
+    def to_json(self):
+        str_json = {'id': self.id,
+                    'level': self.level,
+                    'name': self.name,
+                    'url': self.url,
+                    'p_id': self.p_id,
+                    'html_id': self.html_id
+                    }
+        return str_json
+
     def __repr__(self):
         return "<Auth %r>" % self.name
 
