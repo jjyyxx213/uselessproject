@@ -96,17 +96,21 @@ def index():
         return 'errno', 403
 
 
-@wechat.route('/get_qrcode', methods=['GET'])
-def get_qrcode():
+@wechat.route('/qrcode/get', methods=['GET'])
+def qrcode_get():
+    '''
+    获取微信二维码
+    :return: 微信二维码图片
+    '''
     # 场景值ID，临时二维码时为32位非0整型，永久二维码时最大值为100000（目前参数只支持1--100000）
     scene_id = request.args.get('id', 1)
     access_token = AccessToken.get_access_token()
     url = "https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=%s" % access_token
     params = {
-                 "expire_seconds": 604800,
-                 "action_name": "QR_SCENE",
-                 "action_info": {"scene": {"scene_id": scene_id}}
-             }
+        "expire_seconds": 604800,
+        "action_name": "QR_SCENE",
+        "action_info": {"scene": {"scene_id": scene_id}}
+    }
     response = urlopen(url, data=dumps(params)).read()
     # 转换成字典
     resp_json = loads(response)
@@ -119,4 +123,45 @@ def get_qrcode():
     if ticket:
         return '<img src="https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=%s">' % ticket
     else:
-        return redirect(url_for('home.index'))
+        return u'<h2>没有获取到二维码信息</h2>'
+
+
+@wechat.route('/menu/add', methods=['GET'])
+def menu_add():
+    access_token = AccessToken.get_access_token()
+    url = "https://api.weixin.qq.com/cgi-bin/menu/create?access_token=%s" % access_token
+    params = {
+        "button": [
+            {
+                "type": "click",
+                "name": "没用1",
+                "key": "USELESS1"
+            },
+            {
+                "type": "click",
+                "name": "没用2",
+                "key": "USELESS2"
+            },
+            {
+                "name": "点我",
+                "sub_button": [
+                    {
+                        "type": "click",
+                        "name": "生成二维码",
+                        "key": "QRCODE_GET"
+                    },
+                    {
+                        "type": "view",
+                        "name": "搜索",
+                        "url": "http://m.baidu.com/"
+                    }]
+            }]
+    }
+    response = urlopen(url, data=dumps(params, ensure_ascii=False)).read()
+    # 转换成字典
+    resp_json = loads(response)
+
+    if resp_json.get("errcode")  != 0:
+        raise Exception(resp_json.get("errmsg"))
+    else:
+        return u'<h2>菜单创建成功</h2>'
