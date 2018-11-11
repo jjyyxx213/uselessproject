@@ -15,14 +15,30 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='dist/css/AdminLTE.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='dist/css/skins/skin-blue-light.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='plugins/iCheck/square/blue.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='dist/css/verify.css') }}">
     <!--[if lt IE 9]>
     <script src="{{ url_for('static', filename='dist/js/html5shiv.js') }}"></script>
     <script src="{{ url_for('static', filename='dist/js/respond.js') }}"></script>
     <![endif]-->
 
-
     <!-- YAHEI Font -->
-    <link rel="stylesheet" href="dist/css/ExtraAS.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='dist/css/ExtraAS.css') }}">
+
+    <style>
+        .margin-defined {
+            margin-top: 10px;
+        }
+    </style>
+
+    <style>
+        .padding-defined {
+            padding-left: 0px;
+            padding-right: 0px;
+        }
+    </style>
+
+
+
 </head>
 <body class="hold-transition login-page">
 <div class="login-box">
@@ -64,11 +80,15 @@
                 {{ form.pwd }}
                 <span class="glyphicon glyphicon-lock form-control-feedback"></span>
             </div>
+
             {% for err in form.pwd.errors %}
                 <div class="form-group has-feedback">
                     <p style="color: red">{{ err }}</p>
                 </div>
             {% endfor %}
+
+            <div id="mpanel2" class="form-group has-feedback"></div>
+
             <div class="row">
                 <div class="col-xs-8">
 
@@ -87,6 +107,8 @@
 <!-- /.login-box -->
 <!-- jQuery 3 -->
 <script src="{{ url_for('static', filename='bower_components/jquery/dist/jquery.min.js') }}"></script>
+<script src="{{ url_for('static', filename='dist/js/verify.js') }}"></script>
+
 <!-- Bootstrap 3.3.7 -->
 <script src="{{ url_for('static', filename='bower_components/bootstrap/dist/js/bootstrap.min.js') }}"></script>
 <!-- AdminLTE App -->
@@ -97,12 +119,44 @@
 <script src="{{ url_for('static', filename='plugins/iCheck/icheck.min.js') }}"></script>
 <script>
     $(function () {
+        var v_check = true;
         $('input').iCheck({
             checkboxClass: 'icheckbox_square-blue',
             radioClass: 'iradio_square-blue',
             increaseArea: '20%' /* optional */
         });
+
+        $('#submit').addClass('margin-defined');
+
+        $('#mpanel2').codeVerify({
+            type : 1,
+            width : '200px',
+            height : '50px',
+            fontSize : '30px',
+            codeLength : 4,
+            btnId : 'submit',
+            ready : function() {
+            },
+            success : function(){
+                v_check = true;
+            },
+            error : function() {
+                v_check = false;
+            }
+        });
+
+        $("form").on("submit",function(event){
+            if(v_check){
+
+            }else{
+                alert("验证码输入错误.");
+                event.preventDefault();
+            }
+        })
+
     });
+
+
 </script>
 </body>
 </html>
