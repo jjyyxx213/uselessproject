@@ -211,10 +211,13 @@
 <script>
     $(document).ready(function () {
         var tree = $(".treeview");
+        var fa = $("li");
         var t_id,t_obj;
         var li_id,li_obj;
         {% if roles %}
-            //tree.removeClass("hide");
+            //暂时放开
+            fa.removeClass("hide");
+            tree.removeClass("hide");
             {% for v in roles %}
                 {% if v.level == 1 %}
                     t_id = "{{ v.html_id }}";
