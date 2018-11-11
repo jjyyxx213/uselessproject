@@ -18,12 +18,12 @@
             </span>
         </a>
         <ul class="treeview-menu">
-            <li id="g-stock-list"><a href="{{ url_for('home.stock_list') }}"><i class="fa fa-circle-o"></i> 库存列表</a></li>
-            <li id="g-stock-buy-list"><a href="{{ url_for('home.stock_buy_list') }}"><i class="fa fa-circle-o"></i> 采购入库</a></li>
-            <li id="g-stock-out-list"><a href="{{ url_for('home.stock_out_list') }}"><i class="fa fa-circle-o"></i> 领料出库</a></li>
-            <li id="g-stock-allot-list"><a href="{{ url_for('home.stock_allot_list') }}"><i class="fa fa-circle-o"></i> 调拨管理</a></li>
-            <li id="g-stock-loss-list"><a href="{{ url_for('home.stock_loss_list') }}"><i class="fa fa-circle-o"></i> 报损管理</a></li>
-            <li id="g-stock-return-list"><a href="{{ url_for('home.stock_return_list') }}"><i class="fa fa-circle-o"></i> 采购退货</a></li>
+            <li id="g-stock-list" class="hide"><a href="{{ url_for('home.stock_list') }}"><i class="fa fa-circle-o"></i> 库存列表</a></li>
+            <li id="g-stock-buy-list" class="hide"><a href="{{ url_for('home.stock_buy_list') }}"><i class="fa fa-circle-o"></i> 采购入库</a></li>
+            <li id="g-stock-out-list" class="hide"><a href="{{ url_for('home.stock_out_list') }}"><i class="fa fa-circle-o"></i> 领料出库</a></li>
+            <li id="g-stock-allot-list" class="hide"><a href="{{ url_for('home.stock_allot_list') }}"><i class="fa fa-circle-o"></i> 调拨管理</a></li>
+            <li id="g-stock-loss-list" class="hide"><a href="{{ url_for('home.stock_loss_list') }}"><i class="fa fa-circle-o"></i> 报损管理</a></li>
+            <li id="g-stock-return-list" class="hide"><a href="{{ url_for('home.stock_return_list') }}"><i class="fa fa-circle-o"></i> 采购退货</a></li>
         </ul>
     </li>
     <li class="treeview hide" id="g-customer">
@@ -33,7 +33,7 @@
                         </span>
         </a>
         <ul class="treeview-menu">
-            <li id="g-customer-list"><a href="{{ url_for('home.customer_list') }}"><i class="fa fa-circle-o"></i> 客户列表</a>
+            <li id="g-customer-list" class="hide"><a href="{{ url_for('home.customer_list') }}"><i class="fa fa-circle-o"></i> 客户列表</a>
             </li>
         </ul>
     </li>
@@ -44,13 +44,13 @@
             </span>
         </a>
         <ul class="treeview-menu">
-            <li id="g-is-item">
+            <li id="g-is-item" class="hide">
                 <a href="{{ url_for('home.item_list', type=0) }}"><i class="fa fa-circle-o"></i> 商品查询</a>
             </li>
-            <li id="g-is-service">
+            <li id="g-is-service" class="hide">
                 <a href="{{ url_for('home.item_list', type=1) }}"><i class="fa fa-circle-o"></i> 服务项目查询</a>
             </li>
-            <li id="g-is-supplier">
+            <li id="g-is-supplier" class="hide">
                 <a href="{{ url_for('home.supplier_list') }}"><i class="fa fa-circle-o"></i> 供应商查询</a>
             </li>
         </ul>
@@ -62,11 +62,14 @@
                         </span>
         </a>
         <ul class="treeview-menu">
-            <li id="g-summary-report"><a href="{{ url_for('home.summary_report') }}"><i class="fa fa-circle-o"></i> 汇总报告</a>
+            <li id="g-summary-report" class="hide">
+                <a href="{{ url_for('home.summary_report') }}"><i class="fa fa-circle-o"></i> 汇总报告</a>
             </li>
-            <li id="g-sales-report"><a href="{{ url_for('home.sales_report') }}"><i class="fa fa-circle-o"></i> 收银报表</a>
+            <li id="g-sales-report" class="hide">
+                <a href="{{ url_for('home.sales_report') }}"><i class="fa fa-circle-o"></i> 收银报表</a>
             </li>
-            <li id="g-vips-report"><a href="{{ url_for('home.vips_report') }}"><i class="fa fa-circle-o"></i> 充值报表</a>
+            <li id="g-vips-report" class="hide">
+                <a href="{{ url_for('home.vips_report') }}"><i class="fa fa-circle-o"></i> 充值报表</a>
             </li>
         </ul>
     </li>
@@ -77,31 +80,31 @@
                         </span>
         </a>
         <ul class="treeview-menu">
-            <li id="g-option-mscard">
+            <li id="g-option-mscard" class="hide">
                 <a href="{{ url_for('admin.mscard_list') }}">
                     <i class="fa fa-circle-o"></i> 会员卡
                 </a>
             </li>
-            <li id="g-option-item">
+            <li id="g-option-item" class="hide">
                 <a href="{{ url_for('admin.item_list', type=0) }}"><i class="fa fa-circle-o"></i> 商品</a>
             </li>
-            <li id="g-option-service">
+            <li id="g-option-service" class="hide">
                 <a href="{{ url_for('admin.item_list', type=1) }}"><i class="fa fa-circle-o"></i> 服务项目</a>
             </li>
-            <li id="g-option-supplier">
+            <li id="g-option-supplier" class="hide">
                 <a href="{{ url_for('admin.supplier_list') }}"><i class="fa fa-circle-o"></i> 供应商</a>
             </li>
-            <li id="g-option-category-item">
+            <li id="g-option-category-item" class="hide">
                 <a href="{{ url_for('admin.category_list', type=0) }}">
                     <i class="fa fa-circle-o"></i> 商品分类
                 </a>
             </li>
-            <li id="g-option-category-service">
+            <li id="g-option-category-service" class="hide">
                 <a href="{{ url_for('admin.category_list', type=1) }}">
                     <i class="fa fa-circle-o"></i> 服务项目分类
                 </a>
             </li>
-            <li id="g-option-kvp">
+            <li id="g-option-kvp" class="hide">
                 <a href="{{ url_for('admin.kvp_list') }}"><i class="fa fa-circle-o"></i> 数据字典</a>
             </li>
         </ul>
@@ -113,8 +116,12 @@
                         </span>
         </a>
         <ul class="treeview-menu">
-            <li id="g-user-add"><a href="{{ url_for('admin.user_add') }}"><i class="fa fa-circle-o"></i> 添加员工</a></li>
-            <li id="g-user-list"><a href="{{ url_for('admin.user_list') }}"><i class="fa fa-circle-o"></i> 员工列表</a></li>
+            <li id="g-user-add" class="hide">
+                <a href="{{ url_for('admin.user_add') }}"><i class="fa fa-circle-o"></i> 添加员工</a>
+            </li>
+            <li id="g-user-list" class="hide">
+                <a href="{{ url_for('admin.user_list') }}"><i class="fa fa-circle-o"></i> 员工列表</a>
+            </li>
         </ul>
     </li>
     <li class="treeview hide" id="g-log">
@@ -124,9 +131,12 @@
                         </span>
         </a>
         <ul class="treeview-menu">
-            <li id="g-log-op"><a href="{{ url_for('admin.oplog_list') }}"><i class="fa fa-circle-o"></i> 操作日志列表</a></li>
-            <li id="g-log-login"><a href="{{ url_for('admin.userloginlog_list') }}"><i class="fa fa-circle-o"></i>
-                员工登录日志列表</a></li>
+            <li id="g-log-op" class="hide">
+                <a href="{{ url_for('admin.oplog_list') }}"><i class="fa fa-circle-o"></i> 操作日志列表</a>
+            </li>
+            <li id="g-log-login" class="hide">
+                <a href="{{ url_for('admin.userloginlog_list') }}"><i class="fa fa-circle-o"></i>员工登录日志列表</a>
+            </li>
         </ul>
     </li>
     <li class="treeview hide" id="g-auth">
@@ -136,8 +146,8 @@
                         </span>
         </a>
         <ul class="treeview-menu">
-            <li id="g-auth-add"><a href="{{ url_for('admin.auth_add') }}"><i class="fa fa-circle-o"></i> 添加权限</a></li>
-            <li id="g-auth-list"><a href="{{ url_for('admin.auth_list') }}"><i class="fa fa-circle-o"></i> 权限列表</a></li>
+            <li id="g-auth-add" class="hide"><a href="{{ url_for('admin.auth_add') }}"><i class="fa fa-circle-o"></i> 添加权限</a></li>
+            <li id="g-auth-list" class="hide"><a href="{{ url_for('admin.auth_list') }}"><i class="fa fa-circle-o"></i> 权限列表</a></li>
         </ul>
     </li>
     <li class="treeview hide" id="g-role">
@@ -147,8 +157,8 @@
                         </span>
         </a>
         <ul class="treeview-menu">
-            <li id="g-role-add"><a href="{{ url_for('admin.role_add') }}"><i class="fa fa-circle-o"></i> 添加角色</a></li>
-            <li id="g-role-list"><a href="{{ url_for('admin.role_list') }}"><i class="fa fa-circle-o"></i> 角色列表</a></li>
+            <li id="g-role-add" class="hide"><a href="{{ url_for('admin.role_add') }}"><i class="fa fa-circle-o"></i> 添加角色</a></li>
+            <li id="g-role-list" class="hide"><a href="{{ url_for('admin.role_list') }}"><i class="fa fa-circle-o"></i> 角色列表</a></li>
         </ul>
     </li>
 </ul>
