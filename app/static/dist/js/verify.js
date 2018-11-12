@@ -65,7 +65,7 @@
 									// '<div class="verify-change-area col-xs-3 col-sm-3">' +
 									// 	'<a class="verify-change-code">换一张</a>' +
 									// '</div>' +
-									'<div class="verify-code col-xs-5 col-sm-5" padding-defined>' +
+									'<div class="verify-code col-xs-5 col-sm-5 padding-defined" onselectstart="return false">' +
 
 									'</div>' +
 
