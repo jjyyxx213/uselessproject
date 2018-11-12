@@ -133,6 +133,21 @@
                     location.href = "{{ url_for("admin.auth_list") }}?key=" + key
                 }
             })
+
+            var lable = $(".lable");
+            var l_class,l_obj;
+            {% if roles %}
+                //暂时放开
+                lable.removeClass("hide");
+                {% for v in roles %}
+                    {% if v.level == 3 %}
+                        l_class = "{{ v.html_id }}";
+                        l_obj = $("."+l_class);
+                        l_obj.removeClass("hide");
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+
         })
     </script>
 {% endblock %}
