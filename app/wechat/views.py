@@ -55,7 +55,7 @@ def index():
                 }
             elif resp_dict.get('MsgType') == "event":
                 # subscribe订阅 unsubscribe取消订阅
-                if "subscribe" == resp_dict.get("Event"):
+                if resp_dict.get("Event") == "subscribe":
                     response = {
                         "ToUserName": resp_dict.get("FromUserName", ""),
                         "FromUserName": resp_dict.get("ToUserName", ""),
@@ -65,7 +65,7 @@ def index():
                     }
                     if resp_dict.get('EventKey'):
                         response["Content"] = u"可以的扫码保平安"
-                elif 'SCAN' == resp_dict.get('Event'):
+                elif resp_dict.get('Event') == 'SCAN':
                     # 当用户关注过又扫描二维码的时候,会进入到这儿
                     response = {
                         "ToUserName": resp_dict.get("FromUserName", ""),
@@ -74,6 +74,17 @@ def index():
                         "MsgType": "text",
                         "Content": u"大兄弟关注过了扫你妹儿？"
                     }
+                # elif resp_dict.get('Event') == 'CLICK':
+                #     if resp_dict.get('EventKey') == 'QRCODE_GET':
+                #         # 菜单 生成二维码
+                #         response = {
+                #             "ToUserName": resp_dict.get("FromUserName", ""),
+                #             "FromUserName": resp_dict.get("ToUserName", ""),
+                #             "CreateTime": int(time()),
+                #             "MsgType": "text",
+                #             "Content": u"没出来"
+                #         }
+                #         response["Content"] = qrcode_get()
                 else:
                     response = None
             else:
@@ -128,6 +139,7 @@ def qrcode_get():
 
 @wechat.route('/menu/add', methods=['GET'])
 def menu_add():
+    # 添加菜单
     access_token = AccessToken.get_access_token()
     url = "https://api.weixin.qq.com/cgi-bin/menu/create?access_token=%s" % access_token
     params = {
@@ -146,14 +158,9 @@ def menu_add():
                 "name": "点我",
                 "sub_button": [
                     {
-                        "type": "click",
-                        "name": "生成二维码",
-                        "key": "QRCODE_GET"
-                    },
-                    {
                         "type": "view",
-                        "name": "搜索",
-                        "url": "http://m.baidu.com/"
+                        "name": "生成二维码",
+                        "url": "http://jjyyxx213.ngrok.xiaomiqiu.cn/wechat/qrcode/get"
                     }]
             }]
     }
@@ -161,7 +168,21 @@ def menu_add():
     # 转换成字典
     resp_json = loads(response)
 
-    if resp_json.get("errcode")  != 0:
+    if resp_json.get("errcode") != 0:
         raise Exception(resp_json.get("errmsg"))
     else:
         return u'<h2>菜单创建成功</h2>'
+
+@wechat.route('/menu/del', methods=['GET'])
+def menu_del():
+    # 删除菜单
+    access_token = AccessToken.get_access_token()
+    url = "https://api.weixin.qq.com/cgi-bin/menu/delete?access_token=%s" % access_token
+    response = urlopen(url).read()
+    # 转换成字典
+    resp_json = loads(response)
+
+    if resp_json.get("errcode") != 0:
+        raise Exception(resp_json.get("errmsg"))
+    else:
+        return u'<h2>菜单删除成功</h2>'
