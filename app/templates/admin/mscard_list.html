@@ -62,12 +62,12 @@
                                     {% endif %}
                                     <td>{{ v.addtime }}</td>
                                     <td><a href="{{ url_for('admin.msdetail_edit', id=v.id) }}"
-                                           class="label label-info"> 套餐</a>
+                                           class="label msdetail-edit hide label-info"> 套餐</a>
                                         &nbsp;
                                         <a href="{{ url_for('admin.mscard_edit', id=v.id) }}"
-                                           class="label label-success"> 修改</a>
+                                           class="label mscard-edit hide label-success"> 修改</a>
                                         &nbsp;
-                                        <a name="btn-block" class="label label-danger"> 停用</a>
+                                        <a name="btn-block" class="label mscard-stop hide label-danger"> 停用</a>
                                     </td>
                                 </tr>
                             {% endfor %}

@@ -33,6 +33,7 @@ def inject_admininfo():
         roles = None
     context = {
         'user': user,
+        'debug': current_app.config['DEBUG'],
         'online_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         'roles': roles
     }
@@ -65,6 +66,7 @@ def login():
 
 @admin.route('/auth/add', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def auth_add():
     # 权限添加
     form = AuthForm()
@@ -138,6 +140,7 @@ def auth_edit(id=None):
 # 2/3级权限添加
 @admin.route('/auth/detail_add/<int:id><int:level>', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def auth_detail_add(id=None, level=None):
     form = AuthForm()
     is_flag = True
@@ -173,6 +176,7 @@ def auth_detail_add(id=None, level=None):
 
 @admin.route('/auth/del/<int:id>', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def auth_del(id=None):
     # 权限删除
     auth = Auth.query.filter_by(id=id).first_or_404()
@@ -209,6 +213,7 @@ def auth_list():
 
 @admin.route('/role/add', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def role_add():
     # 角色添加
     form = RoleForm()
@@ -240,6 +245,7 @@ def role_add():
 
 @admin.route('/role/edit<int:id>', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def role_edit(id=None):
     # 角色修改
     form = RoleForm()
@@ -274,6 +280,7 @@ def role_edit(id=None):
 
 @admin.route("/role/del/<int:id>/", methods=['GET', 'POST'])
 @login_required
+@permission_required
 def role_del(id=None):
     # 角色删除
     role = Role.query.filter_by(id=id).first_or_404()
@@ -291,6 +298,7 @@ def role_del(id=None):
 
 @admin.route('/role/list', methods=['GET'])
 @login_required
+@permission_required
 def role_list():
     # 角色列表
     key = request.args.get('key', '')
@@ -309,6 +317,7 @@ def role_list():
 
 @admin.route('/user/add', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def user_add():
     # 员工添加
     form = UserForm()
@@ -348,6 +357,7 @@ def user_add():
 
 @admin.route('/user/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def user_edit(id=None):
     # 员工修改
     form = UserForm()
@@ -396,6 +406,7 @@ def user_edit(id=None):
 
 @admin.route('/user/list', methods=['GET'])
 @login_required
+@permission_required
 def user_list():
     # 员工列表
     key = request.args.get('key', '')
@@ -416,6 +427,7 @@ def user_list():
 
 @admin.route('/user/frozen', methods=['GET'])
 @login_required
+@permission_required
 def user_frozen():
     # 员工冻结
     uid = request.args.get('uid', '')
@@ -453,6 +465,7 @@ def user_frozen():
 # 20181024 取消user外键，改变查询方式。超级管理员操作也记录，内连接不会进行查询....
 @admin.route('/oplog/list', methods=['GET'])
 @login_required
+@permission_required
 def oplog_list():
     # 操作日志
     page = request.args.get('page', 1, type=int)
@@ -472,6 +485,7 @@ def oplog_list():
 
 @admin.route('/userloginlog/list', methods=['GET'])
 @login_required
+@permission_required
 def userloginlog_list():
     # 员工登录日志列表
     page = request.args.get('page', 1, type=int)
@@ -492,6 +506,7 @@ def userloginlog_list():
 
 @admin.route('/mscard/list', methods=['GET'])
 @login_required
+@permission_required
 def mscard_list():
     # 会员卡列表
     key = request.args.get('key', '')
@@ -510,6 +525,7 @@ def mscard_list():
 
 @admin.route('/mscard/add', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def mscard_add():
     # 添加会员卡
     form = MscardForm()
@@ -543,6 +559,7 @@ def mscard_add():
 
 @admin.route('/mscard/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def mscard_edit(id=None):
     # 修改会员卡
     form = MscardForm()
@@ -584,6 +601,7 @@ def mscard_edit(id=None):
 
 @admin.route('/mscard/block', methods=['GET'])
 @login_required
+@permission_required
 def mscard_block():
     # 会员卡停用
     msid = request.args.get('msid', '')
@@ -603,6 +621,7 @@ def mscard_block():
 
 @admin.route('/mscard/msdetail/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def msdetail_edit(id=None):
     # 编辑会员卡套餐明细
     form = MsdetailForm()
@@ -646,6 +665,7 @@ def msdetail_edit(id=None):
 
 @admin.route('/item/get', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def item_get():
     # 获取产品分页清单
     if request.method == 'POST':
@@ -688,6 +708,7 @@ def item_get():
 
 @admin.route('/customer/list', methods=['GET'])
 @login_required
+@permission_required
 def customer_list():
     # 客户列表
     key = request.args.get('key', '')
@@ -714,6 +735,7 @@ def customer_list():
 
 @admin.route('/category/list/<int:type>', methods=['GET'])
 @login_required
+@permission_required
 def category_list(type=0):
     # 商品/服务分类列表
     key = request.args.get('key', '')
@@ -735,6 +757,7 @@ def category_list(type=0):
 
 @admin.route('/category/add/<int:type>', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def category_add(type=0):
     # 商品/服务分类添加
     form = CategoryForm()
@@ -764,6 +787,7 @@ def category_add(type=0):
 
 @admin.route('/category/edit/<int:type>/<int:id>/<string:name>', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def category_edit(type=0, id=None, name=None):
     # 商品/服务分类修改
     form = CategoryForm()
@@ -798,6 +822,7 @@ def category_edit(type=0, id=None, name=None):
 
 @admin.route('/category/del/<int:type>/<int:id>/<string:name>', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def category_del(type=0, id=None, name=None):
     # 商品/服务分类删除
     if Item.query.filter_by(cate=name).first():
@@ -817,6 +842,7 @@ def category_del(type=0, id=None, name=None):
 
 @admin.route('/item/list/<int:type>', methods=['GET'])
 @login_required
+@permission_required
 def item_list(type=0):
     # 商品/服务列表高级权限
     key = request.args.get('key', '')
@@ -840,6 +866,7 @@ def item_list(type=0):
 
 @admin.route('/item/add/<int:type>', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def item_add(type=0):
     # 商品/服务添加
     form = ItemForm(type=type)
@@ -874,6 +901,7 @@ def item_add(type=0):
 
 @admin.route('/item/edit/<int:type>/<int:id>', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def item_edit(type=0, id=None):
     # 商品/服务修改
     form = ItemForm(type=type)
@@ -917,6 +945,7 @@ def item_edit(type=0, id=None):
 
 @admin.route('/item/block', methods=['POST'])
 @login_required
+@permission_required
 def item_block():
     # 商品/服务项目停用
     if request.method == 'POST':
@@ -938,6 +967,7 @@ def item_block():
 
 @admin.route('/supplier/list', methods=['GET'])
 @login_required
+@permission_required
 def supplier_list():
     # 供应商列表
     key = request.args.get('key', '')
@@ -963,6 +993,7 @@ def supplier_list():
 
 @admin.route('/supplier/add', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def supplier_add():
     # 供应商添加
     form = SupplierForm()
@@ -997,6 +1028,7 @@ def supplier_add():
 
 @admin.route('/supplier/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def supplier_edit(id=None):
     # 供应商修改
     form = SupplierForm()
@@ -1040,6 +1072,7 @@ def supplier_edit(id=None):
 
 @admin.route('/supplier/block', methods=['POST'])
 @login_required
+@permission_required
 def supplier_block():
     # 供应商停用
     if request.method == 'POST':
@@ -1062,6 +1095,7 @@ def supplier_block():
 # 20181023 liuqq 获取供应商信息
 @admin.route('/supplier/get', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def supplier_get():
     # 获取供应商信息
     if request.method == 'POST':
@@ -1118,7 +1152,6 @@ def excel_table_byindex(file='file.xls', colnameindex=0, by_index=0):
 
 # liuqq 保存导入数据
 @admin.route('/item/import/<int:type>', methods=['GET', 'POST'])
-@login_required
 def item_import(type=0):
     if request.method == 'GET':
         return render_template('admin/item_import.html', type=type)
@@ -1161,6 +1194,7 @@ def item_import(type=0):
 # 20181010 liuqq 商品导入
 @admin.route('/item/import_get/<int:type>', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def item_improt_get(type=0):
     # 获取产品分页清单
     if request.method == 'POST':
@@ -1346,6 +1380,7 @@ def modal_item():
 #20181022 liuqq  数据字典查询
 @admin.route('/kvp/list', methods=['GET'])
 @login_required
+@permission_required
 def kvp_list():
     # 数据字典列表
     key = request.args.get('key', '')

@@ -50,14 +50,13 @@
                                         <td>{{ v.html_id }}</td>
                                         <td>{{ v.addtime }}</td>
                                         <td>
-                                            <a href="{{ url_for('admin.auth_detail_add', id=v.id, level=2) }}" class="label label-info">明细</a>
-                                            <a href="{{ url_for('admin.auth_edit', id=v.id) }}" class="label label-success">编辑</a>
+                                            <a href="{{ url_for('admin.auth_detail_add', id=v.id, level=2) }}" class="label auth-detail hide label-info">明细</a>
+                                            <a href="{{ url_for('admin.auth_edit', id=v.id) }}" class="label auth-edit hide label-success">编辑</a>
                                             <a href="{{ url_for('admin.auth_del', id=v.id) }}"
-                                               class="label label-danger">删除</a>
+                                               class="label auth-del hide label-danger">删除</a>
                                         </td>
                                     </tr>
 
-                                    <tbody id="collapse-{{ v.id }}">
                                     {% for v1 in pagination.items %}
                                         {% if v1.p_id == v.id %}
                                             <tr class="info">
@@ -68,14 +67,13 @@
                                                 <td>{{ v1.html_id }}</td>
                                                 <td>{{ v1.addtime }}</td>
                                                 <td>
-                                                    <a href="{{ url_for('admin.auth_detail_add', id=v1.id, level=3) }}" class="label label-info">明细</a>
-                                                    <a href="{{ url_for('admin.auth_edit', id=v1.id) }}" class="label label-success">编辑</a>
+                                                    <a href="{{ url_for('admin.auth_detail_add', id=v1.id, level=3) }}" class="label auth-detail hide label-info">明细</a>
+                                                    <a href="{{ url_for('admin.auth_edit', id=v1.id) }}" class="label auth-edit hide label-success">编辑</a>
                                                     <a href="{{ url_for('admin.auth_del', id=v1.id) }}"
-                                                       class="label label-danger">删除</a>
+                                                       class="label auth-del hide label-danger">删除</a>
                                                 </td>
                                             </tr>
 
-                                            <tbody id="collapse-{{ v1.id }}">
                                             {% for v2 in pagination.items %}
                                                 {% if v2.p_id == v1.id %}
                                                     <tr class="warning">
@@ -85,20 +83,16 @@
                                                         <td>{{ v2.html_id }}</td>
                                                         <td>{{ v2.addtime }}</td>
                                                         <td>
-                                                            <a href="{{ url_for('admin.auth_edit', id=v2.id) }}" class="label label-success">编辑</a>
+                                                            <a href="{{ url_for('admin.auth_edit', id=v2.id) }}" class="label auth-edit hide label-success">编辑</a>
                                                             <a href="{{ url_for('admin.auth_del', id=v2.id) }}"
-                                                               class="label label-danger">删除</a>
+                                                               class="label auth-del hide label-danger">删除</a>
                                                         </td>
                                                     </tr>
                                                 {% endif %}
                                             {% endfor %}
-                                            </tbody>
-
-
 
                                         {% endif %}
                                     {% endfor %}
-                                    </tbody>
 
                                 {% endif %}
                             {% endfor %}
@@ -133,21 +127,6 @@
                     location.href = "{{ url_for("admin.auth_list") }}?key=" + key
                 }
             })
-
-            var lable = $(".lable");
-            var l_class,l_obj;
-            {% if roles %}
-                //暂时放开
-                lable.removeClass("hide");
-                {% for v in roles %}
-                    {% if v.level == 3 %}
-                        l_class = "{{ v.html_id }}";
-                        l_obj = $("."+l_class);
-                        l_obj.removeClass("hide");
-                    {% endif %}
-                {% endfor %}
-            {% endif %}
-
         })
     </script>
 {% endblock %}
