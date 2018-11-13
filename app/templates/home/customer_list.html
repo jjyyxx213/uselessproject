@@ -145,7 +145,7 @@
                 }
             })
             // 微信绑定
-            $("button[name='btn-wechat']").on("click", function() {
+            $("a[name='btn-wechat']").on("click", function() {
                 //获取父元素第一个兄弟的text，就是id
                 let key = $(this).parent().siblings().first().text();
                 let appendId = $('#wechat-qrcode');
