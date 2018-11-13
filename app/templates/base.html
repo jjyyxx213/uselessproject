@@ -60,7 +60,11 @@
                             <img src="{{ url_for('static', filename='dist/img/user2-160x160.jpg') }}" class="user-image"
                                  alt="User Image">
                             <!-- hidden-xs hides the username on small devices so only the image appears. -->
-                            <span class="hidden-xs"> {{ user.name }}</span>
+                            {% if user.name %}
+                                <span class="hidden-xs"> {{ user.name }}</span>
+                            {% else %}
+                                <span class="hidden-xs"> 请登录 </span>
+                            {% endif %}
                         </a>
                         <ul class="dropdown-menu">
                             <!-- The user image in the menu -->
@@ -211,13 +215,17 @@
 <script>
     $(document).ready(function () {
         var tree = $(".treeview");
+        var label = $(".label");
         var fa = $("li");
         var t_id,t_obj;
         var li_id,li_obj;
+        var l_class,l_obj;
         {% if roles %}
-            //暂时放开
-            fa.removeClass("hide");
-            tree.removeClass("hide");
+            {% if debug == True %}
+                fa.removeClass("hide");
+                tree.removeClass("hide");
+                label.removeClass("hide");
+            {% endif %}
             {% for v in roles %}
                 {% if v.level == 1 %}
                     t_id = "{{ v.html_id }}";
@@ -229,11 +237,17 @@
                     li_obj = $("#"+li_id);
                     li_obj.removeClass("hide");
                 {% endif %}
+                {% if v.level == 3 %}
+                    l_class = "{{ v.html_id }}";
+                    l_obj = $("."+l_class);
+                    l_obj.removeClass("hide");
+                {% endif %}
             {% endfor %}
         {% else %}
             //暂时放开
             fa.removeClass("hide");
             tree.removeClass("hide");
+            label.removeClass("hide");
         {% endif %}
     })
 </script>

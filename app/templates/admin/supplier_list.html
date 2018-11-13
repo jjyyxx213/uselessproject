@@ -68,9 +68,9 @@
                                     <td>{{ v.remarks }}</td>
                                     <td>
                                         <a href="{{ url_for('admin.supplier_edit', id=v.id) }}"
-                                           class="label label-success">修改</a>
+                                           class="label supplier_edit hide label-success">修改</a>
                                         <a name="btn-block"
-                                           class="label label-danger">停用</a>
+                                           class="label supplier_stop hide label-danger">停用</a>
                                     </td>
                                 </tr>
                             {% endfor %}
