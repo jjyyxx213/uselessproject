@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 from functools import wraps
-from flask import abort, request, session, redirect, url_for
+from flask import abort, request, session, redirect, url_for, current_app
 from app.models import Auth, User, Role, Admin
 
 # 登录控制
@@ -20,7 +20,7 @@ def permission_required(f):
     def decorated_function(*args, **kwargs):
         # 如果是超管直接返回
         admin = Admin.query.filter_by(id=session['user_id']).first()
-        if admin is None:
+        if admin is None and current_app.config['DEBUG'] == False:
             # 如果不是,获取用户权限
             # 获取登录用户权限列表
             user = User.query.join(Role).filter(
