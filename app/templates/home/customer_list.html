@@ -75,7 +75,7 @@
                                     {% endif %}
                                     <td>{{ v.addtime }}</td>
                                     <td>
-                                        <a href="" name="btn-wechat" id="btn-wechat"
+                                        <a href="" name="btn-wechat"
                                            class="label label-default">微信</a>
                                         <a href="{{ url_for('home.customer_edit', id=v.id) }}" name="btn-edit"
                                            class="label label-success">修改</a>
@@ -145,7 +145,7 @@
                 }
             })
             // 微信绑定
-            $("#btn-wechat").on("click", function() {
+            $("button[name='btn-wechat']").on("click", function() {
                 //获取父元素第一个兄弟的text，就是id
                 let key = $(this).parent().siblings().first().text();
                 let appendId = $('#wechat-qrcode');

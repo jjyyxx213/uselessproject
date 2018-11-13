@@ -134,11 +134,11 @@ def qrcode_get():
         raise Exception(resp_json.get("errmsg"))
 
     ticket = resp_json.get('ticket')
-    data = []
     if ticket:
-        data = {"qrcode": '<img src="https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=%s">' % ticket}
+        data = {'qrcode': '<img src="https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=%s">' % ticket}
     else:
-        data = {"qrcode": u'<h4>没有获取到二维码信息</h4>'}
+        data = {'qrcode': u'<h4>没有获取到二维码信息</h4>'}
+    print (data)
     return dumps(data)
 
 
