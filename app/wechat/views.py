@@ -63,8 +63,10 @@ def index():
                         "MsgType": "text",
                         "Content": u"感谢您的关注！"
                     }
+                    # EventKey就是scene_id
                     if resp_dict.get('EventKey'):
-                        response["Content"] = u"可以的扫码保平安"
+                        response["Content"] += u"场景值是:"
+                        response["Content"] += resp_dict.get('EventKey')
                 elif resp_dict.get('Event') == 'SCAN':
                     # 当用户关注过又扫描二维码的时候,会进入到这儿
                     response = {
@@ -72,7 +74,7 @@ def index():
                         "FromUserName": resp_dict.get("ToUserName", ""),
                         "CreateTime": int(time()),
                         "MsgType": "text",
-                        "Content": u"大兄弟关注过了扫你妹儿？"
+                        "Content": resp_dict.get('EventKey')
                     }
                 # elif resp_dict.get('Event') == 'CLICK':
                 #     if resp_dict.get('EventKey') == 'QRCODE_GET':
@@ -114,7 +116,9 @@ def qrcode_get():
     :return: 微信二维码图片
     '''
     # 场景值ID，临时二维码时为32位非0整型，永久二维码时最大值为100000（目前参数只支持1--100000）
-    scene_id = request.args.get('id', 1)
+    scene_id = request.args.get('key', -1)
+    if scene_id == -1:
+        raise Exception(u"没有正确获取用户ID")
     access_token = AccessToken.get_access_token()
     url = "https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=%s" % access_token
     params = {
@@ -130,11 +134,12 @@ def qrcode_get():
         raise Exception(resp_json.get("errmsg"))
 
     ticket = resp_json.get('ticket')
-
     if ticket:
-        return '<img src="https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=%s">' % ticket
+        data = {'qrcode': '<img src="https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=%s">' % ticket}
     else:
-        return u'<h2>没有获取到二维码信息</h2>'
+        data = {'qrcode': u'<h4>没有获取到二维码信息</h4>'}
+    print (data)
+    return dumps(data)
 
 
 @wechat.route('/menu/add', methods=['GET'])

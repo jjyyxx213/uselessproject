@@ -440,8 +440,6 @@ class Customer(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     # 姓名
     name = db.Column(db.String(100), nullable=False)
-    # 微信昵称
-    name_wechat = db.Column(db.String(100))
     # 性别
     sex = db.Column(db.String(10))
     # 手机号
@@ -472,6 +470,10 @@ class Customer(db.Model):
     vip_id = db.Column(db.Integer, db.ForeignKey('tb_vip.id'))
     # 注册时间
     addtime = db.Column(db.DateTime, index=True, default=datetime.now)
+    # 微信openid
+    openid_wechat = db.Column(db.String(100))
+    # 微信昵称
+    name_wechat = db.Column(db.String(100))
 
     # 消费流水外键
     billings = db.relationship('Billing', backref='customer')
