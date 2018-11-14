@@ -81,16 +81,16 @@
                                     <td>{{ v.addtime }}</td>
                                     <td>
                                         <a href="{{ url_for('home.stock_buy_view', id=v.id) }}" name="btn-detail"
-                                           class="label label-info">明细</a>&nbsp
+                                           class="label stock-buy-view hide label-info">明细</a>&nbsp
                                         {% if v.status == 1 and v.user_id == user.id %}
                                         <a href="{{ url_for('home.stock_buy_debt', id=v.id) }}" name="btn-detail"
-                                           class="label label-warning">结款</a>&nbsp
+                                           class="label stock-buy-debt hide label-warning">结款</a>&nbsp
                                         {% endif %}
                                         {% if v.status == 0 and v.user_id == user.id %}
                                         <a href="{{ url_for('home.stock_buy_edit', id=v.id) }}" name="btn-edit"
-                                           class="label label-success">修改</a>&nbsp
+                                           class="label stock-buy-edit hide label-success">修改</a>&nbsp
                                         <a href="{{ url_for('home.stock_buy_del', id=v.id) }}" name="btn-stop"
-                                           class="label label-danger">删除</a>
+                                           class="label stock-buy-del hide label-danger">删除</a>
                                         {% endif %}
                                     </td>
                                 </tr>

@@ -76,19 +76,20 @@
                                     <td>{{ v.addtime }}</td>
                                     <td>
                                         <a name="btn-wechat"
-                                           class="label label-default">微信</a>
+                                           class="label customer-wechat hide label-default">微信</a>
                                         <a href="{{ url_for('home.customer_edit', id=v.id) }}" name="btn-edit"
-                                           class="label label-success">修改</a>
+                                           class="label customer-edit hide label-success">修改</a>
                                         {% if not v.vip_id %}
                                             <a href="{{ url_for('home.cus_vip_add', id=v.id) }}" name="btn-vipadd"
-                                               class="label label-danger">绑卡</a>
+                                               class="label cus-vip-add hide label-danger">绑卡</a>
                                         {% else %}
                                             <a href="{{ url_for('home.cus_vip_list', vip_id=v.vip_id) }}" name="btn-viplist"
-                                               class="label label-info">查询</a>
+                                               class="label cus-vip-list hide label-info">查询</a>
                                             <a href="{{ url_for('home.cus_vip_deposit', vip_id=v.vip_id) }}" name="btn-vipdeposit"
-                                               class="label label-warning">充值</a>
+                                               class="label cus-vip-deposit hide label-warning">充值</a>
                                             {% if (v.score - v.vip.scorelimit) > 0 %}
-                                                <a href="{{ url_for('home.cus_vip_update', vip_id=v.vip_id) }}" name="btn-vipupdate" class="label label-primary">升级</a>
+                                                <a href="{{ url_for('home.cus_vip_update', vip_id=v.vip_id) }}" name="btn-vipupdate"
+                                                   class="label cus-vip-update hide label-primary">升级</a>
                                             {% endif %}
                                         {% endif %}
                                     </td>
