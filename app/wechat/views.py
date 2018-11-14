@@ -135,7 +135,7 @@ def qrcode_get():
 
     ticket = resp_json.get('ticket')
     if ticket:
-        data = {'qrcode': '<img src="https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=%s">' % ticket}
+        data = {'qrcode': '<img src="https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=%s" style="width: 256px">' % ticket}
     else:
         data = {'qrcode': u'<h4>没有获取到二维码信息</h4>'}
     print (data)
