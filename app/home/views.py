@@ -358,7 +358,7 @@ def customer_edit(id=None):
     if form.validate_on_submit():
         province = request.form.get('province')
         pnumber = province + form.pnumber.data
-        if obj_customer.pnumber != form.pnumber.data and Customer.query.filter_by(pnumber=pnumber).first():
+        if obj_customer.pnumber != pnumber and Customer.query.filter_by(pnumber=pnumber).first():
             is_flag = False
             flash(u'您输入的车牌号已存在', 'err')
         if obj_customer.phone != form.phone.data and Customer.query.filter_by(phone=form.phone.data).first():
