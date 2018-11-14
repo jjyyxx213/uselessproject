@@ -75,7 +75,7 @@
                                     {% endif %}
                                     <td>{{ v.addtime }}</td>
                                     <td>
-                                        <a href="" name="btn-wechat"
+                                        <a name="btn-wechat"
                                            class="label label-default">微信</a>
                                         <a href="{{ url_for('home.customer_edit', id=v.id) }}" name="btn-edit"
                                            class="label label-success">修改</a>
@@ -110,16 +110,15 @@
             <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <i class="fa fa-wechat mr1em"></i><h4 class="modal-title" id="wechatModalLabel"> 顾客绑定微信</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                        <h2 class="modal-title" id="wechatModalLabel"><i class="fa fa-wechat mr1em"></i> 顾客绑定微信</h2>
                     </div>
                     <div class="modal-body">
-                        <p> 绑定方式1：让顾客打开微信，扫描下方二维码后关注公众号</p>
+                        <p> <strong>绑定方式：</strong>让顾客打开微信，扫描下方二维码后关注公众号</p>
                         <div class="box" id="wechat-qrcode">
-
                         </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal"> 关闭</button>
                     </div>
                 </div>
             </div>
@@ -147,10 +146,10 @@
             // 微信绑定
             $("a[name='btn-wechat']").on("click", function() {
                 //获取父元素第一个兄弟的text，就是id
-                let key = $(this).parent().siblings().first().text();
+                let customer_id = $(this).parent().siblings().first().text();
                 let appendId = $('#wechat-qrcode');
                 let url = "{{ url_for('wechat.qrcode_get') }}";
-                modal_wechat_qrcode(appendId, url, key);
+                modal_wechat_qrcode(appendId, url, customer_id);
                 //显示modal
                 $('#wechatModal').modal();
             });

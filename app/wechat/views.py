@@ -7,7 +7,8 @@ from time import time
 from urllib2 import urlopen
 from json import dumps, loads
 from flask import render_template, session, redirect, request, make_response, url_for, flash, current_app
-
+from app.models import Customer, Oplog
+from app import db
 
 @wechat.route('/', methods=['GET', 'POST'])
 def index():
@@ -64,29 +65,31 @@ def index():
                         "Content": u"感谢您的关注！"
                     }
                     # EventKey就是scene_id
-                    if resp_dict.get('EventKey'):
-                        response["Content"] += u"场景值是:"
-                        response["Content"] += resp_dict.get('EventKey')
+                    if resp_dict.get("EventKey"):
+                        id = (resp_dict.get("EventKey", "")).replace('qrscene_', '')
+                        openid = resp_dict.get("FromUserName", "")
+                        # 绑定客户和微信的关系
+                        message = u"感谢您的关注"
+                        if id and openid:
+                            customer_info = customer_bindwechat(id, openid)
+                            message = u"%s,你就是你~是颜色不一样的热翔" % customer_info["nickname"]
+                        response["Content"] = message
                 elif resp_dict.get('Event') == 'SCAN':
                     # 当用户关注过又扫描二维码的时候,会进入到这儿
+                    id = (resp_dict.get("EventKey", "")).replace('qrscene_', '')
+                    openid = resp_dict.get("FromUserName", "")
+                    # 绑定客户和微信的关系
+                    message = u"感谢您的关注"
+                    if id and openid:
+                        customer_info = customer_bindwechat(id, openid)
+                        message = u"%s,你就是你~是颜色不一样的热翔" % customer_info["nickname"]
                     response = {
                         "ToUserName": resp_dict.get("FromUserName", ""),
                         "FromUserName": resp_dict.get("ToUserName", ""),
                         "CreateTime": int(time()),
                         "MsgType": "text",
-                        "Content": resp_dict.get('EventKey')
+                        "Content": message
                     }
-                # elif resp_dict.get('Event') == 'CLICK':
-                #     if resp_dict.get('EventKey') == 'QRCODE_GET':
-                #         # 菜单 生成二维码
-                #         response = {
-                #             "ToUserName": resp_dict.get("FromUserName", ""),
-                #             "FromUserName": resp_dict.get("ToUserName", ""),
-                #             "CreateTime": int(time()),
-                #             "MsgType": "text",
-                #             "Content": u"没出来"
-                #         }
-                #         response["Content"] = qrcode_get()
                 else:
                     response = None
             else:
@@ -108,6 +111,35 @@ def index():
     else:
         return 'errno', 403
 
+def customer_bindwechat(id, openid):
+    '''
+    绑定客户和微信的关系
+    '''
+    # 获取客户基本信息
+    access_token = AccessToken.get_access_token()
+    url = "https://api.weixin.qq.com/cgi-bin/user/info?access_token=%s&openid=%s&lang=zh_CN" % (access_token, openid)
+    response = urlopen(url).read()
+    # 转换成字典
+    resp_json = loads(response)
+
+    if "errcode" in resp_json:
+        raise Exception(resp_json.get("errmsg"))
+
+    if resp_json.get("subscribe") == 0:
+        raise Exception(u'该用户未关注公众号，拉取不到基本信息')
+
+    customer = Customer.query.filter_by(id=id).first()
+    customer.openid_wechat = openid
+    customer.name_wechat = resp_json.get("nickname")
+    db.session.add(customer)
+    oplog = Oplog(
+        user_id=id,
+        ip=request.remote_addr,
+        reason=u'绑定客户:%s,微信:%s' % (customer.name, resp_json.get("nickname"))
+    )
+    db.session.add(oplog)
+    db.session.commit()
+    return resp_json
 
 @wechat.route('/qrcode/get', methods=['GET'])
 def qrcode_get():
@@ -135,7 +167,7 @@ def qrcode_get():
 
     ticket = resp_json.get('ticket')
     if ticket:
-        data = {'qrcode': '<img src="https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=%s">' % ticket}
+        data = {'qrcode': '<img src="https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=%s" style="width: 256px">' % ticket}
     else:
         data = {'qrcode': u'<h4>没有获取到二维码信息</h4>'}
     print (data)
