@@ -25,6 +25,7 @@ def index():
 
 @home.route('/summary/report', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def summary_report():
     form = IndexForm()
     # 收入总额
@@ -218,6 +219,7 @@ def pwd():
 
 @home.route('/item/list/<int:type>', methods=['GET'])
 @login_required
+@permission_required
 def item_list(type=0):
     # 商品/服务列表查询
     key = request.args.get('key', '')
@@ -241,6 +243,7 @@ def item_list(type=0):
 
 @home.route('/supplier/list', methods=['GET'])
 @login_required
+@permission_required
 def supplier_list():
     # 供应商列表查询
     key = request.args.get('key', '')
@@ -267,6 +270,7 @@ def supplier_list():
 
 @home.route('/customer/list', methods=['GET'])
 @login_required
+@permission_required
 def customer_list():
     # 客户列表
     key = request.args.get('key', '')
@@ -294,6 +298,7 @@ def customer_list():
 # 20180916 liuqq 新增客户
 @home.route('/customer/cus_add', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def customer_add():
     form = CustomerForm()
     is_flag = True
@@ -336,6 +341,7 @@ def customer_add():
 # 20180918 liuqq 修改客户信息
 @home.route('/customer/cus_edit/<int:id>', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def customer_edit(id=None):
     # 修改客户
     form = CustomerForm()
@@ -393,6 +399,7 @@ def customer_edit(id=None):
 # 20180920 liuqq 新增客户-会员卡
 @home.route('/customer/cus_vip_add/<int:id>', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def cus_vip_add(id=None):
     form = CusVipForm()
     obj_customer = Customer.query.filter_by(id=id).first()
@@ -510,6 +517,7 @@ def msdetails_get():
 # 20181007 liuqq 注销客户-会员卡
 @home.route('/customer/cus_vip_list/<int:vip_id>', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def cus_vip_list(vip_id=None):
     # 明细查看
     obj_customer = Customer.query.filter_by(vip_id=vip_id).first()
@@ -540,6 +548,7 @@ def cus_vip_list(vip_id=None):
 # 20181008 liuqq 客户-会员卡充值
 @home.route('/customer/cus_vip_deposit/<int:vip_id>', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def cus_vip_deposit(vip_id=None):
     form = CusVipDepositForm()
     obj_vip = Vip.query.filter_by(id=vip_id).first()
@@ -594,6 +603,7 @@ def cus_vip_deposit(vip_id=None):
 # 20181025 会员卡升级
 @home.route('/customer/cus_vip_update/<int:vip_id>', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def cus_vip_update(vip_id=None):
     form = CusVipForm()
     # 明细查看
@@ -988,6 +998,7 @@ def modal_stock():
 
 @home.route('/store/get', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def store_get():
     # 获取库房分页清单
     if request.method == 'POST':
@@ -1043,6 +1054,7 @@ def select_user():
 
 @home.route('/stock/list', methods=['GET'])
 @login_required
+@permission_required
 def stock_list():
     # 库存列表
     key = request.args.get('key', '')
@@ -1066,6 +1078,7 @@ def stock_list():
 
 @home.route('/stock/buy/list', methods=['GET'])
 @login_required
+@permission_required
 def stock_buy_list():
     # 采购单列表
     key = request.args.get('key', '')
@@ -1096,6 +1109,7 @@ def stock_buy_list():
 
 @home.route('/stock/buy/view/<int:id>', methods=['GET'])
 @login_required
+@permission_required
 def stock_buy_view(id=None):
     # 采购单明细查看
     porder = Porder.query.filter_by(id=id).first_or_404()
@@ -1104,6 +1118,7 @@ def stock_buy_view(id=None):
 
 @home.route('/stock/buy/debt/<int:id>', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def stock_buy_debt(id=None):
     # 结款
     form = StockBuyDebtForm()
@@ -1138,6 +1153,7 @@ def stock_buy_debt(id=None):
 
 @home.route('/stock/buy/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def stock_buy_edit(id=None):
     # 采购单
     form = StockBuyForm()
@@ -1294,6 +1310,7 @@ def stock_buy_edit(id=None):
 
 @home.route('/stock/buy/del/<int:id>', methods=['GET'])
 @login_required
+@permission_required
 def stock_buy_del(id=None):
     # 采购单删除
     porder = Porder.query.filter_by(id=id).first_or_404()
@@ -1313,6 +1330,7 @@ def stock_buy_del(id=None):
 
 @home.route('/stock/out/list', methods=['GET'])
 @login_required
+@permission_required
 def stock_out_list():
     # 领料单列表
     key = request.args.get('key', '')
@@ -1339,6 +1357,7 @@ def stock_out_list():
 
 @home.route('/stock/out/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def stock_out_edit(id=None):
     # 出库单
     form = StockOutForm()
@@ -1485,6 +1504,7 @@ def stock_out_edit(id=None):
 
 @home.route('/stock/out/del/<int:id>', methods=['GET'])
 @login_required
+@permission_required
 def stock_out_del(id=None):
     # 出库单删除
     porder = Porder.query.filter_by(id=id).first_or_404()
@@ -1504,6 +1524,7 @@ def stock_out_del(id=None):
 
 @home.route('/stock/out/view/<int:id>', methods=['GET'])
 @login_required
+@permission_required
 def stock_out_view(id=None):
     # 出库单明细查看
     porder = Porder.query.filter_by(id=id).first_or_404()
@@ -1512,6 +1533,7 @@ def stock_out_view(id=None):
 
 @home.route('/stock/allot/list', methods=['GET'])
 @login_required
+@permission_required
 def stock_allot_list():
     # 调拨单列表
     key = request.args.get('key', '')
@@ -1538,6 +1560,7 @@ def stock_allot_list():
 
 @home.route('/stock/allot/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def stock_allot_edit(id=None):
     # 调拨单
     form = StockAllotForm()
@@ -1711,6 +1734,7 @@ def stock_allot_edit(id=None):
 
 @home.route('/stock/allot/del/<int:id>', methods=['GET'])
 @login_required
+@permission_required
 def stock_allot_del(id=None):
     # 调拨单删除
     porder = Porder.query.filter_by(id=id).first_or_404()
@@ -1730,6 +1754,7 @@ def stock_allot_del(id=None):
 
 @home.route('/stock/allot/view/<int:id>', methods=['GET'])
 @login_required
+@permission_required
 def stock_allot_view(id=None):
     # 调拨单明细查看
     porder = Porder.query.filter_by(id=id).first_or_404()
@@ -1738,6 +1763,7 @@ def stock_allot_view(id=None):
 
 @home.route('/stock/loss/list', methods=['GET'])
 @login_required
+@permission_required
 def stock_loss_list():
     # 报损单列表
     key = request.args.get('key', '')
@@ -1764,6 +1790,7 @@ def stock_loss_list():
 
 @home.route('/stock/loss/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def stock_loss_edit(id=None):
     # 报损单
     form = StockLossForm()
@@ -1912,6 +1939,7 @@ def stock_loss_edit(id=None):
 
 @home.route('/stock/loss/del/<int:id>', methods=['GET'])
 @login_required
+@permission_required
 def stock_loss_del(id=None):
     # 报损单删除
     porder = Porder.query.filter_by(id=id).first_or_404()
@@ -1931,6 +1959,7 @@ def stock_loss_del(id=None):
 
 @home.route('/stock/loss/view/<int:id>', methods=['GET'])
 @login_required
+@permission_required
 def stock_loss_view(id=None):
     # 报损单明细查看
     porder = Porder.query.filter_by(id=id).first_or_404()
@@ -1939,6 +1968,7 @@ def stock_loss_view(id=None):
 
 @home.route('/stock/return/list', methods=['GET'])
 @login_required
+@permission_required
 def stock_return_list():
     # 退货单列表
     key = request.args.get('key', '')
@@ -1969,6 +1999,7 @@ def stock_return_list():
 
 @home.route('/stock/return/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def stock_return_edit(id=None):
     # 退货单
     form = StockReturnForm()
@@ -2128,6 +2159,7 @@ def stock_return_edit(id=None):
 
 @home.route('/stock/return/del/<int:id>', methods=['GET'])
 @login_required
+@permission_required
 def stock_return_del(id=None):
     # 退货单删除
     porder = Porder.query.filter_by(id=id).first_or_404()
@@ -2147,6 +2179,7 @@ def stock_return_del(id=None):
 
 @home.route('/stock/return/view/<int:id>', methods=['GET'])
 @login_required
+@permission_required
 def stock_return_view(id=None):
     # 退货单明细查看
     porder = Porder.query.filter_by(id=id).first_or_404()
@@ -2155,6 +2188,7 @@ def stock_return_view(id=None):
 
 @home.route('/stock/return/debt/<int:id>', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def stock_return_debt(id=None):
     # 退货单结款
     form = StockReturnDebtForm()
@@ -2188,6 +2222,7 @@ def stock_return_debt(id=None):
 
 @home.route('/stock/list/history/<int:id>', methods=['GET'])
 @login_required
+@permission_required
 def stock_list_history(id=None):
     # 历史
     key = request.args.get('key', '')
@@ -2213,6 +2248,7 @@ def stock_list_history(id=None):
 
 @home.route('/order/list', methods=['GET'])
 @login_required
+@permission_required
 def order_list():
     # 收银单列表
     key = request.args.get('key', '')
@@ -2249,6 +2285,7 @@ def order_list():
 
 @home.route('/order/edit/<string:id>', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def order_edit(id=None):
     # 收银单
     form = OrderForm()
@@ -2493,6 +2530,7 @@ def order_edit(id=None):
 
 @home.route('/order/del/<string:id>', methods=['GET'])
 @login_required
+@permission_required
 def order_del(id=None):
     # 收银单删除
     order = Order.query.filter_by(id=id).first_or_404()
@@ -2512,6 +2550,7 @@ def order_del(id=None):
 
 @home.route('/order/view/<string:id>', methods=['GET'])
 @login_required
+@permission_required
 def order_view(id=None):
     # 收银单明细查看
     order = Order.query.filter_by(id=id).first_or_404()
@@ -2520,6 +2559,7 @@ def order_view(id=None):
 
 @home.route('/order/debt/<string:id>', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def order_debt(id=None):
     # 收银单结款
     form = OrderDebtForm()
@@ -2587,6 +2627,7 @@ def order_debt(id=None):
 
 @home.route('/order/billing/<string:id>', methods=['GET'])
 @login_required
+@permission_required
 def order_billing(id=None):
     # 流水历史列表
     page = request.args.get('page', 1, type=int)
@@ -2599,6 +2640,7 @@ def order_billing(id=None):
 
 @home.route('/sales/report/', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def sales_report():
     # 收银报表
     page = request.args.get('page', 1, type=int)
@@ -2658,6 +2700,7 @@ def sales_report():
 #20181027 会员充值报表
 @home.route('/vips/report/', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def vips_report():
     # 收银报表
     page = request.args.get('page', 1, type=int)
@@ -2704,6 +2747,7 @@ def vips_report():
 #20181027 会员充值信息
 @home.route('/vips/report_list/', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def vips_report_list():
     # 获取会员充值信息
     if request.method == 'POST':
@@ -2737,6 +2781,7 @@ def vips_report_list():
 #20181029 收银报表信息
 @home.route('/sales/report_list/', methods=['GET', 'POST'])
 @login_required
+@permission_required
 def sales_report_list():
     # 获取收银报表信息
     if request.method == 'POST':

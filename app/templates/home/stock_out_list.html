@@ -61,12 +61,12 @@
                                     <td>{{ v.addtime }}</td>
                                     <td>
                                         <a href="{{ url_for('home.stock_out_view', id=v.id) }}" name="btn-detail"
-                                           class="label label-info">明细</a>&nbsp
+                                           class="label stock-out-view hide label-info">明细</a>&nbsp
                                         {% if v.status == 0 and v.user_id == user.id %}
                                         <a href="{{ url_for('home.stock_out_edit', id=v.id) }}" name="btn-edit"
-                                           class="label label-success">修改</a>&nbsp
+                                           class="label stock-out-edit hide label-success">修改</a>&nbsp
                                         <a href="{{ url_for('home.stock_out_del', id=v.id) }}" name="btn-stop"
-                                           class="label label-danger">删除</a>
+                                           class="label stock-out-del hide label-danger">删除</a>
                                         {% endif %}
                                     </td>
                                 </tr>
