@@ -9,6 +9,7 @@ from json import dumps, loads
 from flask import render_template, session, redirect, request, make_response, url_for, flash, current_app
 from app.models import Customer, Oplog
 from app import db
+from app.decorators import permission_required, login_required
 
 @wechat.route('/', methods=['GET', 'POST'])
 def index():
@@ -142,6 +143,7 @@ def customer_bindwechat(id, openid):
     return resp_json
 
 @wechat.route('/qrcode/get', methods=['GET'])
+@login_required
 def qrcode_get():
     '''
     获取微信二维码
@@ -175,6 +177,7 @@ def qrcode_get():
 
 
 @wechat.route('/menu/add', methods=['GET'])
+@login_required
 def menu_add():
     # 添加菜单
     access_token = AccessToken.get_access_token()
@@ -211,6 +214,7 @@ def menu_add():
         return u'<h2>菜单创建成功</h2>'
 
 @wechat.route('/menu/del', methods=['GET'])
+@login_required
 def menu_del():
     # 删除菜单
     access_token = AccessToken.get_access_token()
