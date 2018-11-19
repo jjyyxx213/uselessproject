@@ -19,6 +19,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='plugins/iCheck/square/blue.css') }}">
     {#  20181009  liuqq#}
     <link rel="stylesheet" href="{{ url_for('static', filename='bower_components//bootstrap-fileinput/css/fileinput.min.css') }}">
+    <!-- DataTables -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css') }}">
     <!--[if lt IE 9]>
     <script src="{{ url_for('static', filename='dist/js/html5shiv.js') }}"></script>
     <script src="{{ url_for('static', filename='dist/js/respond.js') }}"></script>
@@ -213,6 +215,9 @@
 {# 20181009 liuqq #}
 <script src="{{ url_for('static', filename='bower_components/bootstrap-fileinput/js/fileinput.min.js') }}"></script>
 <script src="{{ url_for('static', filename='bower_components/bootstrap-fileinput/js/locales/zh.js') }}"></script>
+<!-- DataTables -->
+<script src="{{ url_for('static', filename='bower_components/datatables.net/js/jquery.dataTables.min.js') }}"></script>
+<script src="{{ url_for('static', filename='bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js') }}"></script>
 <script>
     $(document).ready(function () {
         var tree = $(".treeview");

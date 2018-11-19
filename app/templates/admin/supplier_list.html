@@ -36,9 +36,10 @@
                             </div>
                         </div>
                     </div>
-                    <div class="box-body table-responsive no-padding">
-                        <table class="table table-striped table-hover">
-                            <tbody>
+
+                    <div class="box-body table-responsive no-padding" >
+                        <table id="supplier_list" class="table table-bordered table-striped">
+                            <thead>
                             <tr>
                                 <th> 编号</th>
                                 <th> 名称</th>
@@ -51,6 +52,9 @@
                                 <th> 备注</th>
                                 <th> 操作事项</th>
                             </tr>
+                            </thead>
+
+                            <tbody>
                             {% for v in pagination.items %}
                                 <tr>
                                     <td>{{ v.id }}</td>
@@ -77,11 +81,14 @@
                             </tbody>
                         </table>
                     </div>
+
+
                     <div class="box-footer clearfix">
                         <ul class="pagination pagination-sm no-margin pull-right">
                             {{ macros.pagination_widget(pagination, 'admin.supplier_list', key=key) }}
                         </ul>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -90,6 +97,54 @@
 
 {% block js %}
     <script>
+
+        $(function () {
+            $('#supplier_list').DataTable({
+                "language": {
+                    "processing": "加载中...",
+                    "lengthMenu": "显示 _MENU_ 项结果",
+                    "zeroRecords": "没有找到相应的结果",
+                    "info": "当前显示 _START_ 到 _END_ 条，共 _TOTAL_条记录",
+                    "infoEmpty": "第 0 至 0 项结果，共 0 项",
+                    "infoFiltered": "(由 _MAX_ 项结果过滤)",
+                    "infoPostFix": "",
+                    "search": "搜索:",
+                    "searchPlaceholder": "请输入要搜索内容...",
+                    "url": "",
+                    "thousands": "'",
+                    "emptyTable": "表中数据为空",
+                    "loadingRecords": "载入中...",
+                    "infoThousands": ",",
+                    "paginate": {
+                        "first": "首页",
+                        "previous": "上页",
+                        "next": "下页",
+                        "last": "末页"
+                    }
+                },
+                "searching": false, // 是否允许检索
+                "ordering": true,  // 是否允许排序
+                "info": false, // 是否显示情报 就是"当前显示1/100记录"这个信息
+                "paging": false, // 是否允许翻页，设成false，翻页按钮不显示
+                "scrollX": false, // 水平滚动条
+                "scrollY": false,  // 垂直滚动条
+                "lengthChange": false, //更改表的分页显示长度 默认true
+                "lengthMenu": [10, 25, 50, 75, 100], // 每页显示数选择下拉框内容
+                "pageLength": 50, // 每页的初期件数 用户可以操作lengthMenu上的值覆盖
+                //翻页按钮样式
+                // numbers:数字
+                // simple:前一页，后一页
+                // simple_numbers:前一页，后一页，数字
+                // full:第一页，前一页，后一页，最后页
+                // full_numbers:第一页，前一页，后一页，最后页，数字
+                // first_last_numbers:第一页，最后页，数字
+                "pagingType": "full_numbers",
+                "stripeClasses": ['strip1', 'strip2', 'strip3'], // 行样式应用 指定多个的话，第一行tr的class为strip1，第二行为strip2，第三行为strip3.
+                "autoWidth": true,  // 自动列宽
+                "processing": true // 是否表示 "processing" 加载中的信息，这个信息可以修改
+            });
+        })
+
         $(document).ready(function () {
             $("#g-option").addClass("active");
             $("#g-option-supplier").addClass("active");
