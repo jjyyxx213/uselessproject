@@ -584,3 +584,21 @@ class Odetail(db.Model):
     def __repr__(self):
         return '<Odetail %r>' % self.id
 
+# 微信素材
+class WechatMedia(db.Model):
+    __tablename__ = 'tb_wechatmedia'
+    # 编号
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    # 标题
+    title = db.Column(db.String(100), nullable=False)
+    # 类型
+    type = db.Column(db.String(40), nullable=False)
+    # 路径
+    file_path = db.Column(db.String(255))
+    # 微信url
+    url = db.Column(db.String(255))
+    # 上传时间
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
+
+    def __repr__(self):
+        return '<WechatMedia %r>' % self.title
