@@ -1125,6 +1125,38 @@ def supplier_get():
         else:
             return (None)
 
+    if request.method == 'GET':
+        # 获取json数据
+        obj_suppliers = Supplier.query.order_by(Supplier.id)
+        total = obj_suppliers.count()
+        if obj_suppliers:
+            s_json = []
+            valid = ''
+            for v in obj_suppliers:
+                dic = collections.OrderedDict()
+                if v.valid == 1:
+                    valid = '有效'
+                else:
+                    valid = '无效'
+                dic["id"] = v.id
+                dic["name"] = v.name
+                dic["contact"] = v.contact
+                dic["phone"] = v.phone
+                dic["tel"] = v.tel
+                dic["qq"] = v.qq
+                dic["address"] = v.address
+                dic["valid"] = valid
+                dic["remarks"] = v.remarks
+                dic["addtime"] = str(v.addtime)
+                s_json.append(dic)
+            res = {
+                "rows": s_json,
+                "total": total
+            }
+            return (dumps(res))
+        else:
+            return (None)
+
 
 # liuqq Excel打开
 def open_excel(file='file.xls'):
