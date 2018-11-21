@@ -4,12 +4,15 @@ from app.utils.utils import AccessToken
 from hashlib import sha1
 from xmltodict import parse, unparse
 from time import time
-from urllib2 import urlopen
+from urllib2 import urlopen, Request
 from json import dumps, loads
 from flask import render_template, session, redirect, request, make_response, url_for, flash, current_app
-from app.models import Customer, Oplog
+from app.models import Customer, Oplog, WechatMedia
 from app import db
 from app.decorators import permission_required, login_required
+from poster import encode
+from poster.streaminghttp import register_openers
+
 
 @wechat.route('/', methods=['GET', 'POST'])
 def index():
@@ -36,6 +39,7 @@ def index():
             #### 测试消息接口
             # 如果是文本消息
             if resp_dict.get('MsgType') == 'text':
+                upload_img(title=u"门店图片", img_path='venom.jpg')
                 response = {
                     "ToUserName": resp_dict.get('FromUserName'),
                     "FromUserName": resp_dict.get('ToUserName'),
@@ -168,11 +172,11 @@ def qrcode_get():
         raise Exception(resp_json.get("errmsg"))
 
     ticket = resp_json.get('ticket')
+    data = []
     if ticket:
         data = {'qrcode': '<img src="https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=%s" style="width: 256px">' % ticket}
     else:
         data = {'qrcode': u'<h4>没有获取到二维码信息</h4>'}
-    print (data)
     return dumps(data)
 
 
@@ -208,7 +212,7 @@ def menu_add():
     # 转换成字典
     resp_json = loads(response)
 
-    if resp_json.get("errcode") != 0:
+    if "errcode" in resp_json and resp_json.get("errcode") != 0:
         raise Exception(resp_json.get("errmsg"))
     else:
         return u'<h2>菜单创建成功</h2>'
@@ -223,7 +227,41 @@ def menu_del():
     # 转换成字典
     resp_json = loads(response)
 
-    if resp_json.get("errcode") != 0:
+    if "errcode" in resp_json and resp_json.get("errcode") != 0:
         raise Exception(resp_json.get("errmsg"))
     else:
         return u'<h2>菜单删除成功</h2>'
+
+
+def upload_img(title, img_path):
+    # 上传图片
+    access_token = AccessToken.get_access_token()
+    upload_url = "	https://api.weixin.qq.com/cgi-bin/media/uploadimg?access_token=%s" % access_token
+    # img_path = 'uploads/venom.jpg'
+    img_abspath = current_app.config['UPLOAD_DIR'] + img_path
+    open_file = open(img_abspath, "rb")
+    params = {
+        "media" : open_file
+    }
+    '''使用poster模仿post请求'''
+    register_openers()
+    post_data, post_headers = encode.multipart_encode(params)
+    request = Request(upload_url, post_data, post_headers)
+    response = urlopen(request).read()
+    # 转换成字典
+    resp_json = loads(response)
+    if "errcode" in resp_json:
+        raise Exception(resp_json.get("errmsg"))
+    else:
+        url = resp_json.get('url')
+        # 保存到WechatMedia
+        media = WechatMedia(
+            title=title,
+            type="image",
+            file_path=img_path,
+            url=url
+        )
+        db.session.add(media)
+        db.session.commit()
+    return
+
