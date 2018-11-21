@@ -4,13 +4,14 @@ from app.utils.utils import AccessToken
 from hashlib import sha1
 from xmltodict import parse, unparse
 from time import time
-from urllib2 import urlopen
+from urllib2 import urlopen, Request
 from json import dumps, loads
 from flask import render_template, session, redirect, request, make_response, url_for, flash, current_app
 from app.models import Customer, Oplog, WechatMedia
 from app import db
 from app.decorators import permission_required, login_required
-from base64 import b64encode
+from poster import encode
+from poster.streaminghttp import register_openers
 
 
 @wechat.route('/', methods=['GET', 'POST'])
@@ -171,11 +172,11 @@ def qrcode_get():
         raise Exception(resp_json.get("errmsg"))
 
     ticket = resp_json.get('ticket')
+    data = []
     if ticket:
         data = {'qrcode': '<img src="https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=%s" style="width: 256px">' % ticket}
     else:
         data = {'qrcode': u'<h4>没有获取到二维码信息</h4>'}
-    print (data)
     return dumps(data)
 
 
@@ -211,7 +212,7 @@ def menu_add():
     # 转换成字典
     resp_json = loads(response)
 
-    if resp_json.get("errcode") != 0:
+    if "errcode" in resp_json and resp_json.get("errcode") != 0:
         raise Exception(resp_json.get("errmsg"))
     else:
         return u'<h2>菜单创建成功</h2>'
@@ -226,16 +227,11 @@ def menu_del():
     # 转换成字典
     resp_json = loads(response)
 
-    if resp_json.get("errcode") != 0:
+    if "errcode" in resp_json and resp_json.get("errcode") != 0:
         raise Exception(resp_json.get("errmsg"))
     else:
         return u'<h2>菜单删除成功</h2>'
 
-def imageToStr(image):
-    with open(image,'rb') as f:
-        image_byte=b64encode(f.read())
-    image_str=image_byte.decode('ascii') #byte类型转换为str
-    return image_str
 
 def upload_img(title, img_path):
     # 上传图片
@@ -243,14 +239,18 @@ def upload_img(title, img_path):
     upload_url = "	https://api.weixin.qq.com/cgi-bin/media/uploadimg?access_token=%s" % access_token
     # img_path = 'uploads/venom.jpg'
     img_abspath = current_app.config['UPLOAD_DIR'] + img_path
-    # open_file = open(img_abspath, "rb")
+    open_file = open(img_abspath, "rb")
     params = {
-        "media" : imageToStr(img_abspath)
+        "media" : open_file
     }
-    response = urlopen(upload_url, data=dumps(params)).read()
+    '''使用poster模仿post请求'''
+    register_openers()
+    post_data, post_headers = encode.multipart_encode(params)
+    request = Request(upload_url, post_data, post_headers)
+    response = urlopen(request).read()
     # 转换成字典
     resp_json = loads(response)
-    if resp_json.get("errcode") != 0:
+    if "errcode" in resp_json:
         raise Exception(resp_json.get("errmsg"))
     else:
         url = resp_json.get('url')
@@ -261,14 +261,7 @@ def upload_img(title, img_path):
             file_path=img_path,
             url=url
         )
-        oplog = Oplog(
-            user_id=session['user_id'],
-            ip=request.remote_addr,
-            reason=u'上传图片素材:%s' % title
-        )
-        objects = [media, oplog]
-        db.session.add_all(objects)
+        db.session.add(media)
         db.session.commit()
-
-
+    return
 
