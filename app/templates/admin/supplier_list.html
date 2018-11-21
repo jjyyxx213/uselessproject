@@ -13,82 +13,22 @@
     <section class="content" id="showcontent">
         <div class="row">
             <div class="col-md-12">
-                <div class="box box-primary">
-                    <div class="box-header">
+                <div  class="box box-primary">
+                    <div  class="box-header">
                         <h3 class="box-title">
                             供应商列表
                         </h3>
-                        <div class="box-tools">
+                        <div id="toolbar" class="box-tools">
                             <div class="pull-left border-right">
                                 <input type="button" id="exportData" class="btn btn-primary btn-sm" value="导出"/>
-                                <a href="{{ url_for('admin.supplier_add') }}" class="btn btn-primary btn-sm" role="button">
-                                    添加</a>&nbsp;&nbsp;&nbsp;
-                            </div>
-                            <div class="input-group input-group-sm" style="width: 330px;">
-                                <input type="text" name="table_search" class="form-control pull-right"
-                                       placeholder="请输入关键字...  (名称/联系人/手机/电话/QQ/备注)" id="search_key" value="{{ key }}">
-
-                                <div class="input-group-btn">
-                                    <button type="submit" class="btn btn-default" id="do_search">
-                                        <i class="fa fa-search"></i>
-                                    </button>
-                                </div>
+                                <a href="{{ url_for('admin.supplier_add') }}" class="btn btn-primary btn-sm" role="button">添加</a>
                             </div>
                         </div>
                     </div>
 
                     <div class="box-body table-responsive no-padding" >
-                        <table id="supplier_list" class="table table-bordered table-striped">
-                            <thead>
-                            <tr>
-                                <th> 编号</th>
-                                <th> 名称</th>
-                                <th> 联络人</th>
-                                <th> 手机</th>
-                                <th> 联系电话</th>
-                                <th> QQ</th>
-                                <th> 地址</th>
-                                <th> 状态</th>
-                                <th> 备注</th>
-                                <th> 操作事项</th>
-                            </tr>
-                            </thead>
-
-                            <tbody>
-                            {% for v in pagination.items %}
-                                <tr>
-                                    <td>{{ v.id }}</td>
-                                    <td>{{ v.name }}</td>
-                                    <td>{{ v.contact }}</td>
-                                    <td>{{ v.phone }}</td>
-                                    <td>{{ v.tel }}</td>
-                                    <td>{{ v.qq }}</td>
-                                    <td>{{ v.address }}</td>
-                                    {% if v.valid == 1 %}
-                                        <td id="{{ v.id }}"> 有效</td>
-                                    {% else %}
-                                        <td id="{{ v.id }}" style="color: red"> 无效</td>
-                                    {% endif %}
-                                    <td>{{ v.remarks }}</td>
-                                    <td>
-                                        <a href="{{ url_for('admin.supplier_edit', id=v.id) }}"
-                                           class="label supplier_edit hide label-success">修改</a>
-                                        <a name="btn-block"
-                                           class="label supplier_stop hide label-danger">停用</a>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
+                        <table id="tb_departments"></table>
                     </div>
-
-
-                    <div class="box-footer clearfix">
-                        <ul class="pagination pagination-sm no-margin pull-right">
-                            {{ macros.pagination_widget(pagination, 'admin.supplier_list', key=key) }}
-                        </ul>
-                    </div>
-
                 </div>
             </div>
         </div>
@@ -97,55 +37,16 @@
 
 {% block js %}
     <script>
-
-        $(function () {
-            $('#supplier_list').DataTable({
-                "language": {
-                    "processing": "加载中...",
-                    "lengthMenu": "显示 _MENU_ 项结果",
-                    "zeroRecords": "没有找到相应的结果",
-                    "info": "当前显示 _START_ 到 _END_ 条，共 _TOTAL_条记录",
-                    "infoEmpty": "第 0 至 0 项结果，共 0 项",
-                    "infoFiltered": "(由 _MAX_ 项结果过滤)",
-                    "infoPostFix": "",
-                    "search": "搜索:",
-                    "searchPlaceholder": "请输入要搜索内容...",
-                    "url": "",
-                    "thousands": "'",
-                    "emptyTable": "表中数据为空",
-                    "loadingRecords": "载入中...",
-                    "infoThousands": ",",
-                    "paginate": {
-                        "first": "首页",
-                        "previous": "上页",
-                        "next": "下页",
-                        "last": "末页"
-                    }
-                },
-                "searching": false, // 是否允许检索
-                "ordering": true,  // 是否允许排序
-                "info": false, // 是否显示情报 就是"当前显示1/100记录"这个信息
-                "paging": false, // 是否允许翻页，设成false，翻页按钮不显示
-                "scrollX": false, // 水平滚动条
-                "scrollY": false,  // 垂直滚动条
-                "lengthChange": false, //更改表的分页显示长度 默认true
-                "lengthMenu": [10, 25, 50, 75, 100], // 每页显示数选择下拉框内容
-                "pageLength": 50, // 每页的初期件数 用户可以操作lengthMenu上的值覆盖
-                //翻页按钮样式
-                // numbers:数字
-                // simple:前一页，后一页
-                // simple_numbers:前一页，后一页，数字
-                // full:第一页，前一页，后一页，最后页
-                // full_numbers:第一页，前一页，后一页，最后页，数字
-                // first_last_numbers:第一页，最后页，数字
-                "pagingType": "full_numbers",
-                "stripeClasses": ['strip1', 'strip2', 'strip3'], // 行样式应用 指定多个的话，第一行tr的class为strip1，第二行为strip2，第三行为strip3.
-                "autoWidth": true,  // 自动列宽
-                "processing": true // 是否表示 "processing" 加载中的信息，这个信息可以修改
-            });
-        })
+        //当前点击行数据
+        var oRow = null;
+        //当前点击行索引
+        var oIndex = null;
 
         $(document).ready(function () {
+            //初始化Table
+            var oTable = new TableInit();
+            oTable.Init();
+
             $("#g-option").addClass("active");
             $("#g-option-supplier").addClass("active");
             // 搜索按钮
@@ -160,27 +61,29 @@
                     location.href = "{{ url_for('admin.supplier_list') }}?key=" + key;
                 }
             })
+
+
             // 供应商停用(使用post)
-            $("a[name='btn-block']").on("click", function () {
-                //获取父元素第一个兄弟的text，就是id
-                var supid = $(this).parent().siblings().first().text()
-                //var x = $(this).parent().siblings().eq(0).text()//eq(0)也可以
-                //获取状态，如果是失效直接返回不再提交
-                if ($("#" + supid).text() == "失效") {
+            $(".box-body").delegate(".supplier_stop","click",function(){
+                if (oRow.valid == "无效") {
                     return
                 }
                 $.ajax({
                     url: "{{ url_for('admin.supplier_block') }}",
                     type: "post",
                     data: {
-                        'supid': supid,
+                        'supid': oRow.id,
                     },
                     dataType: "json",
                     success: function (result) {
                         if (result.valid == 0) {
                             // 停用成功
-                            $("#" + supid).text("失效");
-                            $("#" + supid).css("color","red");
+                            var parameter = {
+                                index: oIndex,
+                                field: 'valid',
+                                value: '无效'
+                            };
+                            $('#tb_departments').bootstrapTable('updateCell', parameter);
                         }
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
@@ -189,7 +92,7 @@
                         }
                     }
                 })
-            })
+            });
 
             $("#exportData").click(function(){
                 //后台请求返回供应商列表
@@ -204,7 +107,6 @@
                             return;
                         }
                         else {
-                            {#var dataJson = JSON.parse(res);#}
                             JSONToExcelConvertor("供应商列表",res);
                         }
                     },
@@ -212,5 +114,114 @@
 
             });
         })
+
+        var TableInit = function () {
+            var oTableInit = new Object();
+            //初始化Table
+            oTableInit.Init = function () {
+                $('#tb_departments').bootstrapTable({
+                    url: '{{ url_for('admin.supplier_get') }}', //请求后台的URL（*）
+                    method: 'GET',                      //请求方式（*）
+                    toolbar: '#toolbar',                //工具按钮用哪个容器
+                    striped: true,                      //是否显示行间隔色
+                    cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                    pagination: true,                   //是否显示分页（*）
+                    //sortName: "id",                     //排序字段
+                    sortable: true,                     //是否启用排序
+                    sortOrder: "desc",                   //排序方式
+                    sidePagination: "client",           //分页方式：client客户端分页，server服务端分页（*）
+                    queryParams: oTableInit.queryParams,//传递参数（*）
+                    pageNumber: 1,                       //初始化加载第一页，默认第一页
+                    pageSize: 50,                       //每页的记录行数（*）
+                    pageList: [10, 25, 50, 100],        //可供选择的每页的行数（*）
+                    search: true,                       //是否显示表格搜索，此搜索是客户端搜索，不会进服务端，所以，个人感觉意义不大
+                    strictSearch: false,                //设置为 true启用全匹配搜索，否则为模糊搜索。
+                    showColumns: true,                  //是否显示所有的列
+                    showRefresh: true,                  //是否显示刷新按钮
+                    minimumCountColumns: 2,             //最少允许的列数
+                    clickToSelect: true,                //是否启用点击选中行
+                    height: 500,                        //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                    uniqueId: "ID",                     //每一行的唯一标识，一般为主键列
+                    showToggle: false,                    //是否显示详细视图和列表视图的切换按钮
+                    cardView: false,                    //是否显示详细视图
+                    detailView: false,                   //是否显示父子表
+                    onClickCell :function(field, value, row, $element) {
+                        oRow = row;
+                        oIndex = $element.parent().data('index');
+                    },
+                    columns: [ {
+                        field: 'id',
+                        title: '编号',
+                        valign: 'middle',
+                        sortable: true
+                    }, {
+                        field: 'name',
+                        title: '名称',
+                        sortable: true
+                    }, {
+                        field: 'contact',
+                        title: '联络人'
+                    }, {
+                        field: 'phone',
+                        title: '手机'
+                    }, {
+                        field: 'tel',
+                        title: '联系电话'
+                    }, {
+                        field: 'qq',
+                        title: 'QQ'
+                    }, {
+                        field: 'address',
+                        title: '地址',
+                        sortable: true
+                    }, {
+                        field: 'valid',
+                        title: '状态',
+                        sortable: true,
+                        cellStyle:function (value, row, index) {
+                            if (value =='无效'){
+                                return {css:{color:'#FF0000'}};
+                            }
+                            else{
+                                return {css:{color:'#000000'}};
+                            }
+                        }
+                    }, {
+                        field: 'remarks',
+                        title: '备注',
+                    }, {
+                        field: 'operate',
+                        title: '操作',
+                        formatter: operateFormatter //自定义方法，添加操作按钮
+                    },]
+                });
+            };
+
+            //得到查询的参数 暂时不用
+            oTableInit.queryParams = function (params) {
+                var temp = {
+                    rows: params.limit,                         //页面大小
+                    page: (params.offset / params.limit) + 1,   //页码
+                    sort: params.sort,      //排序列名
+                    sortOrder: params.order //排位命令（desc，asc）
+                };
+                return temp;
+            };
+            return oTableInit;
+        };
+
+        function operateFormatter(value, row, index) {//赋予的参数
+            var operation = "";
+            var roles = "{{ roles }}";
+            var debug = "{{ debug }}";
+
+            if ((roles.match('supplier_edit')||(debug == "True")) ){
+                operation += '<a href="/admin/supplier/edit/'+row.id+'" class="label label-success">修改</a>';
+            }
+            if ((roles.match('supplier_stop')||(debug == "True"))){
+                operation += '<a name="btn-block" class="label supplier_stop label-danger">停用</a>';
+            }
+            return operation;
+        }
     </script>
 {% endblock %}

@@ -21,6 +21,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='bower_components//bootstrap-fileinput/css/fileinput.min.css') }}">
     <!-- DataTables -->
     <link rel="stylesheet" href="{{ url_for('static', filename='bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css') }}">
+    <!-- bootstrapDataTables -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='bower_components/bootstrap-table/src/bootstrap-table.css') }}">
     <!--[if lt IE 9]>
     <script src="{{ url_for('static', filename='dist/js/html5shiv.js') }}"></script>
     <script src="{{ url_for('static', filename='dist/js/respond.js') }}"></script>
@@ -218,6 +220,10 @@
 <!-- DataTables -->
 <script src="{{ url_for('static', filename='bower_components/datatables.net/js/jquery.dataTables.min.js') }}"></script>
 <script src="{{ url_for('static', filename='bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js') }}"></script>
+<!-- BootStrapDataTables -->
+<script src="{{ url_for('static', filename='bower_components/bootstrap-table/src/bootstrap-table.js') }}"></script>
+<script src="{{ url_for('static', filename='bower_components/bootstrap-table/src/locale/bootstrap-table-zh-CN.js') }}"></script>
+{% block js %}{% endblock %}
 <script>
     $(document).ready(function () {
         var tree = $(".treeview");
@@ -257,7 +263,7 @@
         {% endif %}
     })
 </script>
-{% block js %}{% endblock %}
+
 <!-- Page script -->
 
 <!-- Optionally, you can add Slimscroll and FastClick plugins.
