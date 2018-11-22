@@ -602,3 +602,22 @@ class WechatMedia(db.Model):
 
     def __repr__(self):
         return '<WechatMedia %r>' % self.title
+
+# 微信门店
+class WechatPoi(db.Model):
+    __tablename__ = 'tb_wechatpoi'
+    # 编号
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    # 商户自己内部ID，即字段中的sid
+    uniqid = db.Column(db.String(100), nullable=False)
+    # 微信的门店ID，微信内门店唯一标示ID
+    poiid = db.Column(db.String(100))
+    # 审核结果 succ fail
+    result = db.Column(db.String(20))
+    # 审核成功或失败的消息
+    msg = db.Column(db.String(100))
+    # 添加时间
+    addtime = db.Column(db.DateTime, index=True, default=datetime.now)
+
+    def __repr__(self):
+        return '<WechatPoi %r>' % self.id

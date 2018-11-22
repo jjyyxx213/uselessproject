@@ -7,7 +7,7 @@ from time import time
 from urllib2 import urlopen, Request
 from json import dumps, loads
 from flask import render_template, session, redirect, request, make_response, url_for, flash, current_app
-from app.models import Customer, Oplog, WechatMedia
+from app.models import Customer, Oplog, WechatMedia, WechatPoi
 from app import db
 from app.decorators import permission_required, login_required
 from poster import encode
@@ -39,7 +39,8 @@ def index():
             #### 测试消息接口
             # 如果是文本消息
             if resp_dict.get('MsgType') == 'text':
-                upload_img(title=u"门店图片", img_path='venom.jpg')
+                # 测试上传图片
+                # upload_img(title=u"门店图片", img_path='venom.jpg')
                 response = {
                     "ToUserName": resp_dict.get('FromUserName'),
                     "FromUserName": resp_dict.get('ToUserName'),
@@ -95,6 +96,18 @@ def index():
                         "MsgType": "text",
                         "Content": message
                     }
+                elif resp_dict.get('Event') == 'poi_check_notify':
+                    # 门店创建审核事件
+                    uniq_id = resp_dict.get("UniqId", "")
+                    poi_id = resp_dict.get("PoiId", "")
+                    result = resp_dict.get("Result", "")
+                    msg = resp_dict.get("msg", "")
+                    wechatpoi = WechatPoi.query.filter_by(uniqid=uniq_id).first()
+                    wechatpoi.poiid = poi_id
+                    wechatpoi.result = result
+                    wechatpoi.msg = msg
+                    db.session.add(wechatpoi)
+                    db.session.commit()
                 else:
                     response = None
             else:
@@ -115,6 +128,7 @@ def index():
 
     else:
         return 'errno', 403
+
 
 def customer_bindwechat(id, openid):
     '''
@@ -146,6 +160,7 @@ def customer_bindwechat(id, openid):
     db.session.commit()
     return resp_json
 
+
 @wechat.route('/qrcode/get', methods=['GET'])
 @login_required
 def qrcode_get():
@@ -174,7 +189,8 @@ def qrcode_get():
     ticket = resp_json.get('ticket')
     data = []
     if ticket:
-        data = {'qrcode': '<img src="https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=%s" style="width: 256px">' % ticket}
+        data = {
+            'qrcode': '<img src="https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=%s" style="width: 256px">' % ticket}
     else:
         data = {'qrcode': u'<h4>没有获取到二维码信息</h4>'}
     return dumps(data)
@@ -217,6 +233,7 @@ def menu_add():
     else:
         return u'<h2>菜单创建成功</h2>'
 
+
 @wechat.route('/menu/del', methods=['GET'])
 @login_required
 def menu_del():
@@ -233,7 +250,7 @@ def menu_del():
         return u'<h2>菜单删除成功</h2>'
 
 
-def upload_img(title, img_path):
+def img_upload(title, img_path):
     # 上传图片
     access_token = AccessToken.get_access_token()
     upload_url = "	https://api.weixin.qq.com/cgi-bin/media/uploadimg?access_token=%s" % access_token
@@ -241,7 +258,7 @@ def upload_img(title, img_path):
     img_abspath = current_app.config['UPLOAD_DIR'] + img_path
     open_file = open(img_abspath, "rb")
     params = {
-        "media" : open_file
+        "media": open_file
     }
     '''使用poster模仿post请求'''
     register_openers()
@@ -265,3 +282,53 @@ def upload_img(title, img_path):
         db.session.commit()
     return
 
+
+@wechat.route('/poi/add', methods=['GET'])
+@login_required
+def poi_add():
+    # 新增门店信息(未测试无权限)
+    access_token = AccessToken.get_access_token()
+    url = "http://api.weixin.qq.com/cgi-bin/poi/addpoi?access_token=%s" % access_token
+    sid = "13333333333"
+    params = {
+        "business": {
+            "base_info": {
+                "sid": sid,
+                "business_name": "大鸡儿有限公司",
+                "branch_name": "大鸡儿有限公司(十堰店)",
+                "province": "湖北省",
+                "city": "十堰市",
+                "district": "茅箭区",
+                "address": "门店所在的详细街道地址",
+                "telephone": "13333333333",
+                "categories": ["汽车美容,贴膜"],
+                "offset_type": 1,
+                "longitude": 115.32375,
+                "latitude": 25.097486,
+                "photo_list": [{
+                    "photo_url": "http://mmbiz.qpic.cn/mmbiz_jpg/F8ERAG17ZlhKz2xu19GfZA1Gicu3N3l4wgmcbqiaviaScKou6d8ln52Gf7WoXOItP99BKWicEwg9icB3cCMMovllawQ/0"
+                }, {
+                    "photo_url": "http://mmbiz.qpic.cn/mmbiz_jpg/F8ERAG17ZlhKz2xu19GfZA1Gicu3N3l4wgmcbqiaviaScKou6d8ln52Gf7WoXOItP99BKWicEwg9icB3cCMMovllawQ/0"
+                }],
+                "recommend": "洗车，贴膜，按摩",
+                "special": "免费wifi，精油",
+                "introduction": "我，秦始皇！打钱",
+                "open_time": "9:00-17:00",
+                "avg_price": 2000
+            }
+        }
+    }
+    response = urlopen(url, data=dumps(params, ensure_ascii=False)).read()
+    # 转换成字典
+    resp_json = loads(response)
+
+    if "errcode" in resp_json and resp_json.get("errcode") != 0:
+        raise Exception(resp_json.get("errmsg"))
+    else:
+        # 保存到WechatPoi
+        media = WechatPoi(
+            uniqid=sid,
+        )
+        db.session.add(media)
+        db.session.commit()
+        return u'<h2>门店创建成功</h2>'
