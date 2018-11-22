@@ -1,5 +1,14 @@
 {% extends 'base.html' %}
-{% import 'ui/admin_page.html' as macros %}
+
+{% block css %}
+    <style>
+        .padding-defined {
+            padding-left: 8px;
+            padding-rigth: 8px;
+        }
+    </style>
+{% endblock %}
+
 {% block page_content %}
     <section class="content-header">
         <h1> 门店管理系统</h1>
@@ -26,7 +35,7 @@
                         </div>
                     </div>
 
-                    <div class="box-body table-responsive no-padding" >
+                    <div class="box-body table-responsive padding-defined" >
                         <table id="tb_departments"></table>
                     </div>
                 </div>
@@ -213,12 +222,11 @@
         function operateFormatter(value, row, index) {//赋予的参数
             var operation = "";
             var roles = "{{ roles }}";
-            var debug = "{{ debug }}";
-
-            if ((roles.match('supplier_edit')||(debug == "True")) ){
+            var admin = "{{ session.get('is_admin')}}";
+            if ((roles.match('supplier_edit')||(admin == "1")) ){
                 operation += '<a href="/admin/supplier/edit/'+row.id+'" class="label label-success">修改</a>';
             }
-            if ((roles.match('supplier_stop')||(debug == "True"))){
+            if ((roles.match('supplier_stop')||(admin == "1"))){
                 operation += '<a name="btn-block" class="label supplier_stop label-danger">停用</a>';
             }
             return operation;
