@@ -13,64 +13,11 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="box box-primary">
-                    <div class="box-header">
+                    <div class="box-header" id="toolbar">
                         <h3 class="box-title"> 员工列表</h3>
-                        <div class="box-tools">
-                            <div class="input-group input-group-sm" style="width: 150px;">
-                                <input type="text" name="table_search" class="form-control pull-right"
-                                       placeholder="请输入关键字..." id="search_key" value="{{ key }}">
-
-                                <div class="input-group-btn">
-                                    <button type="submit" class="btn btn-default" id="do_search">
-                                        <i class="fa fa-search"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
                     </div>
-                    <div class="box-body table-responsive no-padding">
-                        <table class="table table-striped table-hover">
-                            <tbody>
-                            <tr>
-                                <th> 编号</th>
-                                <th> 姓名</th>
-                                <th> 手机号</th>
-                                <th> 身份证号</th>
-                                <th> 底薪</th>
-                                <th> 角色</th>
-                                <th> 员工状态</th>
-                                <th> 添加时间</th>
-                                <th> 操作事项</th>
-                            </tr>
-                            {% for v in pagination.items %}
-                                <tr>
-                                    <td>{{ v.id }}</td>
-                                    <td>{{ v.name }}</td>
-                                    <td>{{ v.phone }}</td>
-                                    <td>{{ v.id_card }}</td>
-                                    <td>{{ v.salary }}</td>
-                                    <td>{{ v.role.name }}</td>
-                                    {% if v.frozen == 1 %}
-                                        <td id="{{ v.id }}">冻结</td>
-                                    {% else %}
-                                        <td id="{{ v.id }}">有效</td>
-                                    {% endif %}
-                                    <td>{{ v.addtime }}</td>
-                                    <td>
-                                        <a href="{{ url_for('admin.user_edit', id=v.id) }}" name="btn-unfrozen"
-                                           class="label user-edit hide label-success">修改</a>
-                                        <a name="btn-frozen"
-                                           class="label user-stop hide label-danger">冻结</a>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="box-footer clearfix">
-                        <ul class="pagination pagination-sm no-margin pull-right">
-                            {{ macros.pagination_widget(pagination, 'admin.user_list', key=key) }}
-                        </ul>
+                    <div class="box-body table-responsive padding-defined" >
+                        <table id="tb_users"></table>
                     </div>
                 </div>
             </div>
@@ -80,7 +27,15 @@
 
 {% block js %}
     <script>
+        //当前点击行数据
+        var oRow = null;
+        //当前点击行索引
+        var oIndex = null;
         $(document).ready(function () {
+            //初始化Table
+            var oTable = new TableInit();
+            oTable.Init();
+
             $("#g-user").addClass("active")
             $("#g-user-list").addClass("active")
             // 搜索按钮
@@ -95,30 +50,37 @@
                     location.href = "{{ url_for("admin.user_list") }}?key=" + key
                 }
             })
+
+
             // 员工冻结
-            $("a[name='btn-frozen']").on("click", function () {
-                //获取父元素第一个兄弟的text，就是id
-                var uid = $(this).parent().siblings().first().text()
-                //var x = $(this).parent().siblings().eq(0).text()//eq(0)也可以
-                //获取状态，如果是失效直接返回不再提交
-                if ($("#" + uid).text() == "失效") {
-                    console.log('success')
+            $(".box-body").delegate(".user_frozen","click",function(){
+                if (oRow.valid == "冻结") {
                     return
                 }
-                console.log('error')
                 $.ajax({
                     url: "{{ url_for('admin.user_frozen') }}",
                     type: "GET",
-                    data: "uid=" + uid,
+                    data: "uid=" + oRow.id,
                     dataType: "json",
                     success: function (result) {
                         if (result.frozen == 1) {
-                            // 冻结成功
-                            $("#" + uid).text("冻结")
+                            //冻结成功
+                            var parameter = {
+                                index: oIndex,
+                                field: 'frozen',
+                                value: '冻结'
+                            };
+                            $('#tb_users').bootstrapTable('updateCell', parameter);
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        if (errorThrown != 'abort') {
+                            alert('失败了，您操作的太频繁');
                         }
                     }
                 })
-            })
+            });
+
             // 员工解冻
             {#$("a[name='btn-unfrozen']").on("click", function () {#}
             {#    //获取父元素第一个兄弟的text，就是id#}
@@ -137,5 +99,103 @@
             {#    })})#}
 
         })
+        var TableInit = function () {
+            var oTableInit = new Object();
+            //初始化Table
+            oTableInit.Init = function () {
+                $('#tb_users').bootstrapTable({
+                    url: '{{ url_for('admin.user_list') }}', //请求后台的URL（*）
+                    method: 'POST',                      //请求方式（*）
+                    toolbar: '#toolbar',                //工具按钮用哪个容器
+                    striped: true,                      //是否显示行间隔色
+                    cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                    pagination: true,                   //是否显示分页（*）
+                    //sortName: "id",                     //排序字段
+                    sortable: true,                     //是否启用排序
+                    sortOrder: "desc",                   //排序方式
+                    sidePagination: "client",           //分页方式：client客户端分页，server服务端分页（*）
+                    //queryParams: oTableInit.queryParams,//传递参数（*）
+                    pageNumber: 1,                       //初始化加载第一页，默认第一页
+                    pageSize: 50,                       //每页的记录行数（*）
+                    pageList: [10, 25, 50, 100],        //可供选择的每页的行数（*）
+                    search: true,                       //是否显示表格搜索，此搜索是客户端搜索，不会进服务端，所以，个人感觉意义不大
+                    strictSearch: false,                //设置为 true启用全匹配搜索，否则为模糊搜索。
+                    showColumns: true,                  //是否显示所有的列
+                    showRefresh: true,                  //是否显示刷新按钮
+                    minimumCountColumns: 2,             //最少允许的列数
+                    clickToSelect: true,                //是否启用点击选中行
+                    height: 500,                        //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                    uniqueId: "ID",                     //每一行的唯一标识，一般为主键列
+                    showToggle: false,                    //是否显示详细视图和列表视图的切换按钮
+                    cardView: false,                    //是否显示详细视图
+                    detailView: false,                   //是否显示父子表
+                    onClickCell :function(field, value, row, $element) {
+                        oRow = row;
+                        oIndex = $element.parent().data('index');
+                    },
+                    columns: [ {
+                        field: 'id',
+                        title: '编号',
+                        valign: 'middle',
+                        sortable: true
+                    }, {
+                        field: 'name',
+                        title: '姓名',
+                        valign: 'middle',
+                        sortable: true
+                    }, {
+                        field: 'id_card',
+                        title: '身份证号',
+                        valign: 'middle'
+                    }, {
+                        field: 'salary',
+                        title: '底薪',
+                        valign: 'middle'
+                    }, {
+                        field: 'rolename',
+                        title: '角色',
+                        valign: 'middle'
+                    }, {
+                        field: 'frozen',
+                        title: '状态',
+                        valign: 'middle',
+                        sortable: true,
+                        cellStyle:function (value, row, index) {
+                            if (value =='冻结'){
+                                return {css:{color:'#FF0000'}};
+                            }
+                            else{
+                                return {css:{color:'#000000'}};
+                            }
+                        }
+                    }, {
+                        field: 'addtime',
+                        title: '添加时间',
+                        valign: 'middle',
+                        sortable: true
+                    }, {
+                        field: 'operate',
+                        title: '操作',
+                        valign: 'middle',
+                        formatter: operateFormatter //自定义方法，添加操作按钮
+                    },]
+                });
+            };
+
+            return oTableInit;
+        };
+
+        function operateFormatter(value, row, index) {//赋予的参数
+            var operation = "";
+            var roles = "{{ roles }}";
+            var admin = "{{ session.get('is_admin')}}";
+            if ((roles.match('user_edit')||(admin == "1")) ){
+                operation += '<a href="/admin/user/edit/'+row.id+'" class="label label-success">修改</a>';
+            }
+            if ((roles.match('user_frozen')||(admin == "1"))){
+                operation += '<a name="btn-frozen" class="label user_frozen label-danger">冻结</a>';
+            }
+            return operation;
+        }
     </script>
 {% endblock %}

@@ -404,25 +404,42 @@ def user_edit(id=None):
     return render_template('admin/user_edit.html', form=form)
 
 
-@admin.route('/user/list', methods=['GET'])
+@admin.route('/user/list', methods=['GET', 'POST'])
 @login_required
 @permission_required
 def user_list():
     # 员工列表
-    key = request.args.get('key', '')
-    page = request.args.get('page', 1, type=int)
-    pagination = User.query
-    # 如果查询了增加查询条件
-    if key:
-        pagination = pagination.filter(User.name.ilike('%' + key + '%'))
-    pagination = pagination.join(Role).filter(
-        Role.id == User.role_id
-    ).order_by(
-        User.addtime.desc()
-    ).paginate(page=page,
-               per_page=current_app.config['POSTS_PER_PAGE'],
-               error_out=False)
-    return render_template('admin/user_list.html', pagination=pagination, key=key)
+    if request.method == 'POST':
+        # 获取json数据
+        obj_users = User.query.order_by(User.id)
+        total = obj_users.count()
+        if obj_users:
+            s_json = []
+            frozen = ''
+            for v in obj_users:
+                dic = collections.OrderedDict()
+                if v.frozen == 1:
+                    frozen = '冻结'
+                else:
+                    frozen = '有效'
+                dic["id"] = v.id
+                dic["name"] = v.name
+                dic["phone"] = v.phone
+                dic["id_card"] = v.id_card
+                dic["salary"] = v.salary
+                dic["rolename"] = v.role.name
+                dic["frozen"] = frozen
+                dic["addtime"] = str(v.addtime)
+                s_json.append(dic)
+            res = {
+                "rows": s_json,
+                "total": total
+            }
+            return (dumps(res))
+        else:
+            return (None)
+
+    return render_template('admin/user_list.html')
 
 
 @admin.route('/user/frozen', methods=['GET'])
@@ -969,27 +986,7 @@ def item_block():
 @login_required
 @permission_required
 def supplier_list():
-    # 供应商列表
-    key = request.args.get('key', '')
-    page = request.args.get('page', 1, type=int)
-    pagination = Supplier.query
-    # 条件查询
-    if key:
-        # 名称/联系人/手机/电话/QQ/备注
-        pagination = pagination.filter(
-            or_(Supplier.name.ilike('%' + key + '%'),
-                Supplier.contact.ilike('%' + key + '%'),
-                Supplier.phone.ilike('%' + key + '%'),
-                Supplier.tel.ilike('%' + key + '%'),
-                Supplier.qq.ilike('%' + key + '%'),
-                Supplier.remarks.ilike('%' + key + '%'))
-        )
-    pagination = pagination.order_by(
-        Supplier.addtime.desc()
-    ).paginate(page=page,
-               per_page=current_app.config['POSTS_PER_PAGE'],
-               error_out=False)
-    return render_template('admin/supplier_list.html', type=type, pagination=pagination, key=key)
+    return render_template('admin/supplier_list.html')
 
 @admin.route('/supplier/add', methods=['GET', 'POST'])
 @login_required

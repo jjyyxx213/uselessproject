@@ -1,5 +1,14 @@
 {% extends 'base.html' %}
-{% import 'ui/admin_page.html' as macros %}
+
+{% block css %}
+    <style>
+        .padding-defined {
+            padding-left: 8px;
+            padding-rigth: 8px;
+        }
+    </style>
+{% endblock %}
+
 {% block page_content %}
     <section class="content-header">
         <h1> 门店管理系统</h1>
@@ -26,8 +35,8 @@
                         </div>
                     </div>
 
-                    <div class="box-body table-responsive no-padding" >
-                        <table id="tb_departments"></table>
+                    <div class="box-body table-responsive padding-defined" >
+                        <table id="tb_suppliers"></table>
                     </div>
                 </div>
             </div>
@@ -83,7 +92,7 @@
                                 field: 'valid',
                                 value: '无效'
                             };
-                            $('#tb_departments').bootstrapTable('updateCell', parameter);
+                            $('#tb_suppliers').bootstrapTable('updateCell', parameter);
                         }
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
@@ -119,7 +128,7 @@
             var oTableInit = new Object();
             //初始化Table
             oTableInit.Init = function () {
-                $('#tb_departments').bootstrapTable({
+                $('#tb_suppliers').bootstrapTable({
                     url: '{{ url_for('admin.supplier_get') }}', //请求后台的URL（*）
                     method: 'GET',                      //请求方式（*）
                     toolbar: '#toolbar',                //工具按钮用哪个容器
@@ -157,26 +166,33 @@
                     }, {
                         field: 'name',
                         title: '名称',
+                        valign: 'middle',
                         sortable: true
                     }, {
                         field: 'contact',
-                        title: '联络人'
+                        title: '联络人',
+                        valign: 'middle',
                     }, {
                         field: 'phone',
-                        title: '手机'
+                        title: '手机',
+                        valign: 'middle',
                     }, {
                         field: 'tel',
-                        title: '联系电话'
+                        title: '联系电话',
+                        valign: 'middle',
                     }, {
                         field: 'qq',
-                        title: 'QQ'
+                        title: 'QQ',
+                        valign: 'middle',
                     }, {
                         field: 'address',
                         title: '地址',
+                        valign: 'middle',
                         sortable: true
                     }, {
                         field: 'valid',
                         title: '状态',
+                        valign: 'middle',
                         sortable: true,
                         cellStyle:function (value, row, index) {
                             if (value =='无效'){
@@ -189,9 +205,11 @@
                     }, {
                         field: 'remarks',
                         title: '备注',
+                        valign: 'middle',
                     }, {
                         field: 'operate',
                         title: '操作',
+                        valign: 'middle',
                         formatter: operateFormatter //自定义方法，添加操作按钮
                     },]
                 });
@@ -213,12 +231,11 @@
         function operateFormatter(value, row, index) {//赋予的参数
             var operation = "";
             var roles = "{{ roles }}";
-            var debug = "{{ debug }}";
-
-            if ((roles.match('supplier_edit')||(debug == "True")) ){
+            var admin = "{{ session.get('is_admin')}}";
+            if ((roles.match('supplier_edit')||(admin == "1")) ){
                 operation += '<a href="/admin/supplier/edit/'+row.id+'" class="label label-success">修改</a>';
             }
-            if ((roles.match('supplier_stop')||(debug == "True"))){
+            if ((roles.match('supplier_stop')||(admin == "1"))){
                 operation += '<a name="btn-block" class="label supplier_stop label-danger">停用</a>';
             }
             return operation;
