@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-{% import 'ui/admin_page.html' as macros %}
 {% block page_content %}
     <section class="content-header">
         <h1> 门店管理系统</h1>
@@ -7,9 +6,9 @@
             <li><a href="#"><i class="fa fa-dashboard"></i> 设置</a></li>
             <li class="active">
                 {% if type == 0 %}
-                商品分类
+                    商品分类
                 {% else %}
-                服务项目分类
+                    服务项目分类
                 {% endif %}
             </li>
         </ol>
@@ -20,66 +19,22 @@
                 <div class="box box-primary">
                     <div class="box-header">
                         <h3 class="box-title">
-                        {% if type == 0 %}
-                         商品分类列表
-                        {% else %}
-                         服务项目分类列表
-                        {% endif %}
+                            {% if type == 0 %}
+                                商品分类列表
+                            {% else %}
+                                服务项目分类列表
+                            {% endif %}
                         </h3>
-                        <div class="box-tools">
+                        <div id="toolbar" class="box-tools">
                             <div class="pull-left border-right">
                                 <a href="{{ url_for('admin.category_add', type=type) }}" class="btn btn-primary btn-sm" role="button">
-                                    添加</a>&nbsp;&nbsp;&nbsp;
-                            </div>
-                            <div class="input-group input-group-sm" style="width: 150px;">
-                                <input type="text" name="table_search" class="form-control pull-right"
-                                       placeholder="请输入关键字..." id="search_key" value="{{ key }}">
-
-                                <div class="input-group-btn">
-                                    <button type="submit" class="btn btn-default" id="do_search">
-                                        <i class="fa fa-search"></i>
-                                    </button>
-                                </div>
+                                    添加</a>
                             </div>
                         </div>
                     </div>
-                    <div class="box-body table-responsive no-padding">
-                        <table class="table table-striped table-hover">
-                            <tbody>
-                            <tr>
-                                <th> 编号</th>
-                                <th> 名称</th>
-                                <th> 类别</th>
-                                <th> 备注</th>
-                                <th> 添加时间</th>
-                                <th> 操作事项</th>
-                            </tr>
-                            {% for v in pagination.items %}
-                                <tr>
-                                    <td>{{ v.id }}</td>
-                                    <td>{{ v.name }}</td>
-                                    {% if v.type == 0 %}
-                                    <td> 商品</td>
-                                    {% else %}
-                                    <td> 服务项目</td>
-                                    {% endif %}
-                                    <td>{{ v.remarks }}</td>
-                                    <td>{{ v.addtime }}</td>
-                                    <td>
-                                        <a href="{{ url_for('admin.category_edit', type=type, id=v.id, name=v.name) }}"
-                                           class="label category-edit hide label-success">修改</a>
-                                        <a href="{{ url_for('admin.category_del', type=type, id=v.id, name=v.name) }}"
-                                           class="label category-del hide label-danger">删除</a>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="box-footer clearfix">
-                        <ul class="pagination pagination-sm no-margin pull-right">
-                            {{ macros.pagination_widget(pagination, 'admin.category_list', type=type, key=key) }}
-                        </ul>
+
+                    <div class="box-body table-responsive" >
+                        <table id="tb_categorys"></table>
                     </div>
                 </div>
             </div>
@@ -89,7 +44,16 @@
 
 {% block js %}
     <script>
+        //当前点击行数据
+        var oRow = null;
+        //当前点击行索引
+        var oIndex = null;
+
         $(document).ready(function () {
+            //初始化Table
+            var oTable = new TableInit();
+            oTable.Init();
+
             $("#g-option").addClass("active");
             type = {{ type }};
             if (type == 0) {//商品
@@ -97,18 +61,90 @@
             }else{//服务项目
                 $("#g-option-category-service").addClass("active");
             }
-            // 搜索按钮
-            $("#do_search").click(function () {
-                var key = $("#search_key").val();
-                location.href = "{{ url_for('admin.category_list', type=type) }}?key=" + key;
-            })
-            $("#search_key").bind("keyup", function (event) {
-                if (event.keyCode == "13") {
-                    //回车执行查询
-                    var key = $("#search_key").val();
-                    location.href = "{{ url_for('admin.category_list',  type=type) }}?key=" + key;
-                }
-            })
+
         })
+
+        var TableInit = function () {
+            var oTableInit = new Object();
+            //初始化Table
+            oTableInit.Init = function () {
+                $('#tb_categorys').bootstrapTable({
+                    url: '{{ url_for('admin.category_list', type=type) }}', //请求后台的URL（*）
+                    method: 'POST',                      //请求方式（*）
+                    toolbar: '#toolbar',                //工具按钮用哪个容器
+                    striped: true,                      //是否显示行间隔色
+                    cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                    pagination: true,                   //是否显示分页（*）
+                    //sortName: "id",                     //排序字段
+                    sortable: true,                     //是否启用排序
+                    sortOrder: "desc",                   //排序方式
+                    sidePagination: "client",           //分页方式：client客户端分页，server服务端分页（*）
+                    queryParams: oTableInit.queryParams,//传递参数（*）
+                    pageNumber: 1,                       //初始化加载第一页，默认第一页
+                    pageSize: 50,                       //每页的记录行数（*）
+                    pageList: [10, 25, 50, 100],        //可供选择的每页的行数（*）
+                    search: true,                       //是否显示表格搜索，此搜索是客户端搜索，不会进服务端，所以，个人感觉意义不大
+                    strictSearch: false,                //设置为 true启用全匹配搜索，否则为模糊搜索。
+                    showColumns: true,                  //是否显示所有的列
+                    showRefresh: true,                  //是否显示刷新按钮
+                    minimumCountColumns: 2,             //最少允许的列数
+                    clickToSelect: true,                //是否启用点击选中行
+                    height: 500,                        //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                    uniqueId: "ID",                     //每一行的唯一标识，一般为主键列
+                    showToggle: false,                    //是否显示详细视图和列表视图的切换按钮
+                    cardView: false,                    //是否显示详细视图
+                    detailView: false,                   //是否显示父子表
+                    onClickCell :function(field, value, row, $element) {
+                        oRow = row;
+                        oIndex = $element.parent().data('index');
+                    },
+                    columns: [ {
+                        field: 'id',
+                        title: '编号',
+                        valign: 'middle',
+                        sortable: true
+                    }, {
+                        field: 'name',
+                        title: '名称',
+                        valign: 'middle',
+                        sortable: true
+                    }, {
+                        field: 'type',
+                        title: '类别',
+                        valign: 'middle',
+                    }, {
+                        field: 'remarks',
+                        title: '备注',
+                        valign: 'middle',
+                    }, {
+                        field: 'addtime',
+                        title: '添加时间',
+                        valign: 'middle',
+                        sortable: true
+                    }, {
+                        field: 'operate',
+                        title: '操作',
+                        valign: 'middle',
+                        formatter: operateFormatter //自定义方法，添加操作按钮
+                    },]
+                });
+            };
+
+            return oTableInit;
+        };
+
+        function operateFormatter(value, row, index) {//赋予的参数
+            var operation = "";
+            var roles = "{{ roles }}";
+            var admin = "{{ session.get('is_admin')}}";
+            var c_type= "{{ type }}";
+            if ((roles.match('category_edit')||(admin == "1")) ){
+                operation += '<a href="/admin/category/edit/'+c_type+'/'+row.id+'/'+row.name+'" class="label label-success">修改</a>';
+            }
+            if ((roles.match('category_del')||(admin == "1"))){
+                operation += '<a href="/admin/category/del/'+c_type+'/'+row.id+'/'+row.name+'" class="label label-danger">删除</a>';
+            }
+            return operation;
+        }
     </script>
 {% endblock %}

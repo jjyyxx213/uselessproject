@@ -1,14 +1,4 @@
 {% extends 'base.html' %}
-
-{% block css %}
-    <style>
-        .padding-defined {
-            padding-left: 8px;
-            padding-rigth: 8px;
-        }
-    </style>
-{% endblock %}
-
 {% block page_content %}
     <section class="content-header">
         <h1> 门店管理系统</h1>
@@ -47,18 +37,6 @@
 
             $("#g-is").addClass("active");
             $("#g-is-supplier").addClass("active");
-            // 搜索按钮
-            $("#do_search").click(function () {
-                var key = $("#search_key").val();
-                location.href = "{{ url_for('home.supplier_list') }}?key=" + key;
-            })
-            $("#search_key").bind("keyup", function (event) {
-                if (event.keyCode == "13") {
-                    //回车执行查询
-                    var key = $("#search_key").val();
-                    location.href = "{{ url_for('home.supplier_list') }}?key=" + key;
-                }
-            })
         })
 
         var TableInit = function () {
