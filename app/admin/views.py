@@ -750,27 +750,38 @@ def customer_list():
     return render_template('admin/customer_list.html', pagination=pagination, key=key)
 
 
-@admin.route('/category/list/<int:type>', methods=['GET'])
+@admin.route('/category/list/<int:type>', methods=['GET', 'POST'])
 @login_required
 @permission_required
 def category_list(type=0):
     # 商品/服务分类列表
-    key = request.args.get('key', '')
-    page = request.args.get('page', 1, type=int)
-    # type 0: item; 1: service
-    pagination = Category.query.filter_by(type=type)
-    # 如果查询了增加查询条件
-    if key:
-        # 名称查询
-        pagination = pagination.filter(
-            Category.name.ilike('%' + key + '%')
-        )
-    pagination = pagination.order_by(
-        Category.addtime.desc()
-    ).paginate(page=page,
-               per_page=current_app.config['POSTS_PER_PAGE'],
-               error_out=False)
-    return render_template('admin/category_list.html', type=type, pagination=pagination, key=key)
+    if request.method == 'POST':
+        # 获取json数据
+        obj_category = Category.query.filter_by(type=type).order_by(Category.addtime.desc())
+        total = obj_category.count()
+        if obj_category:
+            s_json = []
+            for v in obj_category:
+                dic = collections.OrderedDict()
+                if type == 0:
+                    c_type = '商品'
+                else:
+                    c_type = '服务项目'
+                dic["id"] = v.id
+                dic["name"] = v.name
+                dic["type"] = c_type
+                dic["remarks"] = v.remarks
+                dic["addtime"] = str(v.addtime)
+                s_json.append(dic)
+            res = {
+                "rows": s_json,
+                "total": total
+            }
+            return (dumps(res))
+        else:
+            return (None)
+
+    return render_template('admin/category_list.html', type=type)
 
 @admin.route('/category/add/<int:type>', methods=['GET', 'POST'])
 @login_required
@@ -857,29 +868,42 @@ def category_del(type=0, id=None, name=None):
     flash(u'分类删除成功', 'ok')
     return redirect(url_for('admin.category_list', type=type))
 
-@admin.route('/item/list/<int:type>', methods=['GET'])
+@admin.route('/item/list/<int:type>', methods=['GET', 'POST'])
 @login_required
 @permission_required
 def item_list(type=0):
     # 商品/服务列表高级权限
-    key = request.args.get('key', '')
-    page = request.args.get('page', 1, type=int)
-    # type 0: item; 1: service
-    pagination = Item.query.filter_by(type=type)
-    # 如果查询了增加查询条件
-    if key:
-        # 名称查询
-        pagination = pagination.filter(
-            or_(Item.name.ilike('%' + key + '%'),
-                Item.standard.ilike('%' + key + '%'),
-                Item.remarks.ilike('%' + key + '%'))
-        )
-    pagination = pagination.order_by(
-        Item.addtime.desc()
-    ).paginate(page=page,
-               per_page=current_app.config['POSTS_PER_PAGE'],
-               error_out=False)
-    return render_template('admin/item_list.html', type=type, pagination=pagination, key=key)
+    if request.method == 'POST':
+        # 获取json数据
+        obj_item = Item.query.filter_by(type=type).order_by(Item.addtime.desc())
+        total = obj_item.count()
+        if obj_item:
+            s_json = []
+            for v in obj_item:
+                dic = collections.OrderedDict()
+                if v.valid == 1:
+                    c_valid = '有效'
+                else:
+                    c_valid = '失效'
+                dic["id"] = v.id
+                dic["name"] = v.name
+                dic["salesprice"] = str(v.salesprice) + u'元'
+                dic["costprice"] = str(v.costprice) + u'元'
+                dic["rewardprice"] = str(v.rewardprice) + u'元'
+                dic["name"] = v.name
+                dic["valid"] = c_valid
+                dic["remarks"] = v.remarks
+                dic["addtime"] = str(v.addtime)
+                s_json.append(dic)
+            res = {
+                "rows": s_json,
+                "total": total
+            }
+            return (dumps(res))
+        else:
+            return (None)
+
+    return render_template('admin/item_list.html', type=type)
 
 @admin.route('/item/add/<int:type>', methods=['GET', 'POST'])
 @login_required
@@ -1407,25 +1431,26 @@ def modal_item():
     return dumps(res)
 
 #20181022 liuqq  数据字典查询
-@admin.route('/kvp/list', methods=['GET'])
+@admin.route('/kvp/list', methods=['GET', 'POST'])
 @login_required
 @permission_required
 def kvp_list():
     # 数据字典列表
-    key = request.args.get('key', '')
-    page = request.args.get('page', 1, type=int)
-    pagination = Kvp.query
-    # 条件查询
-    if key:
-        # 类型编码/值/添加时间
-        pagination = pagination.filter(
-            or_(Kvp.type.ilike('%' + key + '%'),
-                Kvp.value.ilike('%' + key + '%'),
-                Kvp.addtime.ilike('%' + key + '%'))
-        )
-    pagination = pagination.order_by(
-        Kvp.type.desc()
-    ).paginate(page=page,
-               per_page=current_app.config['POSTS_PER_PAGE'],
-               error_out=False)
-    return render_template('admin/kvp_list.html', type=type, pagination=pagination, key=key)
+    if request.method == 'POST':
+        # 获取json数据
+        obj_kvp = Kvp.query.order_by(Kvp.type)
+        total = obj_kvp.count()
+        if obj_kvp:
+            s_json = []
+            for v in obj_kvp:
+                dic = collections.OrderedDict()
+                dic["type"] = v.type
+                dic["value"] = v.value
+                dic["addtime"] = str(v.addtime)
+                s_json.append(dic)
+            res = {
+                "rows": s_json,
+                "total": total
+            }
+            return (dumps(res))
+    return render_template('admin/kvp_list.html')

@@ -246,26 +246,7 @@ def item_list(type=0):
 @permission_required
 def supplier_list():
     # 供应商列表查询
-    key = request.args.get('key', '')
-    page = request.args.get('page', 1, type=int)
-    pagination = Supplier.query
-    # 条件查询
-    if key:
-        # 名称/联系人/手机/电话/QQ/备注
-        pagination = pagination.filter(
-            or_(Supplier.name.ilike('%' + key + '%'),
-                Supplier.contact.ilike('%' + key + '%'),
-                Supplier.phone.ilike('%' + key + '%'),
-                Supplier.tel.ilike('%' + key + '%'),
-                Supplier.qq.ilike('%' + key + '%'),
-                Supplier.remarks.ilike('%' + key + '%'))
-        )
-    pagination = pagination.order_by(
-        Supplier.addtime.desc()
-    ).paginate(page=page,
-               per_page=current_app.config['POSTS_PER_PAGE'],
-               error_out=False)
-    return render_template('home/supplier_list.html', type=type, pagination=pagination, key=key)
+    return render_template('home/supplier_list.html')
 
 
 @home.route('/customer/list', methods=['GET'])
