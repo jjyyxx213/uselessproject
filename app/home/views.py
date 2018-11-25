@@ -222,24 +222,7 @@ def pwd():
 @permission_required
 def item_list(type=0):
     # 商品/服务列表查询
-    key = request.args.get('key', '')
-    page = request.args.get('page', 1, type=int)
-    # type 0: item; 1: service
-    pagination = Item.query.filter_by(type=type)
-    # 如果查询了增加查询条件
-    if key:
-        # 名称/规格/备注
-        pagination = pagination.filter(
-            or_(Item.name.ilike('%' + key + '%'),
-                Item.standard.ilike('%' + key + '%'),
-                Item.remarks.ilike('%' + key + '%'))
-        )
-    pagination = pagination.order_by(
-        Item.addtime.desc()
-    ).paginate(page=page,
-               per_page=current_app.config['POSTS_PER_PAGE'],
-               error_out=False)
-    return render_template('home/item_list.html', type=type, pagination=pagination, key=key)
+    return render_template('home/item_list.html', type=type)
 
 @home.route('/supplier/list', methods=['GET'])
 @login_required
@@ -249,31 +232,55 @@ def supplier_list():
     return render_template('home/supplier_list.html')
 
 
-@home.route('/customer/list', methods=['GET'])
+@home.route('/customer/list', methods=['GET', 'POST'])
 @login_required
 @permission_required
 def customer_list():
     # 客户列表
-    key = request.args.get('key', '')
-    page = request.args.get('page', 1, type=int)
-    pagination = Customer.query
-    # 如果查询了增加查询条件
-    if key:
-        # 姓名/手机/邮箱/车牌号查询
-        pagination = pagination.filter(
-            or_(Customer.name.ilike('%' + key + '%'),
-                Customer.phone.ilike('%' + key + '%'),
-                Customer.email.ilike('%' + key + '%'),
-                Customer.pnumber.ilike('%' + key + '%'))
-        )
-    pagination = pagination.join(User).filter(
-        User.id == Customer.user_id
-    ).order_by(
-        Customer.addtime.desc()
-    ).paginate(page=page,
-               per_page=current_app.config['POSTS_PER_PAGE'],
-               error_out=False)
-    return render_template('home/customer_list.html', pagination=pagination, key=key)
+    if request.method == 'POST':
+        # 获取json数据
+        obj_customers = Customer.query.order_by(Customer.addtime.desc())
+        total = obj_customers.count()
+        sex = ''
+        user_name = ''
+        vip_name = ''
+        if obj_customers:
+            s_json = []
+            for v in obj_customers:
+                if v.sex == 1:
+                    sex = '男'
+                else:
+                    sex = '女'
+                dic = collections.OrderedDict()
+                dic["id"] = v.id
+                dic["name"] = v.name
+                dic["sex"] = sex
+                dic["phone"] = v.phone
+                dic["freq"] = v.freq
+                dic["summary"] = v.summary
+                dic["pnumber"] = v.pnumber
+                dic["brand"] = v.brand
+                dic["vin"] = v.vin
+                dic["email"] = v.email
+                dic["user_name"] = v.user.name
+                if v.vip_id:
+                    dic["scorelimit"] = v.vip.scorelimit
+                    dic["score"] = v.score
+                    dic["vip_id"] = v.vip_id
+                    vip_name = v.vip.name
+                dic["vip_name"] = vip_name
+
+                dic["addtime"] = str(v.addtime)
+
+                s_json.append(dic)
+            res = {
+                "rows": s_json,
+                "total": total
+            }
+            return (dumps(res))
+        else:
+            return (None)
+    return render_template('home/customer_list.html')
 
 
 # 20180916 liuqq 新增客户
