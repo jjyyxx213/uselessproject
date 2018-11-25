@@ -521,23 +521,41 @@ def userloginlog_list():
     return render_template('admin/userloginlog_list.html', pagination=pagination, key=key)
 
 
-@admin.route('/mscard/list', methods=['GET'])
+@admin.route('/mscard/list', methods=['GET', 'POST'])
 @login_required
 @permission_required
 def mscard_list():
     # 会员卡列表
-    key = request.args.get('key', '')
-    page = request.args.get('page', 1, type=int)
-    pagination = Mscard.query
-    # 如果查询了增加查询条件
-    if key:
-        pagination = pagination.filter(Mscard.name.ilike('%' + key + '%'))
-    pagination = pagination.order_by(
-        Mscard.addtime.desc()
-    ).paginate(page=page,
-               per_page=current_app.config['POSTS_PER_PAGE'],
-               error_out=False)
-    return render_template('admin/mscard_list.html', pagination=pagination, key=key)
+    if request.method == 'POST':
+        # 获取json数据
+        obj_mscards = Mscard.query.order_by(Mscard.addtime.desc())
+        total = obj_mscards.count()
+        if obj_mscards:
+            s_json = []
+            valid = ''
+            for v in obj_mscards:
+                dic = collections.OrderedDict()
+                if v.valid == 1:
+                    valid = '有效'
+                else:
+                    valid = '失效'
+                dic["id"] = v.id
+                dic["name"] = v.name
+                dic["payment"] = v.payment
+                dic["interval"] = str(v.interval) + u'月'
+                dic["scorerule"] = v.scorerule
+                dic["scorelimit"] = v.scorelimit
+                dic["valid"] = valid
+                dic["addtime"] = str(v.addtime)
+                s_json.append(dic)
+            res = {
+                "rows": s_json,
+                "total": total
+            }
+            return (dumps(res))
+        else:
+            return (None)
+    return render_template('admin/mscard_list.html')
 
 
 @admin.route('/mscard/add', methods=['GET', 'POST'])
