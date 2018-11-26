@@ -1040,60 +1040,76 @@ def select_user():
         )
     return dumps(users)
 
-@home.route('/stock/list', methods=['GET'])
+@home.route('/stock/list', methods=['GET', 'POST'])
 @login_required
 @permission_required
 def stock_list():
     # 库存列表
-    key = request.args.get('key', '')
-    page = request.args.get('page', 1, type=int)
-    pagination = Stock.query.join(Item).filter(
-        Item.id == Stock.item_id
-    )
-    # 条件查询
-    if key:
-        # 库房/名称
-        pagination = pagination.filter(
-            or_(Stock.store.ilike('%' + key + '%'),
-                Item.name.ilike('%' + key + '%'))
-        )
-    pagination = pagination.order_by(
-        Item.name.asc()
-    ).paginate(page=page,
-               per_page=current_app.config['POSTS_PER_PAGE'],
-               error_out=False)
-    return render_template('home/stock_list.html', pagination=pagination, key=key)
+    if request.method == 'POST':
+        # 获取json数据
+        obj_stocks = Stock.query.join(Item).filter(Item.id == Stock.item_id).order_by(Item.name.asc())
+        total = obj_stocks.count()
+        if obj_stocks:
+            s_json = []
+            for v in obj_stocks:
+                dic = collections.OrderedDict()
+                dic["id"] = v.id
+                dic["store"] = v.store
+                dic["item_id"] = v.item.id
+                dic["name"] = v.item.name
+                dic["salesprice"] = v.item.salesprice
+                dic["unit"] = v.item.unit
+                dic["standard"] = v.item.standard
+                dic["qty"] = v.qty
+                s_json.append(dic)
+            res = {
+                "rows": s_json,
+                "total": total
+            }
+            return (dumps(res))
+        else:
+            return (None)
+    return render_template('home/stock_list.html')
 
-@home.route('/stock/buy/list', methods=['GET'])
+@home.route('/stock/buy/list', methods=['GET', 'POST'])
 @login_required
 @permission_required
 def stock_buy_list():
     # 采购单列表
-    key = request.args.get('key', '')
-    # 采购单状态 true 临时;false 全部
-    status = request.args.get('status', 'false')
-    # 是否欠款 true 欠;false 否
-    debt = request.args.get('debt', 'false')
-    page = request.args.get('page', 1, type=int)
-    pagination = Porder.query.filter_by(type=0)
-    # 条件查询
-    if key:
-        # 单号/备注
-        pagination = pagination.filter(
-            or_(Porder.id.ilike('%' + key + '%'),
-                Porder.remarks.ilike('%' + key + '%'),
-                Porder.addtime.ilike('%' + key + '%'))
-        )
-    if status == 'true':
-        pagination = pagination.filter(Porder.status == 0)
-    if debt == 'true':
-        pagination = pagination.filter(Porder.debt > 0)
-    pagination = pagination.order_by(
-        Porder.addtime.desc()
-    ).paginate(page=page,
-               per_page=current_app.config['POSTS_PER_PAGE'],
-               error_out=False)
-    return render_template('home/stock_buy_list.html', pagination=pagination, key=key, status=status, debt=debt)
+    if request.method == 'POST':
+        # 获取json数据
+        obj_buy_list = Porder.query.filter_by(type=0).order_by(Porder.addtime.desc())
+        total = obj_buy_list.count()
+        if obj_buy_list:
+            s_json = []
+            s_status = ''
+            for v in obj_buy_list:
+                if v.status == 0:
+                    s_status = u'临时'
+                else:
+                    s_status = u'正式'
+                dic = collections.OrderedDict()
+                dic["id"] = v.id
+                dic["user_name"] = v.user.name
+                dic["user_id"] = v.user.id
+                dic["supplier_name"] = v.supplier.name
+                dic["status"] = s_status
+                dic["amount"] = v.amount
+                dic["discount"] = v.discount
+                dic["payment"] = v.payment
+                dic["debt"] = v.debt
+                dic["remarks"] = v.remarks
+                dic["addtime"] = str(v.addtime)
+                s_json.append(dic)
+            res = {
+                "rows": s_json,
+                "total": total
+            }
+            return (dumps(res))
+        else:
+            return (None)
+    return render_template('home/stock_buy_list.html')
+
 
 @home.route('/stock/buy/view/<int:id>', methods=['GET'])
 @login_required
@@ -2208,31 +2224,49 @@ def stock_return_debt(id=None):
         return redirect(url_for('home.stock_return_list'))
     return render_template('home/stock_return_debt.html', form=form, porder=porder)
 
-@home.route('/stock/list/history/<int:id>', methods=['GET'])
+@home.route('/stock/list/history/<int:id>', methods=['GET', 'POST'])
 @login_required
 @permission_required
 def stock_list_history(id=None):
     # 历史
-    key = request.args.get('key', '')
-    page = request.args.get('page', 1, type=int)
-    pagination = db.session.query(Porder, Podetail).filter(
-        Porder.id == Podetail.porder_id,
-        Porder.status == 1,
-        Podetail.item_id == id,
-        )
-    # 条件查询
-    if key:
-        # 单号/备注
-        pagination = pagination.filter(
-            or_(Porder.remarks.ilike('%' + key + '%'),
-                Porder.addtime.ilike('%' + key + '%'))
-        )
-    pagination = pagination.order_by(
-        Porder.addtime.desc()
-    ).paginate(page=page,
-               per_page=current_app.config['POSTS_PER_PAGE'],
-               error_out=False)
-    return render_template('home/stock_list_history.html', pagination=pagination, key=key, id=id)
+    if request.method == 'POST':
+        # 获取json数据
+        obj_stock_his = db.session.query(Porder, Podetail).filter(Porder.id == Podetail.porder_id,Porder.status == 1,
+                                                                  Podetail.item_id == id,).order_by(Porder.addtime.desc())
+        total = obj_stock_his.count()
+        s_porder_type = ''
+        if obj_stock_his:
+            s_json = []
+            for v in obj_stock_his:
+                if v.Porder.type == 0:
+                    s_porder_type = u'采购单'
+                elif v.Porder.type == 1:
+                    s_porder_type = u'领料单'
+                elif v.Porder.type == 2:
+                    s_porder_type = u'调拨单'
+                elif v.Porder.type == 3:
+                    s_porder_type = u'报损单'
+                else:
+                    s_porder_type = u'退货单'
+                dic = collections.OrderedDict()
+                dic["id"] = v.Porder.id
+                dic["porder_type"] = s_porder_type
+                dic["supplier_name"] = v.Porder.supplier.name
+                dic["item_name"] = v.Podetail.item.name
+                dic["qty"] = v.Podetail.qty
+                dic["costprice"] = v.Podetail.costprice
+                dic["ostore"] = v.Podetail.ostore
+                dic["nstore"] = v.Podetail.nstore
+                dic["addtime"] = str(v.Porder.addtime)
+                s_json.append(dic)
+            res = {
+                "rows": s_json,
+                "total": total
+            }
+            return (dumps(res))
+        else:
+            return (None)
+    return render_template('home/stock_list_history.html', id=id)
 
 @home.route('/order/list', methods=['GET'])
 @login_required

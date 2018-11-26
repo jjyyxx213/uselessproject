@@ -215,7 +215,6 @@
             var operation = "";
             var roles = "{{ roles }}";
             var admin = "{{ session.get('is_admin')}}";
-            var c_type= "{{ type }}";
             if ((roles.match('customer_wechat')||(admin == "1")) ){
                 operation += '<a name="btn-wechat" class="label customer-wechat label-default">微信</a>';
             }
