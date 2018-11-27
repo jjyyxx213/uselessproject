@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-{% import 'ui/admin_page.html' as macros %}
 {% block page_content %}
     <section class="content-header">
         <h1> 门店管理系统</h1>
@@ -14,70 +13,15 @@
                 <div class="box box-primary">
                     <div class="box-header">
                         <h3 class="box-title"> 出库单列表</h3>
-                        <div class="box-tools">
+                        <div id="toolbar" class="box-tools">
                             <div class="pull-left border-right">
                                 <a href="{{ url_for('home.stock_out_edit', id=0) }}" class="btn btn-primary btn-sm" role="button">
-                                    添加</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                <label for="input_name">临时 </label>
-                                <input type="checkbox" id="status_check"
-                                {% if status == 'true' %}
-                                        checked
-                                {% endif %}
-                                >&nbsp;&nbsp;&nbsp;
-                            </div>
-                            <div class="input-group input-group-sm" style="width: 250px;">
-                                <input type="text" name="table_search" class="form-control pull-right"
-                                       placeholder="请输入关键字...  (单号/备注/日期)" id="search_key" value="{{ key }}">
-
-                                <div class="input-group-btn">
-                                    <button type="submit" class="btn btn-default" id="do_search">
-                                        <i class="fa fa-search"></i>
-                                    </button>
-                                </div>
+                                    添加</a>
                             </div>
                         </div>
                     </div>
-                    <div class="box-body table-responsive no-padding">
-                        <table id="ex1" class="table table-striped table-hover">
-                            <tbody>
-                            <tr>
-                                <th> 编号</th>
-                                <th> 出库员</th>
-                                <th> 状态</th>
-                                <th> 备注</th>
-                                <th> 添加时间</th>
-                                <th> 操作方式</th>
-                            </tr>
-                            {% for v in pagination.items %}
-                                <tr>
-                                    <td>{{ v.id }}</td>
-                                    <td>{{ v.user.name }}</td>
-                                    {% if v.status == 0 %}
-                                    <td style="color: red">临时</td>
-                                    {% else %}
-                                    <td>正式</td>
-                                    {% endif %}
-                                    <td>{{ v.remarks }}</td>
-                                    <td>{{ v.addtime }}</td>
-                                    <td>
-                                        <a href="{{ url_for('home.stock_out_view', id=v.id) }}" name="btn-detail"
-                                           class="label stock-out-view hide label-info">明细</a>&nbsp
-                                        {% if v.status == 0 and v.user_id == user.id %}
-                                        <a href="{{ url_for('home.stock_out_edit', id=v.id) }}" name="btn-edit"
-                                           class="label stock-out-edit hide label-success">修改</a>&nbsp
-                                        <a href="{{ url_for('home.stock_out_del', id=v.id) }}" name="btn-stop"
-                                           class="label stock-out-del hide label-danger">删除</a>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="box-footer clearfix">
-                        <ul class="pagination pagination-sm no-margin pull-right">
-                            {{ macros.pagination_widget(pagination, 'home.stock_out_list', key=key, status=status) }}
-                        </ul>
+                    <div class="box-body table-responsive" >
+                        <table id="tb_out_list"></table>
                     </div>
                 </div>
             </div>
@@ -87,28 +31,109 @@
 
 {% block js %}
     <script>
+        //当前点击行数据
+        var oRow = null;
+        //当前点击行索引
+        var oIndex = null;
+
         $(document).ready(function () {
+            //初始化Table
+            var oTable = new TableInit();
+            oTable.Init();
+
             $("#g-stock").addClass("active");
             $("#g-stock-out-list").addClass("active");
-            //只要遇到radio,checkbox 直接转换为icheck
-            $('input[type="checkbox"], input[type="radio"]').iCheck({
-                checkboxClass: 'icheckbox_square-blue',
-                radioClass: 'iradio_square-blue',
-            });
-            // 搜索按钮
-            $("#do_search").click(function () {
-                var key = $("#search_key").val();
-                var status_check = $("#status_check").is(':checked');
-                location.href = "{{ url_for('home.stock_out_list') }}?key=" + key + "&status=" + status_check;
-            })
-            $("#search_key").bind("keyup", function (event) {
-                if (event.keyCode == "13") {
-                    //回车执行查询
-                    var key = $("#search_key").val();
-                    var status_check = $("#status_check").is(':checked');
-                    location.href = "{{ url_for('home.stock_out_list') }}?key=" + key + "&status=" + status_check;
-                }
-            })
         })
+
+        var TableInit = function () {
+            var oTableInit = new Object();
+            //初始化Table
+            oTableInit.Init = function () {
+                $('#tb_out_list').bootstrapTable({
+                    url: '{{ url_for('home.stock_out_list') }}', //请求后台的URL（*）
+                    method: 'POST',                      //请求方式（*）
+                    toolbar: '#toolbar',                //工具按钮用哪个容器
+                    striped: true,                      //是否显示行间隔色
+                    cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                    pagination: true,                   //是否显示分页（*）
+                    //sortName: "id",                     //排序字段
+                    sortable: true,                     //是否启用排序
+                    sortOrder: "desc",                   //排序方式
+                    sidePagination: "client",           //分页方式：client客户端分页，server服务端分页（*）
+                    queryParams: oTableInit.queryParams,//传递参数（*）
+                    pageNumber: 1,                       //初始化加载第一页，默认第一页
+                    pageSize: 50,                       //每页的记录行数（*）
+                    pageList: [10, 25, 50, 100],        //可供选择的每页的行数（*）
+                    search: true,                       //是否显示表格搜索，此搜索是客户端搜索，不会进服务端，所以，个人感觉意义不大
+                    strictSearch: false,                //设置为 true启用全匹配搜索，否则为模糊搜索。
+                    showColumns: true,                  //是否显示所有的列
+                    showRefresh: true,                  //是否显示刷新按钮
+                    minimumCountColumns: 2,             //最少允许的列数
+                    clickToSelect: true,                //是否启用点击选中行
+                    height: 500,                        //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                    uniqueId: "ID",                     //每一行的唯一标识，一般为主键列
+                    showToggle: false,                    //是否显示详细视图和列表视图的切换按钮
+                    cardView: false,                    //是否显示详细视图
+                    detailView: false,                   //是否显示父子表
+                    onClickCell :function(field, value, row, $element) {
+                        oRow = row;
+                        oIndex = $element.parent().data('index');
+                    },
+                    columns: [ {
+                        field: 'id',
+                        title: '编号',
+                        valign: 'middle',
+                        sortable: true
+                    }, {
+                        field: 'user_name',
+                        title: '出库员',
+                        valign: 'middle',
+                        sortable: true
+                    }, {
+                        field: 'status',
+                        title: '状态',
+                        valign: 'middle',
+                        sortable: true
+                    }, {
+                        field: 'remarks',
+                        title: '备注',
+                        valign: 'middle',
+                        sortable: true
+                    }, {
+                        field: 'addtime',
+                        title: '添加时间',
+                        valign: 'middle',
+                        sortable: true
+                    }, {
+                        field: 'operate',
+                        title: '操作',
+                        valign: 'middle',
+                        formatter: operateFormatter //自定义方法，添加操作按钮
+                    },]
+                });
+            };
+
+            return oTableInit;
+        };
+
+        function operateFormatter(value, row, index) {//赋予的参数
+            var operation = "";
+            var roles = "{{ roles }}";
+            var admin = "{{ session.get('is_admin')}}";
+            var user_id = "{{ session.get('user_id') }}";
+            if ((roles.match('stock_out_view')||(admin == "1"))){
+                operation += '<a href="/stock/out/view/'+row.id+'" class="label label-info">明细</a>';
+            }
+            if((row.status == "临时")&&(row.user_id == user_id)){
+                if ((roles.match('stock_out_edit')||(admin == "1"))){
+                    operation += '<a href="/stock/out/edit/'+row.id+'" class="label label-success">修改</a>';
+                }
+                if ((roles.match('stock_out_del')||(admin == "1"))){
+                    operation += '<a href="/stock/out/del/'+row.id+'" class="label label-danger">删除</a>';
+                }
+            }
+
+            return operation;
+        }
     </script>
 {% endblock %}

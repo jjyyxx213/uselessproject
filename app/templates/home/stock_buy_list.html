@@ -23,48 +23,6 @@
                     <div class="box-body table-responsive" >
                         <table id="tb_buy_list"></table>
                     </div>
-                    {#                    <div class="box-body table-responsive no-padding">#}
-                    {#                        <table id="ex1" class="table table-striped table-hover">#}
-                    {#                            <tbody>#}
-                    {#                            <tr>#}
-                    {#                                <th> 编号</th>#}
-                    {#                                <th> 采购员</th>#}
-                    {#                                <th> 供应商</th>#}
-                    {#                                <th> 状态</th>#}
-                    {#                                <th> 应付金额</th>#}
-                    {#                                <th> 优惠后金额</th>#}
-                    {#                                <th> 付款金额</th>#}
-                    {#                                <th> 欠款</th>#}
-                    {#                                <th> 备注</th>#}
-                    {#                                <th> 添加时间</th>#}
-                    {#                                <th> 操作方式</th>#}
-                    {#                            </tr>#}
-                    {#                            {% for v in pagination.items %}#}
-                    {#                                <tr>#}
-                    {#                                    <td>{{ v.id }}</td>#}
-                    {#                                    <td>{{ v.user.name }}</td>#}
-                    {#                                    <td>{{ v.supplier.name }}</td>#}
-                    {#                                    {% if v.status == 0 %}#}
-                    {#                                        <td style="color: red">临时</td>#}
-                    {#                                    {% else %}#}
-                    {#                                        <td>正式</td>#}
-                    {#                                    {% endif %}#}
-                    {#                                    <td>{{ v.amount }}</td>#}
-                    {#                                    <td>{{ v.discount }}</td>#}
-                    {#                                    <td>{{ v.payment }}</td>#}
-                    {#                                    {% if v.debt > 0 %}#}
-                    {#                                        <td style="color:red;">{{ v.debt }}</td>#}
-                    {#                                    {% else %}#}
-                    {#                                        <td>{{ v.debt }}</td>#}
-                    {#                                    {% endif %}#}
-                    {#                                    <td>{{ v.remarks }}</td>#}
-                    {#                                    <td>{{ v.addtime }}</td>#}
-
-                    {#                                </tr>#}
-                    {#                            {% endfor %}#}
-                    {#                            </tbody>#}
-                    {#                        </table>#}
-                    {#                    </div>#}
                 </div>
             </div>
         </div>
@@ -85,11 +43,6 @@
 
             $("#g-stock").addClass("active");
             $("#g-stock-buy-list").addClass("active");
-            //只要遇到radio,checkbox 直接转换为icheck
-            $('input[type="checkbox"], input[type="radio"]').iCheck({
-                checkboxClass: 'icheckbox_square-blue',
-                radioClass: 'iradio_square-blue',
-            });
         })
 
         var TableInit = function () {
@@ -167,7 +120,7 @@
                         valign: 'middle',
                         sortable: true,
                         cellStyle:function (value, row, index) {
-                            if (value < 0){
+                            if (value > 0){
                                 return {css:{color:'#FF0000'}};
                             }
                             else{
@@ -196,20 +149,6 @@
             return oTableInit;
         };
 
-
-        {#                                        {% if v.status == 1 and v.user_id == user.id %}#}
-        {#                                            <a href="{{ url_for('home.stock_buy_debt', id=v.id) }}" name="btn-detail"#}
-        {#                                               class="label stock-buy-debt hide label-"></a>&nbsp#}
-        {#                                        {% endif %}#}
-
-        {#                                        {% if v.status == 0 and v.user_id == user.id %}#}
-        {#                                            <a href="{{ url_for('home.stock_buy_edit', id=v.id) }}" name="btn-edit"#}
-        {#                                               class="label stock-buy-edit hide label-"></a>&nbsp#}
-        {#                                            <a href="{{ url_for('home.stock_buy_del', id=v.id) }}" name="btn-stop"#}
-        {#                                               class="label stock-buy-del hide label-"></a>#}
-        {#                                        {% endif %}#}
-        {#                                    </td>#}
-
         function operateFormatter(value, row, index) {//赋予的参数
             var operation = "";
             var roles = "{{ roles }}";
@@ -228,7 +167,7 @@
                     operation += '<a href="/stock/buy/edit/'+row.id+'" class="label label-success">修改</a>';
                 }
                 if ((roles.match('stock_buy_del')||(admin == "1"))){
-                    operation += '<a href="/stock/buy/buy/'+row.id+'" class="label label-danger">删除</a>';
+                    operation += '<a href="/stock/buy/del/'+row.id+'" class="label label-danger">删除</a>';
                 }
             }
 
