@@ -221,8 +221,11 @@
 <script src="{{ url_for('static', filename='bower_components/datatables.net/js/jquery.dataTables.min.js') }}"></script>
 <script src="{{ url_for('static', filename='bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js') }}"></script>
 <!-- BootStrapDataTables -->
-<script src="{{ url_for('static', filename='bower_components/bootstrap-table/src/bootstrap-table.js') }}"></script>
+<script src="{{ url_for('static', filename='bower_components/bootstrap-table/src/bootstrap-table.js')}}"></script>
 <script src="{{ url_for('static', filename='bower_components/bootstrap-table/src/locale/bootstrap-table-zh-CN.js') }}"></script>
+<script src="{{ url_for('static', filename='bower_components/bootstrap-table/src/extensions/export/bootstrap-table-export.js') }}"></script>
+<script src="{{ url_for('static', filename='bower_components/tableExport/tableExport.js') }}"></script>
+<script src="{{ url_for('static', filename='bower_components/tableExport/xlsx.full.min.js') }}"></script>
 {% block js %}{% endblock %}
 <script>
     $(document).ready(function () {

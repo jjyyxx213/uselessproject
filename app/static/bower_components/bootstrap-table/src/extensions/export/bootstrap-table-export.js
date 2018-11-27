@@ -31,12 +31,12 @@
     json: 'JSON',
     xml: 'XML',
     png: 'PNG',
-    csv: 'CSV',
+    csv: 'CSV表格',
     txt: 'TXT',
     sql: 'SQL',
     doc: 'MS-Word',
     excel: 'MS-Excel',
-    xlsx: 'MS-Excel (OpenXML)',
+    xlsx: 'Excel表格',
     powerpoint: 'MS-Powerpoint',
     pdf: 'PDF'
   }
