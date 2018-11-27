@@ -138,6 +138,19 @@
                     showToggle: false,                    //是否显示详细视图和列表视图的切换按钮
                     cardView: false,                    //是否显示详细视图
                     detailView: false,                   //是否显示父子表
+
+                    //导出excel表格设置
+                    showExport: true,                    //是否显示导出按钮
+                    exportTypes:['xls','xlsx','csv'],   //导出文件类型
+                    exportDataType:'all',                //导出表格方式 默认导出当前页
+                    exportOptions:{
+                        //ignoreColumn: [0,1],  //忽略某一列的索引
+                        fileName: '客户清单',  //文件名称设置
+                        worksheetName: 'Sheet1',  //表格工作区名称
+                        tableName: '客户清单',
+                        excelstyles: ['background-color', 'color', 'font-size', 'font-weight'],
+                        //onMsoNumberFormat: DoOnMsoNumberFormat
+                    },
                     onClickCell :function(field, value, row, $element) {
                         oRow = row;
                         oIndex = $element.parent().data('index');
