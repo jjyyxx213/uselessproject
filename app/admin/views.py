@@ -39,7 +39,9 @@ def inject_admininfo():
     }
     return context
 
+
 @admin.route("/", methods=["GET"])
+@login_required
 def index():
     return redirect(url_for('home.index'))
 
@@ -206,7 +208,7 @@ def auth_list():
     pagination = pagination.order_by(
         Auth.addtime.desc()
     ).paginate(page=page,
-               per_page=current_app.config['POSTS_PER_PAGE'],
+               per_page=current_app.config['POSTS_AUTH_PAGE'],
                error_out=False)
     return render_template('admin/auth_list.html', pagination=pagination, key=key)
 
@@ -1223,6 +1225,8 @@ def excel_table_byindex(file='file.xls', colnameindex=0, by_index=0):
 
 # liuqq 保存导入数据
 @admin.route('/item/import/<int:type>', methods=['GET', 'POST'])
+@login_required
+@permission_required
 def item_import(type=0):
     if request.method == 'GET':
         return render_template('admin/item_import.html', type=type)

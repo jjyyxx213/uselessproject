@@ -19,7 +19,9 @@ def change_filename(filename):
     filename = datetime.now().strftime('%Y%m%d%H%M%S') + str(uuid.uuid4().hex) + fileinfo[-1]
     return filename
 
+
 @home.route('/', methods=['GET', 'POST'])
+@login_required
 def index():
     return render_template('home/index.html')
 

@@ -21,7 +21,7 @@ def permission_required(f):
         # 如果是超管直接返回
         admin = Admin.query.filter_by(id=session['user_id']).first()
         # 20181113 debug = true 的情况下不判断权限
-        if admin is None and current_app.config['DEBUG'] == False:
+        if admin is None:
             # 如果不是,获取用户权限
             # 获取登录用户权限列表
             user = User.query.join(Role).filter(
