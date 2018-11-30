@@ -15,7 +15,7 @@
                         <h3 class="box-title"> 收银单列表</h3>
                         <div id="toolbar" class="box-tools">
                             <div class="pull-left border-right">
-                                <a href="{{ url_for('home.order_edit', id='0') }}" class="btn btn-primary btn-sm" role="button">
+                                <a href="{{ url_for('home.order_edit', id='0') }}" class="btn order_edit hide btn-primary btn-sm" role="button">
                                     添加</a>
                             </div>
                         </div>
@@ -23,67 +23,6 @@
                     <div class="box-body table-responsive" >
                         <table id="tb_order_list"></table>
                     </div>
-                    {#                    <div class="box-body table-responsive no-padding">#}
-                    {#                        <table id="ex1" class="table table-striped table-hover">#}
-                    {#                            <tbody>#}
-                    {#                            <tr>#}
-                    {#                                <th> 单号</th>#}
-                    {#                                <th> 开单人</th>#}
-                    {#                                <th> 状态</th>#}
-                    {#                                <th> 客户</th>#}
-                    {#                                <th> 车牌</th>#}
-                    {#                                <th> 手机</th>#}
-                    {#                                <th> 总金额</th>#}
-                    {#                                <th> 折扣</th>#}
-                    {#                                <th> 欠款</th>#}
-                    {#                                <th> 备注</th>#}
-                    {#                                <th> 添加时间</th>#}
-                    {#                                <th> 操作方式</th>#}
-                    {#                            </tr>#}
-                    {#                            {% for v in pagination.items %}#}
-                    {#                                <tr>#}
-                    {#                                    <td>{{ v.id }}</td>#}
-                    {#                                    <td>{{ v.user.name }}</td>#}
-                    {#                                    {% if v.status == 0 %}#}
-                    {#                                    <td style="color: red">临时</td>#}
-                    {#                                    {% else %}#}
-                    {#                                    <td>正式</td>#}
-                    {#                                    {% endif %}#}
-                    {#                                    <td>{{ v.customer.name }}</td>#}
-                    {#                                    <td>{{ v.customer.pnumber }}</td>#}
-                    {#                                    <td>{{ v.customer.phone }}</td>#}
-                    {#                                    <td>{{ v.amount }}</td>#}
-                    {#                                    <td>{{ v.discount }}</td>#}
-                    {#                                    {% if v.debt > 0 %}#}
-                    {#                                    <td style="color:red;">{{ v.debt }}</td>#}
-                    {#                                    {% else %}#}
-                    {#                                    <td>{{ v.debt }}</td>#}
-                    {#                                    {% endif %}#}
-                    {#                                    <td>{{ v.remarks }}</td>#}
-                    {#                                    <td>{{ v.addtime }}</td>#}
-                    {#                                    <td>#}
-                    {#                                        <a href="{{ url_for('home.order_view', id=v.id) }}" name="btn-detail"#}
-                    {#                                           class="label order-view hide label-info">明细</a>&nbsp#}
-                    {#                                        {% if v.status == 1%}#}
-                    {#                                        <a href="{{ url_for('home.order_billing', id=v.id) }}" name="btn-billing"#}
-                    {#                                           class="label order-billing hide label-default">历史</a>&nbsp#}
-                    {#                                        {% endif %}#}
-                    {#                                        {% if v.status == 1 and v.user_id == user.id %}#}
-                    {#                                        <a href="{{ url_for('home.order_debt', id=v.id) }}" name="btn-detail"#}
-                    {#                                           class="label order-debt hide label-warning">结款</a>&nbsp#}
-                    {#                                        {% endif %}#}
-                    {#                                        {% if v.status == 0 and v.user_id == user.id %}#}
-                    {#                                        <a href="{{ url_for('home.order_edit', id=v.id) }}" name="btn-edit"#}
-                    {#                                           class="label order-edit hide label-success">修改</a>&nbsp#}
-                    {#                                        <a href="{{ url_for('home.order_del', id=v.id) }}" name="btn-stop"#}
-                    {#                                           class="label order-del hide label-danger">删除</a>#}
-                    {#                                        {% endif %}#}
-                    {#                                    </td>#}
-                    {#                                </tr>#}
-                    {#                            {% endfor %}#}
-                    {#                            </tbody>#}
-                    {#                        </table>#}
-                    {#                    </div>#}
                 </div>
             </div>
         </div>
