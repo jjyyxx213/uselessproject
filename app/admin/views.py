@@ -912,6 +912,8 @@ def item_list(type=0):
                 dic["rewardprice"] = str(v.rewardprice) + u'元'
                 dic["name"] = v.name
                 dic["valid"] = c_valid
+                dic["unit"] = v.unit
+                dic["standard"] = v.standard
                 dic["remarks"] = v.remarks
                 dic["addtime"] = str(v.addtime)
                 s_json.append(dic)

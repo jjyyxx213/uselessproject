@@ -19,9 +19,9 @@
             <li><a href="#"><i class="fa fa-dashboard"></i> 设置</a></li>
             <li class="active">
                 {% if type == 0 %}
-                    商品分类导入
+                    商品导入
                 {% else %}
-                    服务项目分类导入
+                    服务项目导入
                 {% endif %}
             </li>
         </ol>
@@ -49,6 +49,27 @@
                         </table>
                     </div>
 
+                    <table id="stats_datatable" class="hide table datatable">
+                        <thead>
+                        <tr>
+                            <th>名称</th>
+                            {% if type == 0 %}
+                                <th>商品类别</th>
+                            {% else %}
+                                <th>服务项目类别</th>
+                            {% endif %}
+                            <th>销售价</th>
+                            <th>成本价</th>
+                            <th>提成</th>
+                            <th>单位</th>
+                            <th>规格</th>
+                            <th>备注</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+
                     <div class="box-footer">
                         <a href="{{ url_for('admin.item_list', type=type) }}" class="btn btn-default pull-right"
                            role="button"> 返回</a>
@@ -62,8 +83,6 @@
             </div>
         </div>
     </section>
-
-
 
 {% endblock %}
 
@@ -175,73 +194,19 @@
         });
 
         $("#templet_down").click(function () {
-            //导出
-            var json = '[{"名称":"","商品类别":"","销售价":"","成本价":"","提成":"","单位":"","规格":"","备注":""}]';
-            var dataJson = JSON.parse(json);
-            JSONToExcelConvertor("导入模板",dataJson);
+            var s_fileName = '';
+            {% if type == 0 %}
+                s_fileName = '商品导入模板';
+            {% else %}
+                s_fileName = '服务项目导入模板';
+            {% endif %}
+
+            $("#stats_datatable").tableExport({
+                type:'xlsx',
+                ascape:'false',
+                fileName: s_fileName
+            })
         })
-
-        function JSONToExcelConvertor(fileName, jsonData) {
-            ///<summary>json转excel下载</summary>
-            ///<param name="fileName">文件名</param>
-            ///<param name="jsonData">json数据</param>
-            var arrData = typeof jsonData != 'object' ? JSON.parse(jsonData) : jsonData;
-
-            var excel = '<table>';
-            var row = "<tr>";
-            for (var name in arrData[0]) {
-                //每个单元格都可以指定样式. eg color:red   生成出来的就是 红色的字体了.
-                row += "<td style='font-size:15px;text-align:center;'>" + name + '</td>';
-            }
-
-            excel += row + "</tr>";
-            excel += "</table>";
-
-            // #region 拼接html
-            var excelFile = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:x='urn:schemas-microsoft-com:office:excel' xmlns='http://www.w3.org/TR/REC-html40'>";
-            excelFile += '<meta http-equiv="content-type" content="application/vnd.ms-excel; charset=UTF-8">';
-            excelFile += '<meta http-equiv="content-type" content="application/vnd.ms-excel';
-            excelFile += '; charset=UTF-8">';
-            excelFile += "<head>";
-            excelFile += "<!--[if gte mso 9]>";
-            excelFile += "<xml>";
-            excelFile += "<x:ExcelWorkbook>";
-            excelFile += "<x:ExcelWorksheets>";
-            excelFile += "<x:ExcelWorksheet>";
-            excelFile += "<x:Name>";
-            excelFile += "{worksheet}";
-            excelFile += "</x:Name>";
-            excelFile += "<x:WorksheetOptions>";
-            excelFile += "<x:DisplayGridlines/>";
-            excelFile += "</x:WorksheetOptions>";
-            excelFile += "</x:ExcelWorksheet>";
-            excelFile += "</x:ExcelWorksheets>";
-            excelFile += "</x:ExcelWorkbook>";
-            excelFile += "</xml>";
-            excelFile += "<![endif]-->";
-            excelFile += "</head>";
-            excelFile += "<body>";
-            excelFile += excel;//将table 拼接
-            excelFile += "</body>";
-            excelFile += "</html>";
-            // #endregion
-
-            var uri = 'data:application/vnd.ms-excel;charset=utf-8,' + encodeURIComponent(excelFile);
-            //创建a标签
-            var link = document.createElement("a");
-            //指定url
-            link.href = uri;
-            //设置为隐藏
-            link.style = "visibility:hidden";
-            //指定文件名和文件后缀格式
-            link.download = fileName + ".xls";
-            //追加a标签
-            document.body.appendChild(link);
-            //触发点击事件
-            link.click();
-            //移除a标签
-            document.body.removeChild(link);
-        }
 
     </script>
 {% endblock %}

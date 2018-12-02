@@ -231,6 +231,7 @@
             }
             if (row.vip_name!='')
             {
+
                 if ((roles.match('cus_vip_list')||(admin == "1"))){
                     operation += '<a href="/customer/cus_vip_list/'+row.vip_id+'" class="label label-danger">查询</a>';
                 }
@@ -246,7 +247,7 @@
             }
             else
             {
-                if ((roles.match('cus_vip_add ')||(admin == "1")) ){
+                if ((roles.match('cus_vip_add')||(admin == "1")) ){
                     operation += '<a href="/customer/cus_vip_add/'+row.id+'" class="label label-danger">绑卡</a>';
                 }
             }
