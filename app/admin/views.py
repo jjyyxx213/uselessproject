@@ -1294,9 +1294,14 @@ def item_improt_get(type=0):
         ex_header = ex_table[0]
         ex_content = ex_table[1]
 
+        if type == 0:
+            s_type = u'商品类别'
+        else:
+            s_type = u'服务项目类别'
+
         # 判断表头是否正确
         if u'名称' not in ex_header or \
-                u'商品类别' not in ex_header or \
+                s_type not in ex_header or \
                 u'销售价' not in ex_header or \
                 u'成本价' not in ex_header or \
                 u'提成' not in ex_header or \

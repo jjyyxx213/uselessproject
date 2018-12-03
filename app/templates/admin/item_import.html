@@ -119,10 +119,32 @@
         })
 
         $("#excelFile").on("fileuploaded", function (event, data, previewId, index) {
-            res = data.response.content; //返回结果
+            var res = data.response.content; //返回结果
             //显示Excel内容
             let ContentWrapper = $("#content");
             ContentWrapper.empty();
+
+            if (data.response.success == true) {
+                $("#excelFile").fileinput("clear");
+                $("#excelFile").fileinput("reset");
+                $("#excelFile").fileinput("refresh");
+                $("#excelFile").fileinput("enable");
+                $(".close").click();
+                $("#reload").click();
+                $('.close.fileinput-remove').hide();
+                $("#submit").removeClass("submit");
+            }
+            else {
+                alert(data.files[index].name + " 提交失败" + data.response.message);
+                //重置
+                $("#excelFile").fileinput("clear");
+                $("#excelFile").fileinput("reset");
+                $('#excelFile').fileinput('refresh');
+                $('#excelFile').fileinput('enable');
+                $('.close.fileinput-remove').hide();
+                $("#submit").addClass("submit");
+            }
+
             ContentWrapper.append('         <tr>\n' +
                 '                                <th> 校验信息</th>\n' +
                 '                                <th> 名称</th>\n' +
@@ -147,30 +169,6 @@
                     '                                    <td>' + res[id_ins]['remarks'] + '</td>\n' +
                     '                        </tr>');
             }
-
-            if (data.response.success == true) {
-                $("#excelFile").fileinput("clear");
-                $("#excelFile").fileinput("reset");
-                $("#excelFile").fileinput("refresh");
-                $("#excelFile").fileinput("enable");
-                $(".close").click();
-                $("#reload").click();
-                $('.close.fileinput-remove').hide();
-                $("#submit").removeClass("submit");
-            }
-            else {
-                alert(data.files[index].name + " 提交失败" + data.response.message);
-                //重置
-                $("#excelFile").fileinput("clear");
-                $("#excelFile").fileinput("reset");
-                $('#excelFile').fileinput('refresh');
-                $('#excelFile').fileinput('enable');
-                $('.close.fileinput-remove').hide();
-                $("#submit").addClass("submit");
-            }
-
-
-
         });
 
         $("#submit").click(function () {

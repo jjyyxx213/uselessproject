@@ -445,7 +445,7 @@ class Customer(db.Model):
     # 手机号
     phone = db.Column(db.String(11), unique=True)
     # 车牌号
-    pnumber = db.Column(db.String(20), unique=True)
+    pnumber = db.Column(db.String(20))
     # 车架号
     vin = db.Column(db.String(50))
     # 品牌类型
