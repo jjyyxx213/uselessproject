@@ -166,12 +166,11 @@ class CustomerForm(FlaskForm):
 
     pnumber = StringField(
         label=u'车牌号',
-        validators=[
-            DataRequired(message=u'请输入车牌号'),
-            #Regexp(u'^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领]{1}[A-Z]{1}[A-Z_0-9]{5}$', message=u'车牌号格式不正确'),
-            Regexp(u'^[A-Z]{1}[A-Z_0-9]{5}$', message=u'车牌号格式不正确'),
-            # Length(min=7, max=7, message=u'车牌号长度不正确')
-        ],
+        # validators=[
+        #     DataRequired(message=u'请输入车牌号'),
+        #     Regexp(u'^[A-Z]{1}[A-Z_0-9]{5}$', message=u'车牌号格式不正确'),
+        #     # Length(min=7, max=7, message=u'车牌号长度不正确')
+        # ],
         description=u'车牌号',
         render_kw={
             'class': 'form-control',
@@ -205,11 +204,10 @@ class CustomerForm(FlaskForm):
     # 校验邮箱合法性
     email = StringField(
         label=u'电子邮箱',
-        validators=[
-            DataRequired(message=u'请输入电子邮箱'),
-            Regexp('^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$', message=u'电子邮箱格式不正确'),
-            # Email(message=u'邮箱格式错误')
-        ],
+        # validators=[
+        #     DataRequired(message=u'请输入电子邮箱'),
+        #     Regexp('^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$', message=u'电子邮箱格式不正确'),
+        # ],
         description=u'电子邮箱',
         render_kw={
             'class': 'form-control',

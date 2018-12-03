@@ -294,21 +294,25 @@ def customer_add():
     is_flag = True
     if form.validate_on_submit():
         province = request.form.get('province')
-        pnumber = province + form.pnumber.data
-        if Customer.query.filter_by(pnumber=pnumber).first():
-            is_flag = False
-            flash(u'您输入的车牌号已存在', 'err')
+        pnumber = ''
+        if form.pnumber.data != '':
+            pnumber = province + form.pnumber.data
+            if Customer.query.filter_by(pnumber=pnumber).first():
+                is_flag = False
+                flash(u'您输入的车牌号已存在', 'err')
+
         if Customer.query.filter_by(phone=form.phone.data).first():
             is_flag = False
             flash(u'您输入的手机号已存在', 'err')
         if is_flag == False:
             return render_template('home/customer_add.html', form=form)
+
         obj_customer = Customer(
             name=form.name.data,
             name_wechat=form.name_wechat.data,
             sex=int(form.sex.data),
             phone=form.phone.data,
-            pnumber=province + form.pnumber.data,
+            pnumber=pnumber,
             vin=form.vin.data,
             brand=form.brand.data,
             email=form.email.data,
@@ -353,10 +357,16 @@ def customer_edit(id=None):
 
     if form.validate_on_submit():
         province = request.form.get('province')
-        pnumber = province + form.pnumber.data
-        if obj_customer.pnumber != pnumber and Customer.query.filter_by(pnumber=pnumber).first():
-            is_flag = False
-            flash(u'您输入的车牌号已存在', 'err')
+        pnumber = ''
+        if form.pnumber.data != '':
+            pnumber = province + form.pnumber.data
+            if province == '':
+                is_flag = False
+                flash(u'车牌号省份不能为空', 'err')
+            if obj_customer.pnumber != pnumber and Customer.query.filter_by(pnumber=pnumber).first():
+                is_flag = False
+                flash(u'您输入的车牌号已存在', 'err')
+
         if obj_customer.phone != form.phone.data and Customer.query.filter_by(phone=form.phone.data).first():
             is_flag = False
             flash(u'您输入的手机号已存在', 'err')
