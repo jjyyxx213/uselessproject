@@ -249,6 +249,7 @@ def customer_list():
         if obj_customers:
             s_json = []
             for v in obj_customers:
+                vip_name = ''
                 if v.sex == '1':
                     sex = '男'
                 else:
@@ -270,15 +271,15 @@ def customer_list():
                     dic["score"] = v.score
                     dic["vip_id"] = v.vip_id
                     vip_name = v.vip.name
+
                 dic["vip_name"] = vip_name
-
                 dic["addtime"] = str(v.addtime)
-
                 s_json.append(dic)
             res = {
                 "rows": s_json,
                 "total": total
             }
+
             return (dumps(res))
         else:
             return (None)
@@ -442,7 +443,7 @@ def cus_vip_add(id=None):
 
         # 保存客户与vip—id关系
         obj_customer.vip_id = max_vip_id
-        obj_customer.balance = form.payment.data #20181024 余额记录在客户表中
+        obj_customer.balance = form.balance.data #20181024 余额记录在客户表中
         obj_oplog_cus = Oplog(
             user_id=session['user_id'],
             ip=request.remote_addr,
