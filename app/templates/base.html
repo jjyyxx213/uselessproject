@@ -231,7 +231,7 @@
     $(document).ready(function () {
         var admin = "{{ session.get('is_admin')}}";
         var tree = $(".treeview");
-        var label = $(".label");
+        var btn = $(".btn");
         var fa = $("li");
         var t_id,t_obj;
         var li_id,li_obj;
@@ -240,7 +240,7 @@
             if (admin == "1") {
                 fa.removeClass("hide");
                 tree.removeClass("hide");
-                label.removeClass("hide");
+                btn.removeClass("hide");
             }
             {% for v in roles %}
                 {% if v.level == 1 %}
@@ -263,7 +263,7 @@
             //暂时放开
             fa.removeClass("hide");
             tree.removeClass("hide");
-            label.removeClass("hide");
+            btn.removeClass("hide");
         {% endif %}
     })
 </script>
