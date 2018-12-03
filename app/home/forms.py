@@ -341,6 +341,20 @@ class CusVipForm(FlaskForm):
             'readonly': 'readonly'
         }
     )
+
+    balance = StringField(
+        label=u'卡内金额',
+        validators=[
+            DataRequired('请输入卡内金额'),
+            Regexp('[\d+\.\d]', message=u'请输入数字'),
+        ],
+        description=u'卡内金额',
+        render_kw={
+            'class': 'form-control',
+            'placeholder': u'请输入卡内金额'
+        }
+    )
+
     interval = StringField(
         label=u'有效期',
         validators=[

@@ -57,6 +57,17 @@
                                     {{ form.payment.label }}
                                     {{ form.payment }}
                                 </div>
+                                <div class="form-group">
+                                    {{ form.balance.label }}
+                                    <label for="input_balance" class="badge bg-red" data-toggle="tooltip"
+                                           title="办卡后卡内金额">?</label>
+                                    {{ form.balance }}
+                                    {% for err in form.balance.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
                             </div>
                             <div class="col-xs-4 col-sm-4">
                                 <div class="form-group">
