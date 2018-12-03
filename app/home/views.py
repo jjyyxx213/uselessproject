@@ -249,7 +249,7 @@ def customer_list():
         if obj_customers:
             s_json = []
             for v in obj_customers:
-                if v.sex == 1:
+                if v.sex == '1':
                     sex = '男'
                 else:
                     sex = '女'

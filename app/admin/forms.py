@@ -138,7 +138,7 @@ class UserForm(FlaskForm):
         label=u'手机',
         validators=[
             DataRequired(message=u'请输入手机号'),
-            Regexp('1[3458]\\d{9}', message=u'手机号格式不正确'),
+            Regexp('1[3456789]\\d{9}', message=u'手机号格式不正确'),
             Length(min=11, max=11, message=u'手机号长度不正确')
         ],
         description=u'手机',
