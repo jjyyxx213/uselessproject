@@ -136,16 +136,16 @@
             var roles = "{{ roles }}";
             var admin = "{{ session.get('is_admin')}}";
             if (admin == "1"){
-                if (row.id == "0"){
+                if (row.porder_type_id == "0"){
                     operation += '<a href="/stock/buy/view/'+row.id+'" class="label label-success">订单明细</a>';
                 }
-                else if (row.id == "1"){
+                else if (row.porder_type_id == "1"){
                     operation += '<a href="/stock/out/view/'+row.id+'" class="label label-success">订单明细</a>';
                 }
-                else if (row.id == "2"){
+                else if (row.porder_type_id == "2"){
                     operation += '<a href="/stock/allot/view/'+row.id+'" class="label label-success">订单明细</a>';
                 }
-                else if (row.id == "3"){
+                else if (row.porder_type_id == "3"){
                     operation += '<a href="/stock/loss/view/'+row.id+'" class="label label-success">订单明细</a>';
                 }
                 else {

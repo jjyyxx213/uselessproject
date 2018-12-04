@@ -2296,6 +2296,7 @@ def stock_list_history(id=None):
                     s_porder_type = u'退货单'
                 dic = collections.OrderedDict()
                 dic["id"] = v.Porder.id
+                dic["porder_type_id"] = v.Porder.type
                 dic["porder_type"] = s_porder_type
                 dic["supplier_name"] = v.Porder.supplier.name
                 dic["item_name"] = v.Podetail.item.name
