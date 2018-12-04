@@ -119,7 +119,7 @@
         })
 
         $("#excelFile").on("fileuploaded", function (event, data, previewId, index) {
-            var res = data.response.content; //返回结果
+            res = data.response.content; //返回结果
             //显示Excel内容
             let ContentWrapper = $("#content");
             ContentWrapper.empty();
