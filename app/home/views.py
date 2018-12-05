@@ -729,33 +729,12 @@ def modal_customer():
 @login_required
 def modal_item():
     # 获取商品弹出框数据
-    key = request.args.get('key', '')
-    items = Item.query.outerjoin(
-        Stock, Item.id == Stock.item_id
-    )
-    items = items.filter(Item.valid == 1, Item.type == 0)
-    # 条件查询
-    if key:
-        # 库房/零件名称/类别/规格
-        items = items.filter(
-            or_(Stock.store.ilike('%' + key + '%'),
-                Item.name.ilike('%' + key + '%'),
-                Item.cate.ilike('%' + key + '%'),
-                Item.standard.ilike('%' + key + '%'),
-                )
-        )
-    items = items.order_by(Item.name.asc()).limit(current_app.config['POSTS_PER_PAGE']).all()
-    # 返回的数据格式为
-    # {
-    # "pages": 1,
-    # "data": [
-    #         {"id": "1",
-    #         "name": "xx"}
-    #         ]
-    # }
+    items = Item.query.outerjoin(Stock, Item.id == Stock.item_id).filter(Item.valid == 1, Item.type == 0).order_by(Item.name.asc()).all()
+    total = 0
     data = []
     for v in items:
         qty = 0
+        total += 1;
         stock_costprice = v.costprice
         for j in v.stocks:
             qty += j.qty
@@ -775,53 +754,11 @@ def modal_item():
             }
         )
     res = {
-        "key": key,
-        "data": data,
+        "rows": data,
+        "total": total
     }
     return dumps(res)
 
-@home.route('/modal/service', methods=['GET'])
-@login_required
-def modal_service():
-    # 获取服务弹出框数据
-    key = request.args.get('key', '')
-    items = Item.query.filter(Item.valid == 1, Item.type == 1)
-    # 条件查询
-    if key:
-        # 库房/零件名称/类别/规格
-        items = items.filter(
-            or_(Item.name.ilike('%' + key + '%'),
-                Item.cate.ilike('%' + key + '%'),
-                Item.standard.ilike('%' + key + '%'),
-                )
-        )
-    items = items.order_by(Item.name.asc()).limit(current_app.config['POSTS_PER_PAGE']).all()
-    # 返回的数据格式为
-    # {
-    # "pages": 1,
-    # "data": [
-    #         {"id": "1",
-    #         "name": "xx"}
-    #         ]
-    # }
-    data = []
-    for v in items:
-        data.append(
-            {
-                "item_id": v.id,
-                "item_name": v.name,
-                "item_standard": v.standard,
-                "item_unit": v.unit,
-                "item_costprice": v.costprice,
-                "item_salesprice": v.salesprice,
-                "item_cate": v.cate,
-            }
-        )
-    res = {
-        "key": key,
-        "data": data,
-    }
-    return dumps(res)
 
 @home.route('/order/modal/service', methods=['GET'])
 @login_required
@@ -955,27 +892,11 @@ def modal_stock():
     # 获取库存弹出框数据
     key = request.args.get('key', '')
     stocks = Stock.query.join(Item)
-    # 条件查询
-    if key:
-        # 库房/零件名称/类别/规格
-        stocks = stocks.filter(
-            or_(Stock.store.ilike('%' + key + '%'),
-                Item.name.ilike('%' + key + '%'),
-                Item.cate.ilike('%' + key + '%'),
-                Item.standard.ilike('%' + key + '%'),
-                )
-        )
     stocks = stocks.order_by(Stock.item_id.asc(), Stock.store.asc()).limit(current_app.config['POSTS_PER_PAGE']).all()
-    # 返回的数据格式为
-    # {
-    # "pages": 1,
-    # "data": [
-    #         {"id": "1",
-    #         "name": "xx"}
-    #         ]
-    # }
+    total = 0
     data = []
     for v in stocks:
+        total += 1
         data.append(
             {
                 "id": v.id,
@@ -992,8 +913,8 @@ def modal_stock():
             }
         )
     res = {
-        "key": key,
-        "data": data,
+        "rows": data,
+        "total": total
     }
     return dumps(res)
 
