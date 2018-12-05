@@ -1377,28 +1377,10 @@ def item_improt_get(type=0):
 @login_required
 def modal_service():
     # 获取服务弹出框数据
-    key = request.args.get('key', '')
-    items = Item.query.filter(Item.valid == 1, Item.type == 1)
-    # 条件查询
-    if key:
-        # 库房/零件名称/类别/规格
-        items = items.filter(
-            or_(Item.name.ilike('%' + key + '%'),
-                Item.cate.ilike('%' + key + '%'),
-                Item.standard.ilike('%' + key + '%'),
-                )
-        )
-    items = items.order_by(Item.name.asc()).limit(current_app.config['POSTS_PER_PAGE']).all()
-    # 返回的数据格式为
-    # {
-    # "pages": 1,
-    # "data": [
-    #         {"id": "1",
-    #         "name": "xx"}
-    #         ]
-    # }
+    items = Item.query.filter(Item.valid == 1, Item.type == 1).order_by(Item.name.asc())
+    total = items.count()
     data = []
-    for v in items:
+    for v in items.all():
         data.append(
             {
                 "item_id": v.id,
@@ -1411,8 +1393,8 @@ def modal_service():
             }
         )
     res = {
-        "key": key,
-        "data": data,
+        "rows": data,
+        "total": total
     }
     return dumps(res)
 
@@ -1420,28 +1402,10 @@ def modal_service():
 @login_required
 def modal_item():
     # 获取商品弹出框数据
-    key = request.args.get('key', '')
-    items = Item.query.filter(Item.valid == 1, Item.type == 0)
-    # 条件查询
-    if key:
-        # 库房/零件名称/类别/规格
-        items = items.filter(
-            or_(Item.name.ilike('%' + key + '%'),
-                Item.cate.ilike('%' + key + '%'),
-                Item.standard.ilike('%' + key + '%'),
-                )
-        )
-    items = items.order_by(Item.name.asc()).limit(current_app.config['POSTS_PER_PAGE']).all()
-    # 返回的数据格式为
-    # {
-    # "pages": 1,
-    # "data": [
-    #         {"id": "1",
-    #         "name": "xx"}
-    #         ]
-    # }
+    items = Item.query.filter(Item.valid == 1, Item.type == 0).order_by(Item.name.asc())
+    total = items.count()
     data = []
-    for v in items:
+    for v in items.all():
         data.append(
             {
                 "item_id": v.id,
@@ -1454,8 +1418,8 @@ def modal_item():
             }
         )
     res = {
-        "key": key,
-        "data": data,
+        "rows": data,
+        "total": total
     }
     return dumps(res)
 

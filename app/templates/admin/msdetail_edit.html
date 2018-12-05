@@ -66,9 +66,9 @@
                                                    name="inputrows-{{ loop.index0 }}-item_id" type="hidden"
                                                    value="{{ v.data.item_id or '' }}">
                                             <input id="inputrows-{{ loop.index0 }}-item_name"
-                                               name="inputrows-{{ loop.index0 }}-item_name" type="text" class="form-control"
+                                                   name="inputrows-{{ loop.index0 }}-item_name" type="text" class="form-control"
                                                    placeholder="请选择商品/服务" readonly
-                                               value="{{ v.data.item_name or '' }}">
+                                                   value="{{ v.data.item_name or '' }}">
                                             <span class="input-group-btn">
                                                 <button class="btn btn-default" type="button" name="item_choice" loop_index="{{ loop.index0 }}" style="border-radius: 0">
                                                     物
@@ -79,9 +79,9 @@
                                             </span>
                                         </div>
                                         {% for err in v.item_id.errors %}
-                                                <div class="col-md-12">
-                                                    <p style="color: red" class="small">{{ err }}</p>
-                                                </div>
+                                            <div class="col-md-12">
+                                                <p style="color: red" class="small">{{ err }}</p>
+                                            </div>
                                         {% endfor %}
                                     </div>
                                     <div class="col-md-2 padding-defined">
@@ -109,7 +109,7 @@
                                             <input id="inputrows-{{ loop.index0 }}-quantity"
                                                    name="inputrows-{{ loop.index0 }}-quantity" class="form-control"
                                                    placeholder="次数" type="text" value="{{ v.data.quantity or '' }}">
-                                        {% for err in v.quantity.errors %}
+                                            {% for err in v.quantity.errors %}
                                                 <div class="col-md-12">
                                                     <p style="color: red" class="small">{{ err }}</p>
                                                 </div>
@@ -121,11 +121,11 @@
                                             <input id="inputrows-{{ loop.index0 }}-interval"
                                                    name="inputrows-{{ loop.index0 }}-interval" class="form-control"
                                                    placeholder="有效期(月)" type="text" value="{{ v.data.interval or '' }}">
-                                        {% for err in v.interval.errors %}
+                                            {% for err in v.interval.errors %}
                                                 <div class="col-md-12">
                                                     <p style="color: red" class="small">{{ err }}</p>
                                                 </div>
-                                        {% endfor %}
+                                            {% endfor %}
                                         </div>
                                     </div>
                                     <div class="col-md-1" style="padding-left: 5px">
@@ -159,32 +159,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="row">
-                            <div class="input-group input-group-sm pull-right" style="width: 300px;">
-                                <input type="text" name="table_search" class="form-control pull-right"
-                                       placeholder="请输入关键字...  (名称/规格)" id="service_search">
-                                <div class="input-group-btn">
-                                    <button type="submit" class="btn btn-default" id="do_service_search">
-                                        <i class="fa fa-search"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <table class="table table-striped table-hover">
-                                <thead>
-                                <tr>
-                                    <th> 编号</th>
-                                    <th> 名称</th>
-                                    <th> 规格</th>
-                                    <th> 单位</th>
-                                    <th> 售价</th>
-                                    <th> 服务类型</th>
-                                </tr>
-                                </thead>
-                                <tbody id="services">
-
-                                </tbody>
-                            </table>
+                            <table id="services"></table>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -205,32 +180,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="row">
-                            <div class="input-group input-group-sm pull-right" style="width: 300px;">
-                                <input type="text" name="table_search" class="form-control pull-right"
-                                       placeholder="请输入关键字...  (名称/规格)" id="item_search">
-                                <div class="input-group-btn">
-                                    <button type="submit" class="btn btn-default" id="do_item_search">
-                                        <i class="fa fa-search"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <table class="table table-striped table-hover">
-                                <thead>
-                                <tr>
-                                    <th> 编号</th>
-                                    <th> 名称</th>
-                                    <th> 规格</th>
-                                    <th> 单位</th>
-                                    <th> 售价</th>
-                                    <th> 商品类型</th>
-                                </tr>
-                                </thead>
-                                <tbody id="items">
-
-                                </tbody>
-                            </table>
+                            <table id="items"></table>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -333,30 +283,12 @@
 
             let loop_index;
             $("#inputs").on("click", "button[name='service_choice']", function () {
-                let appendId = $('#services');
                 let url = "{{ url_for('admin.modal_service') }}";
-                let key = $("#service_search").val();
-                card_modal_service(appendId, url, key);
+                card_modal_service(url);
                 //显示modal
                 $('#serviceModal').modal();
                 // 获取loop_index
                 loop_index = $(this).attr('loop_index');
-            });
-            //模态框模糊查询
-            $("#do_service_search").click(function () {
-                let appendId = $('#services');
-                let url = "{{ url_for('admin.modal_service') }}";
-                let key = $("#service_search").val();
-                card_modal_service(appendId, url, key);
-            });
-            $("#service_search").bind("keyup", function (event) {
-                if (event.keyCode == "13") {
-                    //回车执行查询
-                    let appendId = $('#services');
-                    let url = "{{ url_for('admin.modal_service') }}";
-                    let key = $("#service_search").val();
-                    card_modal_service(appendId, url, key);
-                }
             });
 
             //modal_service高亮事件
@@ -384,30 +316,12 @@
             });
             //////////////商品与服务分隔
             $("#inputs").on("click", "button[name='item_choice']", function () {
-                let appendId = $('#items');
                 let url = "{{ url_for('admin.modal_item') }}";
-                let key = $("#item_search").val();
-                card_modal_item(appendId, url, key);
+                card_modal_item(url);
                 //显示modal
                 $('#itemModal').modal();
                 // 获取loop_index
                 loop_index = $(this).attr('loop_index');
-            });
-            //模态框模糊查询
-            $("#do_item_search").click(function () {
-                let appendId = $('#items');
-                let url = "{{ url_for('admin.modal_item') }}";
-                let key = $("#service_search").val();
-                card_modal_item(appendId, url, key);
-            });
-            $("#item_search").bind("keyup", function (event) {
-                if (event.keyCode == "13") {
-                    //回车执行查询
-                    let appendId = $('#items');
-                    let url = "{{ url_for('admin.modal_item') }}";
-                    let key = $("#item_search").val();
-                    card_modal_item(appendId, url, key);
-                }
             });
 
             //modal_item高亮事件

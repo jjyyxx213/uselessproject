@@ -49,9 +49,9 @@
                                         </span>
                                     </div>
                                     {% for err in form.customer_name.errors %}
-                                    <div class="col-md-12">
-                                        <p style="color: red">{{ err }}</p>
-                                    </div>
+                                        <div class="col-md-12">
+                                            <p style="color: red">{{ err }}</p>
+                                        </div>
                                     {% endfor %}
                                 </div>
                                 <div class="col-md-2 padding-defined">
@@ -79,7 +79,7 @@
                                 <div class="col-md-3 padding-defined">
                                     <div class="input-group">
                                         <span class="input-group-addon">车型</span>
-                                    {{ form.customer_brand }}
+                                        {{ form.customer_brand }}
                                     </div>
                                     {% for err in form.customer_brand.errors %}
                                         <div class="col-md-12">
@@ -90,7 +90,7 @@
                                 <div class="col-md-2 padding-defined">
                                     <div class="input-group">
                                         <span class="input-group-addon">支付方式</span>
-                                    {{ form.paywith }}
+                                        {{ form.paywith }}
                                     </div>
                                     {% for err in form.paywith.errors %}
                                         <div class="col-md-12">
@@ -106,15 +106,15 @@
                                         {{ form.vip_id }}
                                     </div>
                                     {% for err in form.vip_id.errors %}
-                                    <div class="col-md-12">
-                                        <p style="color: red">{{ err }}</p>
-                                    </div>
+                                        <div class="col-md-12">
+                                            <p style="color: red">{{ err }}</p>
+                                        </div>
                                     {% endfor %}
                                 </div>
                                 <div class="col-md-2 padding-defined">
                                     <div class="input-group">
                                         <span class="input-group-addon">卡型</span>
-                                    {{ form.vip_name }}
+                                        {{ form.vip_name }}
                                     </div>
                                     {% for err in form.vip_name.errors %}
                                         <div class="col-md-12">
@@ -125,7 +125,7 @@
                                 <div class="col-md-2 padding-defined">
                                     <div class="input-group">
                                         <span class="input-group-addon">余额</span>
-                                    {{ form.customer_balance }}
+                                        {{ form.customer_balance }}
                                     </div>
                                     {% for err in form.customer_balance.errors %}
                                         <div class="col-md-12">
@@ -147,7 +147,7 @@
                                 <div class="col-md-3 padding-defined">
                                     <div class="input-group">
                                         <span class="input-group-addon">备注</span>
-                                    {{ form.remarks }}
+                                        {{ form.remarks }}
                                     </div>
                                     {% for err in form.remarks.errors %}
                                         <div class="col-md-12">
@@ -284,8 +284,8 @@
                                         </div>
                                         <div class="col-md-3 padding-defined">
                                             <input class="users" id="inputrows-{{ loop.index0 }}-users"
-                                                       name="inputrows-{{ loop.index0 }}-users" type="hidden"
-                                                       value="{{ v.data.users or '' }}">
+                                                   name="inputrows-{{ loop.index0 }}-users" type="hidden"
+                                                   value="{{ v.data.users or '' }}">
                                             <select class="form-control select2 users-choice"
                                                     id="inputrows-{{ loop.index0 }}-userlist"
                                                     name="inputrows-{{ loop.index0 }}-userlist"
@@ -338,7 +338,7 @@
                                         {{ form.balance }}
                                         <span class="input-group-btn">
                                             <button class="btn btn-default" type="button" data-toggle="tooltip"
-                                            title="积分兑换比率100:1"> 积分消耗(?)</button>
+                                                    title="积分兑换比率100:1"> 积分消耗(?)</button>
                                         </span>
                                         {{ form.score }}
                                         <span class="input-group-btn">
@@ -354,21 +354,21 @@
                             </div>
                             <div class="row" style="margin-bottom: 0px">
                                 <div class="col-md-11 padding-defined pull-left">
-                                        {% for err in form.discount.errors %}
-                                            <p style="color: red" class="small">{{ err }}</p>
-                                        {% endfor %}
-                                        {% for err in form.payment.errors %}
-                                            <p style="color: red" class="small">{{ err }}</p>
-                                        {% endfor %}
-                                        {% for err in form.balance.errors %}
-                                            <p style="color: red" class="small">{{ err }}</p>
-                                        {% endfor %}
-                                        {% for err in form.score.errors %}
-                                            <p style="color: red" class="small">{{ err }}</p>
-                                        {% endfor %}
-                                        {% for err in form.debt.errors %}
-                                            <p style="color: red" class="small">{{ err }}</p>
-                                        {% endfor %}
+                                    {% for err in form.discount.errors %}
+                                        <p style="color: red" class="small">{{ err }}</p>
+                                    {% endfor %}
+                                    {% for err in form.payment.errors %}
+                                        <p style="color: red" class="small">{{ err }}</p>
+                                    {% endfor %}
+                                    {% for err in form.balance.errors %}
+                                        <p style="color: red" class="small">{{ err }}</p>
+                                    {% endfor %}
+                                    {% for err in form.score.errors %}
+                                        <p style="color: red" class="small">{{ err }}</p>
+                                    {% endfor %}
+                                    {% for err in form.debt.errors %}
+                                        <p style="color: red" class="small">{{ err }}</p>
+                                    {% endfor %}
                                 </div>
                             </div>
                             <div class="box-footer">
@@ -393,37 +393,11 @@
                         </button>
                         <h4 class="modal-title" id="customerModalLabel"> 客户选择</h4>
                     </div>
+                    <div id="toolbar" class="label label-warning">警告：如果已选择明细，更换客户将导致有折扣的商品/服务失效</div>
                     <div class="modal-body">
                         <div class="row">
-                                <div class="pull-left label label-warning">警告：如果已选择明细，更换客户将导致有折扣的商品/服务失效</div>
-                            <div class="input-group input-group-sm pull-right" style="width: 300px;">
-                                <input type="text" name="table_search" class="form-control pull-right"
-                                       placeholder="请输入关键字...  (姓名/手机/车牌/邮箱)" id="customer_search">
-                                <div class="input-group-btn">
-                                    <button type="submit" class="btn btn-default" id="do_customer_search">
-                                        <i class="fa fa-search"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <table class="table table-striped table-hover">
-                                <thead>
-                                <tr>
-                                    <th> 编号</th>
-                                    <th> 姓名</th>
-                                    <th> 手机</th>
-                                    <th> 车牌</th>
-                                    <th> 车型</th>
-                                    <th> 邮箱</th>
-                                    <th> 会员卡</th>
-                                    <th> 到店次数</th>
-                                    <th> 累计消费</th>
-                                </tr>
-                                </thead>
-                                <tbody id="customers">
+                            <table id="customers">
 
-                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -445,36 +419,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="row">
-                            <div class="input-group input-group-sm pull-right" style="width: 300px;">
-                                <input type="text" name="table_search" class="form-control pull-right"
-                                       placeholder="请输入关键字...  (名称/规格/商品类型)" id="stock_search">
-                                <div class="input-group-btn">
-                                    <button type="submit" class="btn btn-default" id="do_stock_search">
-                                        <i class="fa fa-search"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <table class="table table-striped table-hover">
-                                <thead>
-                                <tr>
-                                    <th> 编号</th>
-                                    <th> 名称</th>
-                                    <th> 规格</th>
-                                    <th> 单位</th>
-                                    <th> 仓库</th>
-                                    <th> 库存数量</th>
-                                    <th> 售价</th>
-                                    <th> 优惠价</th>
-                                    <th> 优惠次数</th>
-                                    <th> 截止日期</th>
-                                    <th> 商品类型</th>
-                                </tr>
-                                </thead>
-                                <tbody id="stocks">
-
-                                </tbody>
+                            <table id="stocks">
                             </table>
                         </div>
                     </div>
@@ -496,34 +441,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="row">
-                            <div class="input-group input-group-sm pull-right" style="width: 300px;">
-                                <input type="text" name="table_search" class="form-control pull-right"
-                                       placeholder="请输入关键字...  (名称/规格/服务类型)" id="service_search">
-                                <div class="input-group-btn">
-                                    <button type="submit" class="btn btn-default" id="do_service_search">
-                                        <i class="fa fa-search"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <table class="table table-striped table-hover">
-                                <thead>
-                                <tr>
-                                    <th> 编号</th>
-                                    <th> 名称</th>
-                                    <th> 规格</th>
-                                    <th> 单位</th>
-                                    <th> 售价</th>
-                                    <th> 优惠价</th>
-                                    <th> 优惠次数</th>
-                                    <th> 截止日期</th>
-                                    <th> 服务类型</th>
-                                </tr>
-                                </thead>
-                                <tbody id="services">
-
-                                </tbody>
+                            <table id="services">
                             </table>
                         </div>
                     </div>
@@ -667,11 +585,11 @@
                         '                                        <div class="form-group">\n' +
                         '                                       <input class="users" id="inputrows-' + id_ins + '-users"\n' +
                         '                                               name="inputrows-' + id_ins + '-users" type="hidden">\n' +
-                                '                                    <select class="form-control select2 users-choice" loop_index="' + id_ins + '"\n' +
-                                '                                            id="inputrows-' + id_ins + '-userlist"\n' +
-                                '                                            name="inputrows-' + id_ins + '-userlist"\n' +
-                                '                                            multiple data-placeholder="请选择工作人员(多选)">\n' +
-                                '                                    </select>\n' +
+                        '                                    <select class="form-control select2 users-choice" loop_index="' + id_ins + '"\n' +
+                        '                                            id="inputrows-' + id_ins + '-userlist"\n' +
+                        '                                            name="inputrows-' + id_ins + '-userlist"\n' +
+                        '                                            multiple data-placeholder="请选择工作人员(多选)">\n' +
+                        '                                    </select>\n' +
                         '                                        </div>\n' +
                         '                                    </div>\n' +
                         '                                    <div class="col-md-1 padding-defined">\n' +
@@ -723,28 +641,10 @@
 
             //客户弹出模态框选择物料
             $("button[name='customer_choice']").on("click", function () {
-                let appendId = $('#customers');
                 let url = "{{ url_for('home.modal_customer') }}";
-                let key = $("#customer_search").val();
-                modal_customer(appendId, url, key);
+                modal_customer(url);
                 //显示modal
                 $('#customerModal').modal();
-            });
-            //模态框模糊查询
-            $("#do_customer_search").click(function () {
-                let appendId = $('#customers');
-                let url = "{{ url_for('home.modal_customer') }}";
-                let key = $("#customer_search").val();
-                modal_customer(appendId, url, key);
-            });
-            $("#customer_search").bind("keyup", function (event) {
-                if (event.keyCode == "13") {
-                    //回车执行查询
-                    let appendId = $('#customers');
-                    let url = "{{ url_for('home.modal_customer') }}";
-                    let key = $("#customer_search").val();
-                    modal_customer(appendId, url, key);
-                }
             });
 
             //modal_customer高亮事件
@@ -790,30 +690,12 @@
             let loop_index;
             //库存弹出模态框选择物料
             $("#inputs").on("click", "button[name='stock_choice']", function () {
-                let appendId = $('#stocks');
                 let url = "{{ url_for('home.order_modal_stock') }}?vip_id=" + $("#vip_id").val();
-                let key = $("#stock_search").val();
-                order_modal_stock(appendId, url, key);
+                order_modal_stock(url);
                 //显示modal
                 $('#stockModal').modal();
                 // 获取loop_index
                 loop_index = $(this).attr('loop_index');
-            });
-            //模态框模糊查询
-            $("#do_stock_search").click(function () {
-                let appendId = $('#stocks');
-                let url = "{{ url_for('home.order_modal_stock') }}?vip_id=" + $("#vip_id").val();
-                let key = $("#stock_search").val();
-                order_modal_stock(appendId, url, key);
-            });
-            $("#stock_search").bind("keyup", function (event) {
-                if (event.keyCode == "13") {
-                    //回车执行查询
-                    let appendId = $('#stocks');
-                    let url = "{{ url_for('home.order_modal_stock') }}?vip_id=" + $("#vip_id").val();
-                    let key = $("#stock_search").val();
-                    order_modal_stock(appendId, url, key);
-                }
             });
 
             //modal_stock高亮事件
@@ -862,30 +744,12 @@
             /////////////////////////////分割两个模态框
 
             $("#inputs").on("click", "button[name='service_choice']", function () {
-                let appendId = $('#services');
                 let url = "{{ url_for('home.order_modal_service') }}?vip_id=" + $("#vip_id").val();
-                let key = $("#service_search").val();
-                order_modal_service(appendId, url, key);
+                order_modal_service(url);
                 //显示modal
                 $('#serviceModal').modal();
                 // 获取loop_index
                 loop_index = $(this).attr('loop_index');
-            });
-            //模态框模糊查询
-            $("#do_service_search").click(function () {
-                let appendId = $('#services');
-                let url = "{{ url_for('home.order_modal_service') }}?vip_id=" + $("#vip_id").val();
-                let key = $("#service_search").val();
-                order_modal_service(appendId, url, key);
-            });
-            $("#service_search").bind("keyup", function (event) {
-                if (event.keyCode == "13") {
-                    //回车执行查询
-                    let appendId = $('#services');
-                    let url = "{{ url_for('home.order_modal_service') }}?vip_id=" + $("#vip_id").val();
-                    let key = $("#service_search").val();
-                    order_modal_service(appendId, url, key);
-                }
             });
 
             //modal_stock高亮事件
