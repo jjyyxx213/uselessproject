@@ -53,18 +53,18 @@
                             </div>
                             <div class="row">
                                 <div class="input-group col-md-3 pull-left margin-defined">
-                                {% for err in form.supplier_id.errors %}
-                                    <div class="col-md-12">
-                                        <p style="color: red" class="small">{{ err }}</p>
-                                    </div>
-                                {% endfor %}
+                                    {% for err in form.supplier_id.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
                                 </div>
                                 <div class="input-group col-md-3 pull-left margin-defined">
-                                {% for err in form.user_name.errors %}
-                                    <div class="col-md-12">
-                                        <p style="color: red" class="small">{{ err }}</p>
-                                    </div>
-                                {% endfor %}
+                                    {% for err in form.user_name.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
                                 </div>
                             </div>
                         </div>
@@ -83,10 +83,10 @@
                                 <div class="col-md-2 padding-defined">
                                     <label style="color: red">*</label>
                                     <label class="small">
-                                         仓库&nbsp;&nbsp;&nbsp;&nbsp;
+                                        仓库&nbsp;&nbsp;&nbsp;&nbsp;
                                         <a id="batch">批量</a>
                                         <label class="badge bg-green" data-toggle="tooltip"
-                                       title="根据第一行仓库批量维护">?</label>
+                                               title="根据第一行仓库批量维护">?</label>
                                     </label>
                                 </div>
                                 <div class="col-md-1 padding-defined">
@@ -243,15 +243,15 @@
                             </div>
                             <div class="row" style="margin-bottom: 0px">
                                 <div class="col-md-9 padding-defined pull-left">
-                                        {% for err in form.discount.errors %}
-                                            <p style="color: red" class="small">{{ err }}</p>
-                                        {% endfor %}
-                                        {% for err in form.payment.errors %}
-                                            <p style="color: red" class="small">{{ err }}</p>
-                                        {% endfor %}
-                                        {% for err in form.debt.errors %}
-                                            <p style="color: red" class="small">{{ err }}</p>
-                                        {% endfor %}
+                                    {% for err in form.discount.errors %}
+                                        <p style="color: red" class="small">{{ err }}</p>
+                                    {% endfor %}
+                                    {% for err in form.payment.errors %}
+                                        <p style="color: red" class="small">{{ err }}</p>
+                                    {% endfor %}
+                                    {% for err in form.debt.errors %}
+                                        <p style="color: red" class="small">{{ err }}</p>
+                                    {% endfor %}
                                 </div>
                             </div>
                             <div class="box-footer">
@@ -279,34 +279,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="row">
-                            <div class="input-group input-group-sm pull-right" style="width: 300px;">
-                                <input type="text" name="table_search" class="form-control pull-right"
-                                       placeholder="请输入关键字...  (名称/规格)" id="item_search">
-                                <div class="input-group-btn">
-                                    <button type="submit" class="btn btn-default" id="do_item_search">
-                                        <i class="fa fa-search"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <table class="table table-striped table-hover">
-                                <thead>
-                                <tr>
-                                    <th> 编号</th>
-                                    <th> 商品名称</th>
-                                    <th> 库存数量</th>
-                                    <th> 规格</th>
-                                    <th> 单位</th>
-                                    <th> 成本价</th>
-                                    <th> 销售价</th>
-                                    <th> 商品类型</th>
-                                </tr>
-                                </thead>
-                                <tbody id="items">
-
-                                </tbody>
-                            </table>
+                            <table id="items"></table>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -484,30 +457,12 @@
             let loop_index;
             //弹出模态框选择物料
             $("#inputs").on("click", "button[name='item_choice']", function () {
-                let appendId = $('#items');
                 let url = "{{ url_for('home.modal_item') }}";
-                let key = $("#item_search").val();
-                modal_item(appendId, url, key);
+                modal_item(url);
                 //显示modal
                 $('#itemModal').modal();
                 // 获取loop_index
                 loop_index = $(this).attr('loop_index');
-            });
-            //模态框模糊查询
-            $("#do_item_search").click(function () {
-                let appendId = $('#items');
-                let url = "{{ url_for('home.modal_item') }}";
-                let key = $("#item_search").val();
-                modal_item(appendId, url, key);
-            });
-            $("#item_search").bind("keyup", function (event) {
-                if (event.keyCode == "13") {
-                    //回车执行查询
-                    let appendId = $('#items');
-                    let url = "{{ url_for('home.modal_item') }}";
-                    let key = $("#item_search").val();
-                    modal_item(appendId, url, key);
-                }
             });
 
             //数量监听事件
@@ -671,8 +626,8 @@
         }
         // 计算欠款
         function calcDebt() {
-                //本次欠款
-                return parseFloat($("#discount").val()) - parseFloat($("#payment").val());
+            //本次欠款
+            return parseFloat($("#discount").val()) - parseFloat($("#payment").val());
         }
     </script>
 {% endblock %}

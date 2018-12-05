@@ -47,11 +47,11 @@
                             </div>
                             <div class="row">
                                 <div class="input-group col-md-3 pull-left margin-defined">
-                                {% for err in form.user_name.errors %}
-                                    <div class="col-md-12">
-                                        <p style="color: red" class="small">{{ err }}</p>
-                                    </div>
-                                {% endfor %}
+                                    {% for err in form.user_name.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
                                 </div>
                             </div>
                         </div>
@@ -79,7 +79,7 @@
                                 <div class="col-md-1 padding-defined">
                                     <label class="small"> 库存数量</label>
                                     <label class="badge bg-green" data-toggle="tooltip"
-                                       title="库存数量以结算时为准">?</label>
+                                           title="库存数量以结算时为准">?</label>
                                 </div>
                                 <div class="col-md-1 padding-defined">
                                     <label style="color: red">*</label>
@@ -245,35 +245,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="row">
-                            <div class="input-group input-group-sm pull-right" style="width: 300px;">
-                                <input type="text" name="table_search" class="form-control pull-right"
-                                       placeholder="请输入关键字...  (名称/规格)" id="stock_search">
-                                <div class="input-group-btn">
-                                    <button type="submit" class="btn btn-default" id="do_stock_search">
-                                        <i class="fa fa-search"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <table class="table table-striped table-hover">
-                                <thead>
-                                <tr>
-                                    <th> 编号</th>
-                                    <th> 商品名称</th>
-                                    <th> 规格</th>
-                                    <th> 单位</th>
-                                    <th> 成本价</th>
-                                    <th> 上次进价</th>
-                                    <th> 仓库</th>
-                                    <th> 库存数量</th>
-                                    <th> 商品类型</th>
-                                </tr>
-                                </thead>
-                                <tbody id="stocks">
-
-                                </tbody>
-                            </table>
+                            <table id="stocks"></table>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -422,30 +394,12 @@
             let loop_index;
             //弹出模态框选择物料
             $("#inputs").on("click", "button[name='stock_choice']", function () {
-                let appendId = $('#stocks');
                 let url = "{{ url_for('home.modal_stock') }}";
-                let key = $("#stock_search").val();
-                modal_stock(appendId, url, key);
+                modal_stock(url);
                 //显示modal
                 $('#stockModal').modal();
                 // 获取loop_index
                 loop_index = $(this).attr('loop_index');
-            });
-            //模态框模糊查询
-            $("#do_stock_search").click(function () {
-                let appendId = $('#stocks');
-                let url = "{{ url_for('home.modal_stock') }}";
-                let key = $("#stock_search").val();
-                modal_stock(appendId, url, key);
-            });
-            $("#stock_search").bind("keyup", function (event) {
-                if (event.keyCode == "13") {
-                    //回车执行查询
-                    let appendId = $('#stocks');
-                    let url = "{{ url_for('home.modal_stock') }}";
-                    let key = $("#stock_search").val();
-                    modal_stock(appendId, url, key);
-                }
             });
 
             //modal_stock高亮事件
