@@ -10,6 +10,11 @@
             margin-top: 10px;
             margin-left: 10px;
         }
+
+        .fixed-table-container{
+            height: 385px !important;
+            padding-bottom: 40px !important;
+        }
     </style>
 {% endblock %}
 {% block page_content %}
@@ -47,11 +52,11 @@
                             </div>
                             <div class="row">
                                 <div class="input-group col-md-3 pull-left margin-defined">
-                                {% for err in form.user_name.errors %}
-                                    <div class="col-md-12">
-                                        <p style="color: red" class="small">{{ err }}</p>
-                                    </div>
-                                {% endfor %}
+                                    {% for err in form.user_name.errors %}
+                                        <div class="col-md-12">
+                                            <p style="color: red" class="small">{{ err }}</p>
+                                        </div>
+                                    {% endfor %}
                                 </div>
                             </div>
                         </div>
@@ -78,13 +83,13 @@
                                         到..&nbsp;&nbsp;&nbsp;&nbsp;
                                         <a id="batch">批量</a>
                                         <label class="badge bg-green" data-toggle="tooltip"
-                                       title="根据第一行仓库批量维护">?</label>
+                                               title="根据第一行仓库批量维护">?</label>
                                     </label>
                                 </div>
                                 <div class="col-md-1 padding-defined">
                                     <label class="small"> 库存数量</label>
                                     <label class="badge bg-green" data-toggle="tooltip"
-                                       title="库存数量以结算时为准">?</label>
+                                           title="库存数量以结算时为准">?</label>
                                 </div>
                                 <div class="col-md-1 padding-defined">
                                     <label style="color: red">*</label>
@@ -181,11 +186,11 @@
                                         <div class="col-md-2 padding-defined">
                                             <div class="form-group">
                                                 <select class="form-control select2 store-choice"
-                                                    id="inputrows-{{ loop.index0 }}-nstore"
-                                                    name="inputrows-{{ loop.index0 }}-nstore"
-                                                    data-placeholder="调拨仓库"
-                                                    v="{{ v.data.nstore or '' }}">
-                                            </select>
+                                                        id="inputrows-{{ loop.index0 }}-nstore"
+                                                        name="inputrows-{{ loop.index0 }}-nstore"
+                                                        data-placeholder="调拨仓库"
+                                                        v="{{ v.data.nstore or '' }}">
+                                                </select>
                                             </div>
                                             {% for err in v.nstore.errors %}
                                                 <div class="col-md-12">
