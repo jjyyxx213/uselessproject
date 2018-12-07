@@ -88,6 +88,9 @@ function order_modal_stock(url) {
         }, {
             field: 'vipdetail_id',
             class: 'hide'
+        }, {
+            field: 'stock_id',
+            class: 'hide'
         }, ]
     });
 }
