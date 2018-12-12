@@ -232,6 +232,7 @@
         var admin = "{{ session.get('is_admin')}}";
         var tree = $(".treeview");
         var btn = $(".btn");
+        var label = $(".label");
         var fa = $("li");
         var t_id,t_obj;
         var li_id,li_obj;
@@ -241,6 +242,7 @@
                 fa.removeClass("hide");
                 tree.removeClass("hide");
                 btn.removeClass("hide");
+                label.removeClass("hide");
             }
             {% for v in roles %}
                 {% if v.level == 1 %}
@@ -264,6 +266,7 @@
             fa.removeClass("hide");
             tree.removeClass("hide");
             btn.removeClass("hide");
+            label.removeClass("hide");
         {% endif %}
     })
 </script>

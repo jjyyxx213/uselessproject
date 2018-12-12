@@ -2768,39 +2768,3 @@ def sales_report_list():
             return (dumps(s_json))
         else:
             return (None)
-
-
-@home.route("/wxlogin", methods=['GET', 'POST'])
-def wxlogin():
-    if (request.method == 'POST'):
-        if not (request.json):
-            res = {
-                "result": 'false'
-            }
-            return (dumps(res))
-        else:
-            # 验证密码
-            data = request.get_json()
-            rec_phone = data['phone']
-            rec_pwd = data['password']
-            user = User.query.filter_by(phone=rec_phone).first()
-            if user is not None and user.verify_password(rec_pwd) and user.frozen == 0:
-                userlog = Userlog(
-                    user_id=user.id,
-                    ip=request.remote_addr,
-                )
-                db.session.add(userlog)
-                db.session.commit()
-                res = {
-                    "result": 'success'
-                }
-            else:
-                res = {
-                    "result": 'pwderror'
-                }
-            return (dumps(res))
-    else:
-        res = {
-            "result": 'false'
-        }
-        return (dumps(res))
