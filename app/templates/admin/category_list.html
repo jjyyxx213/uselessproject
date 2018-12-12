@@ -48,6 +48,9 @@
         var oRow = null;
         //当前点击行索引
         var oIndex = null;
+        //角色
+        var roles = "{{ roles }}";
+        var admin = "{{ session.get('is_admin')}}";
 
         $(document).ready(function () {
             //初始化Table
@@ -61,7 +64,9 @@
             }else{//服务项目
                 $("#g-option-category-service").addClass("active");
             }
-
+            if ((roles.match('category_add')||(admin == "1")) ){
+                $('.category_add').removeClass("hide");
+            }
         })
 
         var TableInit = function () {
@@ -135,8 +140,6 @@
 
         function operateFormatter(value, row, index) {//赋予的参数
             var operation = "";
-            var roles = "{{ roles }}";
-            var admin = "{{ session.get('is_admin')}}";
             var c_type= "{{ type }}";
             if ((roles.match('category_edit')||(admin == "1")) ){
                 operation += '<a href="/admin/category/edit/'+c_type+'/'+row.id+'/'+row.name+'" class="label label-success">修改</a>';

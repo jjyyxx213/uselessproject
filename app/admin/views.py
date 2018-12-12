@@ -22,19 +22,26 @@ def inject_admininfo():
             # 权限列表编码
             auths_list = list(map(lambda v: int(v), auths.split(',')))
             # 遍历权限
+            roles_menu = []
             roles = []
             for i, val in enumerate(auths_list):
                 auth = Auth.query.filter_by(id=val).first()
-                roles.append(auth.to_json())
+                if auth.level == 3:
+                    roles.append(auth.to_json())
+                else:
+                    roles_menu.append(auth.to_json())
         except:
+            roles_menu = None
             roles = None
     except:
         user = None
-        roles = None
+        roles_menu = None
+        roles =None
     context = {
         'user': user,
         'debug': current_app.config['DEBUG'],
         'online_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        'roles_menu': roles_menu,
         'roles': roles
     }
     return context

@@ -52,6 +52,9 @@
         var oRow = null;
         //当前点击行索引
         var oIndex = null;
+        //角色
+        var roles = "{{ roles }}";
+        var admin = "{{ session.get('is_admin')}}";
 
         $(document).ready(function () {
             //初始化Table
@@ -64,6 +67,12 @@
                 $("#g-option-item").addClass("active");
             }else{//服务项目
                 $("#g-option-service").addClass("active");
+            }
+            if ((roles.match('item_add')||(admin == "1")) ){
+                $('.item_add').removeClass("hide");
+            }
+            if ((roles.match('item_import')||(admin == "1")) ){
+                $('.item_import').removeClass("hide");
             }
 
             // 商品停用(使用post)
@@ -200,8 +209,6 @@
 
         function operateFormatter(value, row, index) {//赋予的参数
             var operation = "";
-            var roles = "{{ roles }}";
-            var admin = "{{ session.get('is_admin')}}";
             var c_type= "{{ type }}";
             if ((roles.match('item_edit')||(admin == "1")) ){
                 operation += '<a href="/admin/item/edit/'+c_type+'/'+row.id+'" class="label label-success">修改</a>';

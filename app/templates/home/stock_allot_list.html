@@ -30,11 +30,17 @@
 {% endblock %}
 
 {% block js %}
-    //当前点击行数据
-    var oRow = null;
-    //当前点击行索引
-    var oIndex = null;
+
     <script>
+        //当前点击行数据
+        var oRow = null;
+        //当前点击行索引
+        var oIndex = null;
+        //角色
+        var roles = "{{ roles }}";
+        var admin = "{{ session.get('is_admin')}}";
+        var user_id = "{{ session.get('user_id') }}";
+
         $(document).ready(function () {
             //初始化Table
             var oTable = new TableInit();
@@ -42,6 +48,10 @@
 
             $("#g-stock").addClass("active");
             $("#g-stock-allot-list").addClass("active");
+
+            if ((roles.match('stock_allot_edit')||(admin == "1")) ){
+                $('.stock_allot_edit').removeClass("hide");
+            }
         })
         var TableInit = function () {
             var oTableInit = new Object();
@@ -116,9 +126,6 @@
 
         function operateFormatter(value, row, index) {//赋予的参数
             var operation = "";
-            var roles = "{{ roles }}";
-            var admin = "{{ session.get('is_admin')}}";
-            var user_id = "{{ session.get('user_id') }}";
             if ((roles.match('stock_allot_view')||(admin == "1"))){
                 operation += '<a href="/stock/allot/view/'+row.id+'" class="label label-info">明细</a>';
             }
