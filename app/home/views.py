@@ -1,10 +1,14 @@
 # -*- coding:utf-8 -*-
 from . import home
 from flask import render_template, session, redirect, request, url_for, flash, current_app
-from forms import LoginForm, PwdForm, CustomerForm, CusVipForm, CusVipDepositForm, StockBuyForm, StockBuyListForm, StockBuyDebtForm, \
-    StockOutListForm, StockOutForm, StockAllotListForm, StockAllotForm, StockLossListForm, StockLossForm, StockReturnListForm, \
-    StockReturnForm, StockReturnDebtForm, OrderListForm, OrderForm, OrderDebtForm, SalesAdvancedForm, IndexForm, VipsAdvancedForm
-from app.models import User, Userlog, Oplog, Item, Supplier, Customer, Stock, Porder, Podetail, Kvp, Mscard, Msdetail, Vip, Vipdetail, Order, Odetail, Billing
+from forms import LoginForm, PwdForm, CustomerForm, CusVipForm, CusVipDepositForm, StockBuyForm, StockBuyListForm, \
+    StockBuyDebtForm, \
+    StockOutListForm, StockOutForm, StockAllotListForm, StockAllotForm, StockLossListForm, StockLossForm, \
+    StockReturnListForm, \
+    StockReturnForm, StockReturnDebtForm, OrderListForm, OrderForm, OrderDebtForm, SalesAdvancedForm, IndexForm, \
+    VipsAdvancedForm
+from app.models import User, Userlog, Oplog, Item, Supplier, Customer, Stock, Porder, Podetail, Kvp, Mscard, Msdetail, \
+    Vip, Vipdetail, Order, Odetail, Billing
 from app import db
 from app.decorators import permission_required, login_required
 from werkzeug.security import generate_password_hash
@@ -12,6 +16,7 @@ from sqlalchemy import or_, and_, func, text
 from json import dumps
 from datetime import datetime, timedelta, date
 import os, random, uuid, collections, hashlib
+
 
 def change_filename(filename):
     # 修改文件名称
@@ -24,6 +29,7 @@ def change_filename(filename):
 @login_required
 def index():
     return render_template('home/index.html')
+
 
 @home.route('/summary/report', methods=['GET', 'POST'])
 @login_required
@@ -66,7 +72,7 @@ def summary_report():
     per_other = '0%'
     if request.method == 'GET':
         # 本月第一天
-        form.date_from.data = date(date.today().year,date.today().month,1)
+        form.date_from.data = date(date.today().year, date.today().month, 1)
         form.date_to.data = date.today()
     if form.validate_on_submit():
         date_from = datetime.strptime(form.date_from.data, '%Y-%m-%d')
@@ -156,6 +162,7 @@ def summary_report():
     }
     return render_template("home/summary_report.html", form=form, **context)
 
+
 @home.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -176,6 +183,7 @@ def login():
         return redirect(url_for('home.login'))
     return render_template('home/login.html', form=form)
 
+
 @home.route('/logout')
 def logout():
     # 用户登出
@@ -183,6 +191,7 @@ def logout():
     session.pop('user_id', None)
     session.pop('is_admin', None)
     return redirect(url_for('home.login'))
+
 
 # 20180913 liuqq 修改密码
 @home.route('/user/pwd', methods=['GET', 'POST'])
@@ -219,12 +228,14 @@ def pwd():
         return redirect(url_for('home.login'))
     return render_template('home/pwd.html', form=form)
 
+
 @home.route('/item/list/<int:type>', methods=['GET'])
 @login_required
 @permission_required
 def item_list(type=0):
     # 商品/服务列表查询
     return render_template('home/item_list.html', type=type)
+
 
 @home.route('/supplier/list', methods=['GET'])
 @login_required
@@ -397,6 +408,7 @@ def customer_edit(id=None):
         return redirect(url_for('home.customer_list'))
     return render_template('home/customer_edit.html', form=form, province=province)
 
+
 # 20180920 liuqq 新增客户-会员卡
 @home.route('/customer/cus_vip_add/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -408,7 +420,7 @@ def cus_vip_add(id=None):
     if form.validate_on_submit():
         # 计算vip ID
         obj_max_vip = Vip.query.order_by(Vip.id.desc()).first()
-        if(obj_max_vip):
+        if (obj_max_vip):
             max_vip_id = obj_max_vip.id + 1
         else:
             max_vip_id = 1
@@ -422,7 +434,7 @@ def cus_vip_add(id=None):
         obj_mscard = Mscard.query.filter_by(id=form.name.data).first()
         # 创建VIP主表对象
         obj_vip = Vip(
-            id = max_vip_id,
+            id=max_vip_id,
             name=obj_mscard.name,  # 名称
             # balance=form.payment.data,  # 余额
             scorerule=form.scorerule.data,  # 积分规则
@@ -443,7 +455,7 @@ def cus_vip_add(id=None):
 
         # 保存客户与vip—id关系
         obj_customer.vip_id = max_vip_id
-        obj_customer.balance = form.balance.data #20181024 余额记录在客户表中
+        obj_customer.balance = form.balance.data  # 20181024 余额记录在客户表中
         obj_oplog_cus = Oplog(
             user_id=session['user_id'],
             ip=request.remote_addr,
@@ -453,7 +465,7 @@ def cus_vip_add(id=None):
         obj_billing = Billing(
             cust_id=obj_customer.id,  # 客户id
             paywith=form.paywith.data,  # 支付方式
-            vip_id=max_vip_id, # 会员卡号
+            vip_id=max_vip_id,  # 会员卡号
             amount=form.payment.data,  # 应付金额
             payment=form.payment.data,  # 支付金额
             paytype=u'客户办卡'
@@ -463,7 +475,7 @@ def cus_vip_add(id=None):
 
         # 保存vip明细内容
         for iter_add in form.inputrows:
-            #interval_day = int(form.interval.data) * 30  # 卡的有效期*30天
+            # interval_day = int(form.interval.data) * 30  # 卡的有效期*30天
             # 20181008 liuqq 修改bug
             interval_day = int(iter_add.interval.data) * 30  # 卡的有效期*30天
             obj_vip_detail = Vipdetail(
@@ -533,7 +545,7 @@ def cus_vip_list(vip_id=None):
         db.session.add(obj_customer)
         db.session.flush()
         db.session.query(Vipdetail).filter(Vipdetail.vip_id == vip_id).delete()
-        db.session.query(Billing).filter(Billing.vip_id == vip_id).delete() #20181024 删除消费流水
+        db.session.query(Billing).filter(Billing.vip_id == vip_id).delete()  # 20181024 删除消费流水
         db.session.delete(obj_vip)
         # 20181024 记录日志
         obj_oplog = Oplog(
@@ -545,6 +557,7 @@ def cus_vip_list(vip_id=None):
         db.session.commit()
         flash(u'会员卡注销成功', 'ok')
         return redirect(url_for('home.customer_list'))
+
 
 # 20181008 liuqq 客户-会员卡充值
 @home.route('/customer/cus_vip_deposit/<int:vip_id>', methods=['GET', 'POST'])
@@ -563,14 +576,14 @@ def cus_vip_deposit(vip_id=None):
         obj_oplog_vip = Oplog(
             user_id=session['user_id'],
             ip=request.remote_addr,
-            reason=u'充值vip卡:%s 会员:%s 金额:%s' % (obj_vip.id,obj_customer.name, form.deposit.data)
+            reason=u'充值vip卡:%s 会员:%s 金额:%s' % (obj_vip.id, obj_customer.name, form.deposit.data)
         )
 
         # 20181024 liuqq 客户消费流水
         obj_billing = Billing(
             cust_id=obj_customer.id,  # 客户id
             paywith=form.paywith.data,  # 支付方式
-            vip_id=obj_vip.id, # 会员卡号
+            vip_id=obj_vip.id,  # 会员卡号
             amount=float(form.re_deposit.data),  # 应付金额
             payment=float(form.re_deposit.data),  # 支付金额
             paytype=u'会员充值'
@@ -621,10 +634,10 @@ def cus_vip_update(vip_id=None):
         obj_mscard = Mscard.query.filter_by(id=form.name.data).first()
         # 修改VIP主表对象
         obj_vip.name = obj_mscard.name
-        obj_vip.scorerule = form.scorerule.data # 积分规则
-        obj_vip.scorelimit = form.scorelimit.data # 积分限制提醒
-        obj_vip.addtime = add_time # 办理时间
-        obj_vip.endtime = end_time # 截止时间 = 办理时间 + 有效期
+        obj_vip.scorerule = form.scorerule.data  # 积分规则
+        obj_vip.scorelimit = form.scorelimit.data  # 积分限制提醒
+        obj_vip.addtime = add_time  # 办理时间
+        obj_vip.endtime = end_time  # 截止时间 = 办理时间 + 有效期
 
         obj_oplog_vip = Oplog(
             user_id=session['user_id'],
@@ -705,11 +718,13 @@ def modal_customer():
     }
     return dumps(res)
 
+
 @home.route('/modal/item', methods=['GET'])
 @login_required
 def modal_item():
     # 获取商品弹出框数据
-    items = Item.query.outerjoin(Stock, Item.id == Stock.item_id).filter(Item.valid == 1, Item.type == 0).order_by(Item.name.asc()).all()
+    items = Item.query.outerjoin(Stock, Item.id == Stock.item_id).filter(Item.valid == 1, Item.type == 0).order_by(
+        Item.name.asc()).all()
     total = 0
     data = []
     for v in items:
@@ -791,6 +806,7 @@ def order_modal_service():
     }
     return dumps(res)
 
+
 @home.route('/order/modal/stock', methods=['GET'])
 @login_required
 def order_modal_stock():
@@ -846,6 +862,7 @@ def order_modal_stock():
     }
     return dumps(res)
 
+
 @home.route('/modal/stock', methods=['GET'])
 @login_required
 def modal_stock():
@@ -878,6 +895,7 @@ def modal_stock():
     }
     return dumps(res)
 
+
 @home.route('/store/get', methods=['GET', 'POST'])
 @login_required
 @permission_required
@@ -909,7 +927,7 @@ def store_get():
         data = []
         for v in pagination.items:
             data.append(
-                {#key和值都用字符
+                {  # key和值都用字符
                     "id": v.value,
                     "name": v.value
                 }
@@ -919,6 +937,7 @@ def store_get():
             "data": data,
         }
     return dumps(res)
+
 
 @home.route('/select/user', methods=["GET"])
 @login_required
@@ -933,6 +952,7 @@ def select_user():
             }
         )
     return dumps(users)
+
 
 @home.route('/stock/list', methods=['GET', 'POST'])
 @login_required
@@ -964,6 +984,7 @@ def stock_list():
         else:
             return (None)
     return render_template('home/stock_list.html')
+
 
 @home.route('/stock/buy/list', methods=['GET', 'POST'])
 @login_required
@@ -1013,6 +1034,7 @@ def stock_buy_view(id=None):
     porder = Porder.query.filter_by(id=id).first_or_404()
     podetails = Podetail.query.filter_by(porder_id=id).order_by(Podetail.id.asc()).all()
     return render_template('home/stock_buy_view.html', porder=porder, podetails=podetails)
+
 
 @home.route('/stock/buy/debt/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -1126,12 +1148,12 @@ def stock_buy_edit(id=None):
             porder.payment = form.payment.data
             porder.debt = form.debt.data
             porder.remarks = form.remarks.data
-            porder.addtime = datetime.now()#更新为发布日期
+            porder.addtime = datetime.now()  # 更新为发布日期
         try:
             db.session.add(porder)
             db.session.flush()  # 提交一下获取id,不要使用commit
 
-            if switch == 1:#结算
+            if switch == 1:  # 结算
                 # 删除所有明细
                 # for iter_del in podetails:
                 #     db.session.delete(iter_del)
@@ -1151,10 +1173,10 @@ def stock_buy_edit(id=None):
                     # 判断库存是否存在
                     stock = Stock.query.filter_by(item_id=iter_add.item_id.data,
                                                   store=iter_add.store.data).first()
-                    if stock: #存在就更新数量
+                    if stock:  # 存在就更新数量
                         stock.qty += float(iter_add.qty.data)
                         costprice = iter_add.costprice.data
-                    else: #不存在库存表加一条
+                    else:  # 不存在库存表加一条
                         stock = Stock(
                             item_id=iter_add.item_id.data,
                             costprice=iter_add.costprice.data,
@@ -1173,7 +1195,7 @@ def stock_buy_edit(id=None):
                 db.session.add(oplog)
                 db.session.commit()
                 flash(u'采购单结算成功', 'ok')
-            else:#暂存
+            else:  # 暂存
                 # 删除所有明细
                 # for iter_del in podetails:
                 #     db.session.delete(iter_del)
@@ -1206,6 +1228,7 @@ def stock_buy_edit(id=None):
 
     return render_template('home/stock_buy_edit.html', form=form, porder=porder, form_count=form_count)
 
+
 @home.route('/stock/buy/del/<int:id>', methods=['GET'])
 @login_required
 @permission_required
@@ -1225,6 +1248,7 @@ def stock_buy_del(id=None):
     db.session.commit()
     flash(u'采购单删除成功', 'ok')
     return redirect(url_for('home.stock_buy_list'))
+
 
 @home.route('/stock/out/list', methods=['GET', 'POST'])
 @login_required
@@ -1260,6 +1284,7 @@ def stock_out_list():
             return (None)
     return render_template('home/stock_out_list.html')
 
+
 @home.route('/stock/out/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 @permission_required
@@ -1277,7 +1302,7 @@ def stock_out_edit(id=None):
         Podetail.porder_id == id,
         Podetail.item_id == Stock.item_id,
         Podetail.nstore == Stock.store,
-        ).order_by(Podetail.id.asc()).all()
+    ).order_by(Podetail.id.asc()).all()
     if request.method == 'GET':
         # porder赋值
         if porder:
@@ -1297,8 +1322,8 @@ def stock_out_edit(id=None):
                 listform.item_name = detail.Podetail.item.name
                 listform.item_standard = detail.Podetail.item.standard
                 listform.item_unit = detail.Podetail.item.unit
-                listform.costprice = detail.Podetail.item.costprice # 新增商品的价格
-                listform.stock_costprice = detail.Stock.costprice # 库存中最后一次采购价
+                listform.costprice = detail.Podetail.item.costprice  # 新增商品的价格
+                listform.stock_costprice = detail.Stock.costprice  # 库存中最后一次采购价
                 listform.store = detail.Podetail.nstore
                 listform.stock_qty = detail.Stock.qty
                 listform.qty = detail.Podetail.qty
@@ -1337,13 +1362,13 @@ def stock_out_edit(id=None):
                     porder_id=porder.id,
                     item_id=iter_add.item_id.data,
                     nstore=iter_add.store.data,
-                    qty=float(iter_add.qty.data), # 这里一定要强转，临时数据后面要比较
+                    qty=float(iter_add.qty.data),  # 这里一定要强转，临时数据后面要比较
                 )
                 db.session.add(podetail)
             # 把所有明细暂存，后面用于计算是否存在核减为负数的情况
             db.session.flush()
 
-            if switch == 1:# 结算
+            if switch == 1:  # 结算
                 # valid True可以提交; False 不能提交
                 valid = True
                 # 合并所有item_id,store相同的，总数不能比库存数量大
@@ -1351,7 +1376,7 @@ def stock_out_edit(id=None):
                            '(select a.item_id, nstore, sum(qty) as sum_qty from tb_podetail as a ' \
                            'where a.porder_id = :id group by item_id, nstore) as b, tb_stock as c, tb_item as d ' \
                            'where b.item_id = c.item_id and b.nstore = c.store and b.item_id = d.id'
-                grouplists = db.session.execute(text(sql_text), {'id' : porder.id})
+                grouplists = db.session.execute(text(sql_text), {'id': porder.id})
                 for iter in grouplists:
                     if iter.qty < iter.sum_qty:
                         flash(u'零件:[' + iter.item_name + u']出库后数量小于0', 'err')
@@ -1364,11 +1389,11 @@ def stock_out_edit(id=None):
                         Podetail.porder_id == porder.id,
                         Podetail.item_id == Stock.item_id,
                         Podetail.nstore == Stock.store,
-                        ).order_by(Podetail.id.asc()).all()
+                    ).order_by(Podetail.id.asc()).all()
                     # 减少库存数量
                     for iter in checklists:
                         iter.Stock.qty -= iter.Podetail.qty
-                    porder.status = 1 # 设置为发布状态
+                    porder.status = 1  # 设置为发布状态
                     db.session.add(porder)
                     # 记录出库日志
                     oplog = Oplog(
@@ -1391,7 +1416,7 @@ def stock_out_edit(id=None):
                     db.session.commit()
                     return redirect(url_for('home.stock_out_edit', id=porder.id))
 
-            else: # 暂存
+            else:  # 暂存
                 oplog = Oplog(
                     user_id=session['user_id'],
                     ip=request.remote_addr,
@@ -1406,6 +1431,7 @@ def stock_out_edit(id=None):
             return redirect(url_for('home.stock_out_edit', id=porder.id))
 
     return render_template('home/stock_out_edit.html', form=form, porder=porder, form_count=form_count)
+
 
 @home.route('/stock/out/del/<int:id>', methods=['GET'])
 @login_required
@@ -1427,6 +1453,7 @@ def stock_out_del(id=None):
     flash(u'出库单删除成功', 'ok')
     return redirect(url_for('home.stock_out_list'))
 
+
 @home.route('/stock/out/view/<int:id>', methods=['GET'])
 @login_required
 @permission_required
@@ -1435,6 +1462,7 @@ def stock_out_view(id=None):
     porder = Porder.query.filter_by(id=id).first_or_404()
     podetails = Podetail.query.filter_by(porder_id=id).order_by(Podetail.id.asc()).all()
     return render_template('home/stock_out_view.html', porder=porder, podetails=podetails)
+
 
 @home.route('/stock/allot/list', methods=['GET', 'POST'])
 @login_required
@@ -1470,6 +1498,7 @@ def stock_allot_list():
             return (None)
     return render_template('home/stock_allot_list.html')
 
+
 @home.route('/stock/allot/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 @permission_required
@@ -1487,7 +1516,7 @@ def stock_allot_edit(id=None):
         Podetail.porder_id == id,
         Podetail.item_id == Stock.item_id,
         Podetail.ostore == Stock.store,
-        ).order_by(Podetail.id.asc()).all()
+    ).order_by(Podetail.id.asc()).all()
     if request.method == 'GET':
         # porder赋值
         if porder:
@@ -1509,8 +1538,8 @@ def stock_allot_edit(id=None):
                 listform.item_unit = detail.Podetail.item.unit
                 listform.item_costprice = detail.Podetail.item.costprice
                 # listform.stock_costprice = detail.Stock.costprice # 库存中最后一次采购价
-                listform.ostore = detail.Podetail.ostore # 来源仓库
-                listform.nstore = detail.Podetail.nstore # 目标仓库
+                listform.ostore = detail.Podetail.ostore  # 来源仓库
+                listform.nstore = detail.Podetail.nstore  # 目标仓库
                 listform.stock_qty = detail.Stock.qty
                 listform.qty = detail.Podetail.qty
                 form.inputrows.append_entry(listform)
@@ -1558,13 +1587,13 @@ def stock_allot_edit(id=None):
                     item_id=iter_add.item_id.data,
                     ostore=iter_add.ostore.data,
                     nstore=iter_add.nstore.data,
-                    qty=float(iter_add.qty.data), # 这里一定要强转，临时数据后面要比较
+                    qty=float(iter_add.qty.data),  # 这里一定要强转，临时数据后面要比较
                 )
                 db.session.add(podetail)
             # 把所有明细暂存，后面用于计算是否存在核减为负数的情况
             db.session.flush()
 
-            if switch == 1:# 结算
+            if switch == 1:  # 结算
                 # valid True可以提交; False 不能提交
                 valid = True
                 # 判断临时数据中有无调拨数量大于库存的
@@ -1585,7 +1614,7 @@ def stock_allot_edit(id=None):
                         Podetail.porder_id == porder.id,
                         Podetail.item_id == Stock.item_id,
                         Podetail.ostore == Stock.store,
-                        ).order_by(Podetail.id.asc()).all()
+                    ).order_by(Podetail.id.asc()).all()
                     for iter in checklists:
                         # 减少原库存数量
                         iter.Stock.qty -= iter.Podetail.qty
@@ -1605,7 +1634,7 @@ def stock_allot_edit(id=None):
                         db.session.add(iter.Stock)
                         db.session.add(stock)
 
-                    porder.status = 1 # 设置为发布状态
+                    porder.status = 1  # 设置为发布状态
                     db.session.add(porder)
                     # 记录出库日志
                     oplog = Oplog(
@@ -1628,7 +1657,7 @@ def stock_allot_edit(id=None):
                     db.session.commit()
                     return redirect(url_for('home.stock_allot_edit', id=porder.id))
 
-            else: # 暂存
+            else:  # 暂存
                 oplog = Oplog(
                     user_id=session['user_id'],
                     ip=request.remote_addr,
@@ -1643,6 +1672,7 @@ def stock_allot_edit(id=None):
             return redirect(url_for('home.stock_allot_edit', id=porder.id))
 
     return render_template('home/stock_allot_edit.html', form=form, porder=porder, form_count=form_count)
+
 
 @home.route('/stock/allot/del/<int:id>', methods=['GET'])
 @login_required
@@ -1664,6 +1694,7 @@ def stock_allot_del(id=None):
     flash(u'调拨单删除成功', 'ok')
     return redirect(url_for('home.stock_allot_list'))
 
+
 @home.route('/stock/allot/view/<int:id>', methods=['GET'])
 @login_required
 @permission_required
@@ -1672,6 +1703,7 @@ def stock_allot_view(id=None):
     porder = Porder.query.filter_by(id=id).first_or_404()
     podetails = Podetail.query.filter_by(porder_id=id).order_by(Podetail.id.asc()).all()
     return render_template('home/stock_allot_view.html', porder=porder, podetails=podetails)
+
 
 @home.route('/stock/loss/list', methods=['GET', 'POST'])
 @login_required
@@ -1708,6 +1740,7 @@ def stock_loss_list():
 
     return render_template('home/stock_loss_list.html')
 
+
 @home.route('/stock/loss/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 @permission_required
@@ -1725,7 +1758,7 @@ def stock_loss_edit(id=None):
         Podetail.porder_id == id,
         Podetail.item_id == Stock.item_id,
         Podetail.ostore == Stock.store,
-        ).order_by(Podetail.id.asc()).all()
+    ).order_by(Podetail.id.asc()).all()
     if request.method == 'GET':
         # porder赋值
         if porder:
@@ -1785,13 +1818,13 @@ def stock_loss_edit(id=None):
                     porder_id=porder.id,
                     item_id=iter_add.item_id.data,
                     ostore=iter_add.ostore.data,
-                    qty=float(iter_add.qty.data), # 这里一定要强转，临时数据后面要比较
+                    qty=float(iter_add.qty.data),  # 这里一定要强转，临时数据后面要比较
                 )
                 db.session.add(podetail)
             # 把所有明细暂存，后面用于计算是否存在核减为负数的情况
             db.session.flush()
 
-            if switch == 1:# 结算
+            if switch == 1:  # 结算
                 # valid True可以提交; False 不能提交
                 valid = True
                 # 判断临时数据中有无报损数量大于库存的
@@ -1812,13 +1845,13 @@ def stock_loss_edit(id=None):
                         Podetail.porder_id == porder.id,
                         Podetail.item_id == Stock.item_id,
                         Podetail.ostore == Stock.store,
-                        ).order_by(Podetail.id.asc()).all()
+                    ).order_by(Podetail.id.asc()).all()
                     for iter in checklists:
                         # 减少原库存数量
                         iter.Stock.qty -= iter.Podetail.qty
                         db.session.add(iter.Stock)
 
-                    porder.status = 1 # 设置为发布状态
+                    porder.status = 1  # 设置为发布状态
                     db.session.add(porder)
                     # 记录出库日志
                     oplog = Oplog(
@@ -1841,7 +1874,7 @@ def stock_loss_edit(id=None):
                     db.session.commit()
                     return redirect(url_for('home.stock_loss_edit', id=porder.id))
 
-            else: # 暂存
+            else:  # 暂存
                 oplog = Oplog(
                     user_id=session['user_id'],
                     ip=request.remote_addr,
@@ -1856,6 +1889,7 @@ def stock_loss_edit(id=None):
             return redirect(url_for('home.stock_loss_edit', id=porder.id))
 
     return render_template('home/stock_loss_edit.html', form=form, porder=porder, form_count=form_count)
+
 
 @home.route('/stock/loss/del/<int:id>', methods=['GET'])
 @login_required
@@ -1928,6 +1962,7 @@ def stock_return_list():
 
     return render_template('home/stock_return_list.html')
 
+
 @home.route('/stock/return/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 @permission_required
@@ -1944,7 +1979,7 @@ def stock_return_edit(id=None):
         Podetail.porder_id == id,
         Podetail.item_id == Stock.item_id,
         Podetail.ostore == Stock.store,
-        ).order_by(Podetail.id.asc()).all()
+    ).order_by(Podetail.id.asc()).all()
     if request.method == 'GET':
         # porder赋值
         if porder:
@@ -2025,7 +2060,7 @@ def stock_return_edit(id=None):
             # 把所有明细暂存，后面用于计算是否存在核减为负数的情况
             db.session.flush()
 
-            if switch == 1:#结算
+            if switch == 1:  # 结算
                 # valid True可以提交; False 不能提交
                 valid = True
                 # 判断临时数据中有无报损数量大于库存的
@@ -2045,7 +2080,7 @@ def stock_return_edit(id=None):
                         Podetail.porder_id == porder.id,
                         Podetail.item_id == Stock.item_id,
                         Podetail.ostore == Stock.store,
-                        ).order_by(Podetail.id.asc()).all()
+                    ).order_by(Podetail.id.asc()).all()
                     for iter in checklists:
                         # 减少原库存数量
                         iter.Stock.qty -= iter.Podetail.qty
@@ -2063,7 +2098,7 @@ def stock_return_edit(id=None):
                     db.session.commit()
                     flash(u'退货单结算成功', 'ok')
                     return redirect(url_for('home.stock_return_list'))
-                else:# 校验不通过,暂存
+                else:  # 校验不通过,暂存
                     oplog = Oplog(
                         user_id=session['user_id'],
                         ip=request.remote_addr,
@@ -2072,7 +2107,7 @@ def stock_return_edit(id=None):
                     db.session.add(oplog)
                     db.session.commit()
                     return redirect(url_for('home.stock_return_edit', id=porder.id))
-            else:# 暂存
+            else:  # 暂存
                 oplog = Oplog(
                     user_id=session['user_id'],
                     ip=request.remote_addr,
@@ -2087,6 +2122,7 @@ def stock_return_edit(id=None):
             return redirect(url_for('home.stock_return_edit', id=porder.id))
 
     return render_template('home/stock_return_edit.html', form=form, porder=porder, form_count=form_count)
+
 
 @home.route('/stock/return/del/<int:id>', methods=['GET'])
 @login_required
@@ -2108,6 +2144,7 @@ def stock_return_del(id=None):
     flash(u'退货单删除成功', 'ok')
     return redirect(url_for('home.stock_return_list'))
 
+
 @home.route('/stock/return/view/<int:id>', methods=['GET'])
 @login_required
 @permission_required
@@ -2116,6 +2153,7 @@ def stock_return_view(id=None):
     porder = Porder.query.filter_by(id=id).first_or_404()
     podetails = Podetail.query.filter_by(porder_id=id).order_by(Podetail.id.asc()).all()
     return render_template('home/stock_return_view.html', porder=porder, podetails=podetails)
+
 
 @home.route('/stock/return/debt/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -2151,6 +2189,7 @@ def stock_return_debt(id=None):
         return redirect(url_for('home.stock_return_list'))
     return render_template('home/stock_return_debt.html', form=form, porder=porder)
 
+
 @home.route('/stock/list/history/<int:id>', methods=['GET', 'POST'])
 @login_required
 @permission_required
@@ -2158,8 +2197,9 @@ def stock_list_history(id=None):
     # 历史
     if request.method == 'POST':
         # 获取json数据
-        obj_stock_his = db.session.query(Porder, Podetail).filter(Porder.id == Podetail.porder_id,Porder.status == 1,
-                                                                  Podetail.item_id == id,).order_by(Porder.addtime.desc())
+        obj_stock_his = db.session.query(Porder, Podetail).filter(Porder.id == Podetail.porder_id, Porder.status == 1,
+                                                                  Podetail.item_id == id, ).order_by(
+            Porder.addtime.desc())
         total = obj_stock_his.count()
         s_porder_type = ''
         if obj_stock_his:
@@ -2196,6 +2236,7 @@ def stock_list_history(id=None):
             return (None)
     return render_template('home/stock_list_history.html', id=id)
 
+
 @home.route('/order/list', methods=['GET', 'POST'])
 @login_required
 @permission_required
@@ -2203,7 +2244,8 @@ def order_list():
     # 收银单列表
     if request.method == 'POST':
         # 获取json数据
-        obj_orders = Order.query.join(Customer).filter(Order.type == 0, Order.customer_id == Customer.id).order_by(Order.addtime.desc())
+        obj_orders = Order.query.join(Customer).filter(Order.type == 0, Order.customer_id == Customer.id).order_by(
+            Order.addtime.desc())
         total = obj_orders.count()
         s_status = ''
         if obj_orders:
@@ -2236,6 +2278,7 @@ def order_list():
             return (None)
     return render_template('home/order_list.html')
 
+
 @home.route('/order/edit/<string:id>', methods=['GET', 'POST'])
 @login_required
 @permission_required
@@ -2249,7 +2292,7 @@ def order_edit(id=None):
         if order.user_id != int(session['user_id']) or order.status == 1 or order.type != 0:
             return redirect(url_for('home.order_list'))
 
-    odetails = Odetail.query.filter(Odetail.order_id == id,).order_by(Odetail.id.asc()).all()
+    odetails = Odetail.query.filter(Odetail.order_id == id, ).order_by(Odetail.id.asc()).all()
     if request.method == 'GET':
         # porder赋值
         if order:
@@ -2287,11 +2330,11 @@ def order_edit(id=None):
                 listform.item_id = detail.item_id
                 listform.item_name = detail.item.name
                 listform.item_type = detail.item.type
-                listform.stock_id = detail.stock_id # 方便计算
+                listform.stock_id = detail.stock_id  # 方便计算
                 listform.store = detail.store
                 listform.item_unit = detail.item.unit
                 listform.item_salesprice = detail.item.salesprice
-                listform.vipdetail_id = detail.vipdetail_id # 方便计算
+                listform.vipdetail_id = detail.vipdetail_id  # 方便计算
                 listform.discount = detail.discount
                 listform.qty = detail.qty
                 listform.users = detail.users
@@ -2306,7 +2349,8 @@ def order_edit(id=None):
             # 添加主表
             if not order:  # 没有新增一个
                 order = Order(
-                    id=datetime.now().strftime('%Y%m%d%H%M%S') + ''.join([str(random.randint(1,10)) for i in range(2)]),
+                    id=datetime.now().strftime('%Y%m%d%H%M%S') + ''.join(
+                        [str(random.randint(1, 10)) for i in range(2)]),
                     type=0,
                     user_id=int(session['user_id']),
                     customer_id=form.customer_id.data,
@@ -2346,18 +2390,18 @@ def order_edit(id=None):
                     item_id=iter_add.item_id.data,
                     stock_id=iter_add.stock_id.data,
                     store=iter_add.store.data,
-                    qty=float(iter_add.qty.data), # 这里一定要强转，临时数据后面要比较
+                    qty=float(iter_add.qty.data),  # 这里一定要强转，临时数据后面要比较
                     salesprice=float(iter_add.item_salesprice.data),
                     vipdetail_id=iter_add.vipdetail_id.data,
                     discount=discount,
                     rowamount=float(iter_add.rowamount.data),
                     users=iter_add.users.data,
-                    #users=','.join(map(lambda v: str(v), iter_add.users.data)),
+                    # users=','.join(map(lambda v: str(v), iter_add.users.data)),
                 )
                 db.session.add(odetail)
             # 把所有明细暂存，后面用于计算是否存在核减为负数的情况
             db.session.commit()
-            if switch == 1: # 结算
+            if switch == 1:  # 结算
                 # valid True可以提交; False 不能提交
                 valid = True
                 customer = Customer.query.filter(Customer.id == order.customer_id).first_or_404()
@@ -2370,9 +2414,10 @@ def order_edit(id=None):
                     flash(u'客户积分不足', 'err')
                     valid = False
                 # 判断优惠是否属于当前会员
+                # jiangyu 20181212 排序字段bug
                 sql_text = 'select distinct o.order_id, o.item_id, i.name as item_name, o.discount, o.vipdetail_id from tb_odetail o, tb_item i  ' \
                            'where o.order_id = :order_id and o.item_id = i.id and o.vipdetail_id != \'\' and not exists ( ' \
-                           'select id  from tb_vipdetail v where o.vipdetail_id = v.id and v.endtime > now() ) order by o.id '
+                           'select id  from tb_vipdetail v where o.vipdetail_id = v.id and v.endtime > now() ) order by o.item_id '
                 checklist = db.session.execute(text(sql_text), {'order_id': order.id})
                 for iter in checklist:
                     flash(u'商品/服务:[' + iter.item_name + u']优惠已失效', 'err')
@@ -2384,7 +2429,8 @@ def order_edit(id=None):
                            'where a.item_id = i.id and a.vipdetail_id = v.id and a.sum_qty > v.quantity and v.endtime > now()'
                 checklist = db.session.execute(text(sql_text), {'order_id': order.id})
                 for iter in checklist:
-                    flash(u'商品/服务:[' + iter.item_name + u']能选择的优惠总数为' + str(int(iter.quantity)) + u',已选择' + str(int(iter.sum_qty)) + u'次' , 'err')
+                    flash(u'商品/服务:[' + iter.item_name + u']能选择的优惠总数为' + str(int(iter.quantity)) + u',已选择' + str(
+                        int(iter.sum_qty)) + u'次', 'err')
                     valid = False
 
                 # 校验通过
@@ -2394,7 +2440,7 @@ def order_edit(id=None):
                     stocklist = db.session.query(Odetail, Stock).filter(
                         Odetail.order_id == order.id,
                         Odetail.stock_id == Stock.id,
-                        ).order_by(Odetail.id.asc()).all()
+                    ).order_by(Odetail.id.asc()).all()
                     for iter in stocklist:
                         ## 减少库存数量
                         iter.Stock.qty -= iter.Odetail.qty
@@ -2403,7 +2449,7 @@ def order_edit(id=None):
                     viplist = db.session.query(Odetail, Vipdetail).filter(
                         Odetail.order_id == order.id,
                         Odetail.vipdetail_id == Vipdetail.id,
-                        ).order_by(Odetail.id.asc()).all()
+                    ).order_by(Odetail.id.asc()).all()
                     for iter in viplist:
                         ## 减少VIP使用次数
                         iter.Vipdetail.quantity -= iter.Odetail.qty
@@ -2481,6 +2527,7 @@ def order_edit(id=None):
             return redirect(url_for('home.order_edit', id=order_id))
     return render_template('home/order_edit.html', form=form, order=order, form_count=form_count)
 
+
 @home.route('/order/del/<string:id>', methods=['GET'])
 @login_required
 @permission_required
@@ -2501,6 +2548,7 @@ def order_del(id=None):
     flash(u'收银单删除成功', 'ok')
     return redirect(url_for('home.order_list'))
 
+
 @home.route('/order/view/<string:id>', methods=['GET'])
 @login_required
 @permission_required
@@ -2509,6 +2557,7 @@ def order_view(id=None):
     order = Order.query.filter_by(id=id).first_or_404()
     odetails = Odetail.query.filter_by(order_id=id).order_by(Odetail.id.asc()).all()
     return render_template('home/order_view.html', order=order, odetails=odetails)
+
 
 @home.route('/order/debt/<string:id>', methods=['GET', 'POST'])
 @login_required
@@ -2578,6 +2627,7 @@ def order_debt(id=None):
         return redirect(url_for('home.order_list'))
     return render_template('home/order_debt.html', form=form, order=order)
 
+
 @home.route('/order/billing/<string:id>', methods=['GET'])
 @login_required
 @permission_required
@@ -2590,6 +2640,7 @@ def order_billing(id=None):
                per_page=current_app.config['POSTS_PER_PAGE'],
                error_out=False)
     return render_template('home/order_billing.html', pagination=pagination, id=id)
+
 
 @home.route('/sales/report/', methods=['GET', 'POST'])
 @login_required
@@ -2650,7 +2701,7 @@ def sales_report():
     return render_template('home/sales_report.html', form=form, pagination=pagination, key=key)
 
 
-#20181027 会员充值报表
+# 20181027 会员充值报表
 @home.route('/vips/report/', methods=['GET', 'POST'])
 @login_required
 @permission_required
@@ -2697,7 +2748,7 @@ def vips_report():
     return render_template('home/cus_vip_report.html', form=form, pagination=pagination, key=key)
 
 
-#20181027 会员充值信息
+# 20181027 会员充值信息
 @home.route('/vips/report_list/', methods=['GET', 'POST'])
 @login_required
 @permission_required
@@ -2705,7 +2756,8 @@ def vips_report_list():
     # 获取会员充值信息
     if request.method == 'POST':
         # 获取json数据
-        obj_vips_report = db.session.query(Customer, Billing).filter(Customer.vip_id == Billing.vip_id).order_by(Billing.addtime.desc(), Customer.name.asc())
+        obj_vips_report = db.session.query(Customer, Billing).filter(Customer.vip_id == Billing.vip_id).order_by(
+            Billing.addtime.desc(), Customer.name.asc())
         if obj_vips_report:
             s_json = []
             i = 1
@@ -2723,7 +2775,7 @@ def vips_report_list():
                 dic[u"支付金额"] = v.Billing.amount
                 dic[u"支付方式"] = v.Billing.payment
                 dic[u"欠款"] = v.Billing.debt
-                dic[u"支付时间"] = str( v.Billing.addtime)
+                dic[u"支付时间"] = str(v.Billing.addtime)
                 s_json.append(dic)
                 i = i + 1
             return (dumps(s_json))
@@ -2731,7 +2783,7 @@ def vips_report_list():
             return (None)
 
 
-#20181029 收银报表信息
+# 20181029 收银报表信息
 @home.route('/sales/report_list/', methods=['GET', 'POST'])
 @login_required
 @permission_required
