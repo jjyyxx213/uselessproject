@@ -16,7 +16,7 @@
                         <h3 class="box-title"> 会员卡列表</h3>
                         <div id="toolbar" class="box-tools">
                             <div class="pull-left border-right">
-                                <a href="{{ url_for('admin.mscard_add') }}" class="btn hied mscard_add btn-primary btn-sm" role="button">
+                                <a href="{{ url_for('admin.mscard_add') }}" class="btn hide mscard_add btn-primary btn-sm" role="button">
                                     添加</a>
                             </div>
                         </div>
@@ -37,6 +37,9 @@
         var oRow = null;
         //当前点击行索引
         var oIndex = null;
+        //角色
+        var roles = "{{ roles }}";
+        var admin = "{{ session.get('is_admin')}}";
 
         $(document).ready(function () {
             //初始化Table
@@ -45,6 +48,9 @@
 
             $("#g-option").addClass("active")
             $("#g-option-mscard").addClass("active")
+            if ((roles.match('mscard_add')||(admin == "1")) ){
+                $('.mscard_add').removeClass("hide");
+            }
 
             var pendingRequests = {}
             $.ajaxPrefilter(function (options, originalOptions, jqXHR) {
@@ -228,8 +234,6 @@
 
         function operateFormatter(value, row, index) {//赋予的参数
             var operation = "";
-            var roles = "{{ roles }}";
-            var admin = "{{ session.get('is_admin')}}";
             if ((roles.match('msdetail_edit')||(admin == "1")) ){
                 operation += '<a href="/admin/mscard/msdetail/edit/'+row.id+'" class="label label-info">套餐</a>';
             }

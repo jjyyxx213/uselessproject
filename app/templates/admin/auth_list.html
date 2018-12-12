@@ -112,9 +112,24 @@
 
 {% block js %}
     <script>
+        //角色
+        var roles = "{{ roles }}";
+        var admin = "{{ session.get('is_admin')}}";
+
         $(document).ready(function () {
             $("#g-auth").addClass("active")
             $("#g-auth-list").addClass("active")
+
+            if ((roles.match('auth-edit')||(admin == "1")) ){
+                $('.auth-edit').removeClass("hide");
+            }
+            if ((roles.match('auth-del')||(admin == "1")) ){
+                $('.auth-del').removeClass("hide");
+            }
+            if ((roles.match('auth-detail')||(admin == "1")) ){
+                $('.auth-detail').removeClass("hide");
+            }
+
             // 搜索按钮
             $("#do_search").click(function () {
                 var key = $("#search_key").val()

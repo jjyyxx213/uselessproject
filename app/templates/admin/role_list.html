@@ -66,9 +66,20 @@
 
 {% block js %}
     <script>
+        //角色
+        var roles = "{{ roles }}";
+        var admin = "{{ session.get('is_admin')}}";
+
         $(document).ready(function () {
             $("#g-role").addClass("active")
             $("#g-role-list").addClass("active")
+
+            if ((roles.match('role-edit')||(admin == "1")) ){
+                $('.role-edit').removeClass("hide");
+            }
+            if ((roles.match('role-del')||(admin == "1")) ){
+                $('.role-del').removeClass("hide");
+            }
             // 搜索按钮
             $("#do_search").click(function () {
                 var key = $("#search_key").val()

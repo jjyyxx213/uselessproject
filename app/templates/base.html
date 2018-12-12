@@ -237,14 +237,14 @@
         var t_id,t_obj;
         var li_id,li_obj;
         var l_class,l_obj;
-        {% if roles %}
+        {% if roles_menu %}
             if (admin == "1") {
                 fa.removeClass("hide");
                 tree.removeClass("hide");
                 btn.removeClass("hide");
                 label.removeClass("hide");
             }
-            {% for v in roles %}
+            {% for v in roles_menu %}
                 {% if v.level == 1 %}
                     t_id = "{{ v.html_id }}";
                     t_obj = $("#"+t_id);
@@ -254,11 +254,6 @@
                     li_id = "{{ v.html_id }}";
                     li_obj = $("#"+li_id);
                     li_obj.removeClass("hide");
-                {% endif %}
-                {% if v.level == 3 %}
-                    l_class = "{{ v.html_id }}";
-                    l_obj = $("."+l_class);
-                    l_obj.removeClass("hide");
                 {% endif %}
             {% endfor %}
         {% else %}

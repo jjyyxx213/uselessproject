@@ -35,6 +35,10 @@
         var oRow = null;
         //当前点击行索引
         var oIndex = null;
+        //角色
+        var roles = "{{ roles }}";
+        var admin = "{{ session.get('is_admin')}}";
+        var user_id = "{{ session.get('user_id') }}";
 
         $(document).ready(function () {
             //初始化Table
@@ -43,6 +47,10 @@
 
             $("#g-order").addClass("active");
             $("#g-order-list").addClass("active");
+
+            if ((roles.match('order_edit')||(admin == "1")) ){
+                $('.order_edit').removeClass("hide");
+            }
         })
 
         var TableInit = function () {
@@ -156,10 +164,6 @@
 
         function operateFormatter(value, row, index) {//赋予的参数
             var operation = "";
-            var roles = "{{ roles }}";
-            var admin = "{{ session.get('is_admin')}}";
-            var user_id = "{{ session.get('user_id') }}";
-
             if ((roles.match('order_view')||(admin == "1"))){
                 operation += '<a href="/order/view/'+row.id+'" class="label label-info">明细</a>';
             }

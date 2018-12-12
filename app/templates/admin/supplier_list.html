@@ -40,6 +40,9 @@
         var oRow = null;
         //当前点击行索引
         var oIndex = null;
+        //角色
+        var roles = "{{ roles }}";
+        var admin = "{{ session.get('is_admin')}}";
 
         $(document).ready(function () {
             //初始化Table
@@ -48,6 +51,9 @@
 
             $("#g-option").addClass("active");
             $("#g-option-supplier").addClass("active");
+            if ((roles.match('supplier_add')||(admin == "1")) ){
+                $('.supplier_add').removeClass("hide");
+            }
 
             // 供应商停用(使用post)
             $(".box-body").delegate(".supplier_stop","click",function(){
@@ -207,8 +213,6 @@
 
         function operateFormatter(value, row, index) {//赋予的参数
             var operation = "";
-            var roles = "{{ roles }}";
-            var admin = "{{ session.get('is_admin')}}";
             if ((roles.match('supplier_edit')||(admin == "1")) ){
                 operation += '<a href="/admin/supplier/edit/'+row.id+'" class="label label-success">修改</a>';
             }

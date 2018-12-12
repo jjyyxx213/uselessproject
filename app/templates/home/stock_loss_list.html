@@ -35,6 +35,10 @@
         var oRow = null;
         //当前点击行索引
         var oIndex = null;
+        //角色
+        var roles = "{{ roles }}";
+        var admin = "{{ session.get('is_admin')}}";
+        var user_id = "{{ session.get('user_id') }}";
 
         $(document).ready(function () {
             //初始化Table
@@ -43,6 +47,10 @@
 
             $("#g-stock").addClass("active");
             $("#g-stock-loss-list").addClass("active");
+
+            if ((roles.match('stock_loss_edit')||(admin == "1")) ){
+                $('.stock_loss_edit').removeClass("hide");
+            }
         })
 
         var TableInit = function () {
@@ -117,9 +125,6 @@
 
         function operateFormatter(value, row, index) {//赋予的参数
             var operation = "";
-            var roles = "{{ roles }}";
-            var admin = "{{ session.get('is_admin')}}";
-            var user_id = "{{ session.get('user_id') }}";
             if ((roles.match('stock_loss_view')||(admin == "1"))){
                 operation += '<a href="/stock/loss/view/'+row.id+'" class="label label-info">明细</a>';
             }
