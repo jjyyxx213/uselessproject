@@ -7,11 +7,12 @@ from time import time
 from urllib2 import urlopen, Request
 from json import dumps, loads
 from flask import render_template, session, redirect, request, make_response, url_for, flash, current_app
-from app.models import Customer, Oplog, WechatMedia, WechatPoi
+from app.models import Customer, Oplog, WechatMedia, WechatPoi, User, Userlog, Item
 from app import db
 from app.decorators import permission_required, login_required
 from poster import encode
 from poster.streaminghttp import register_openers
+import collections
 
 
 @wechat.route('/', methods=['GET', 'POST'])
@@ -332,3 +333,85 @@ def poi_add():
         db.session.add(media)
         db.session.commit()
         return u'<h2>门店创建成功</h2>'
+
+
+@wechat.route("/wxlogin", methods=['GET', 'POST'])
+def wxlogin():
+    if (request.method == 'POST'):
+        if not (request.json):
+            res = {
+                "result": 'false'
+            }
+            return (dumps(res))
+        else:
+            # 验证密码
+            data = request.get_json()
+            rec_phone = data['phone']
+            rec_pwd = data['password']
+            user = User.query.filter_by(phone=rec_phone).first()
+            if user is not None and user.verify_password(rec_pwd) and user.frozen == 0:
+                userlog = Userlog(
+                    user_id=user.id,
+                    ip=request.remote_addr,
+                )
+                db.session.add(userlog)
+                db.session.commit()
+                res = {
+                    "result": 'success'
+                }
+            else:
+                res = {
+                    "result": 'pwderror'
+                }
+            return (dumps(res))
+    else:
+        res = {
+            "result": 'false'
+        }
+        return (dumps(res))
+
+
+@wechat.route("/getopenid", methods=['GET', 'POST'])
+def getopenid():
+    if (request.method == 'POST'):
+        data = request.get_json()
+        rec_code= data['code']
+        url = "https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code" % (current_app.config['WECHAT_APPID'],current_app.config['WECHAT_APPSECRET'], rec_code)
+        response = urlopen(url).read()
+        return (dumps(response))
+
+
+@wechat.route('/item/list/<int:type>', methods=['GET', 'POST'])
+def item_list(type=0):
+    # 商品/服务列表高级权限
+    if request.method == 'POST':
+        # 获取json数据
+        obj_item = Item.query.filter_by(type=type).order_by(Item.addtime.desc())
+        total = obj_item.count()
+        if obj_item:
+            s_json = []
+            for v in obj_item:
+                dic = collections.OrderedDict()
+                if v.valid == 1:
+                    c_valid = '有效'
+                else:
+                    c_valid = '失效'
+                dic["id"] = v.id
+                dic["name"] = v.name
+                dic["salesprice"] = str(v.salesprice) + u'元'
+                dic["costprice"] = str(v.costprice) + u'元'
+                dic["rewardprice"] = str(v.rewardprice) + u'元'
+                dic["valid"] = c_valid
+                dic["unit"] = v.unit
+                dic["standard"] = v.standard
+                dic["remarks"] = v.remarks
+                dic["addtime"] = str(v.addtime)
+                s_json.append(dic)
+            res = {
+                "rows": s_json,
+                "total": total
+            }
+            return (dumps(res))
+        else:
+            return (None)
+    return (None)

@@ -910,7 +910,6 @@ def item_list(type=0):
                 dic["salesprice"] = str(v.salesprice) + u'元'
                 dic["costprice"] = str(v.costprice) + u'元'
                 dic["rewardprice"] = str(v.rewardprice) + u'元'
-                dic["name"] = v.name
                 dic["valid"] = c_valid
                 dic["unit"] = v.unit
                 dic["standard"] = v.standard

@@ -750,7 +750,7 @@ def order_modal_service():
                "from tb_item a left outer join tb_vipdetail b on " \
                "a.id = b.item_id and vip_id = :vip_id and b.quantity > 0 and b.endtime > now() where a.type = 1 and a.valid = 1 "
     # 排序
-    sql_text += "order by b.vip_id desc, a.name limit " + str(current_app.config['POSTS_PER_PAGE'])
+    sql_text += "order by b.vip_id desc, a.name"
     services = db.session.execute(text(sql_text), {'vip_id': vip_id})
 
     total = 0
@@ -803,7 +803,7 @@ def order_modal_stock():
                "left outer join tb_vipdetail d on c.item_id = d.item_id and d.vip_id = :vip_id and d.quantity > 0 and d.endtime > now() "
     # 条件查询(零件名称/类别/规格)
     # 排序
-    sql_text += "order by d.vip_id desc, c.item_id, c.store limit " + str(current_app.config['POSTS_PER_PAGE'])
+    sql_text += "order by d.vip_id desc, c.item_id, c.store"
     services = db.session.execute(text(sql_text), {'vip_id': vip_id})
 
     data = []
@@ -852,7 +852,7 @@ def modal_stock():
     # 获取库存弹出框数据
     key = request.args.get('key', '')
     stocks = Stock.query.join(Item)
-    stocks = stocks.order_by(Stock.item_id.asc(), Stock.store.asc()).limit(current_app.config['POSTS_PER_PAGE']).all()
+    stocks = stocks.order_by(Stock.item_id.asc(), Stock.store.asc()).all()
     total = 0
     data = []
     for v in stocks:
