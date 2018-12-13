@@ -2400,8 +2400,9 @@
 
       if (this.options.showHeader && this.options.height) {
         this.$tableHeader.show()
-        this.resetHeader()
-        padding += this.$header.outerHeight()
+         //liuqq 注释掉下面两行 取消表头初始化解决表头和内容不对齐问题
+        // this.resetHeader()
+        // padding += this.$header.outerHeight()
       } else {
         this.$tableHeader.hide()
         this.trigger('post-header')

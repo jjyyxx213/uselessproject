@@ -55,6 +55,9 @@
         var oRow = null;
         //当前点击行索引
         var oIndex = null;
+        //角色
+        var roles = "{{ roles }}";
+        var admin = "{{ session.get('is_admin')}}";
 
         $(document).ready(function () {
             //初始化Table
@@ -63,6 +66,10 @@
 
             $("#g-customer").addClass("active");
             $("#g-customer-list").addClass("active");
+
+            if ((roles.match('customer_add')||(admin == "1")) ){
+                $('.customer_add').removeClass("hide");
+            }
 
             // 微信绑定
             $(".box-body").delegate(".customer-wechat","click",function(){
@@ -221,8 +228,6 @@
 
         function operateFormatter(value, row, index) {//赋予的参数
             var operation = "";
-            var roles = "{{ roles }}";
-            var admin = "{{ session.get('is_admin')}}";
             if ((roles.match('customer_wechat')||(admin == "1")) ){
                 operation += '<a name="btn-wechat" class="label customer-wechat label-default">微信</a>';
             }
