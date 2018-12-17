@@ -386,11 +386,18 @@ def item_list(type=0):
     # 商品/服务列表高级权限
     if request.method == 'POST':
         # 获取json数据
-        obj_item = Item.query.filter_by(type=type).order_by(Item.addtime.desc())
-        total = obj_item.count()
+        data = request.get_json()
+        rec_page = data['page']
+        rec_pagesize = data['pagesize']
+        # 查询数据
+        obj_item = Item.query
+        obj_item = obj_item.filter_by(type=type).order_by(Item.addtime.desc()).paginate(page=rec_page,
+               per_page=rec_pagesize,
+               error_out=False)
+        total = obj_item.total
         if obj_item:
             s_json = []
-            for v in obj_item:
+            for v in obj_item.items:
                 dic = collections.OrderedDict()
                 if v.valid == 1:
                     c_valid = '有效'
