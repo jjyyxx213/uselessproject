@@ -2358,6 +2358,7 @@ def order_edit(id=None):
                     amount=form.amount.data,
                     discount=form.discount.data,
                     payment=form.payment.data,
+                    balance=form.balance.data,
                     debt=form.debt.data,
                     score=form.score.data,
                     status=0,
