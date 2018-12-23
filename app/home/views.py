@@ -2350,7 +2350,7 @@ def order_edit(id=None):
             if not order:  # 没有新增一个
                 order = Order(
                     id=datetime.now().strftime('%Y%m%d%H%M%S') + ''.join(
-                        [str(random.randint(1, 10)) for i in range(2)]),
+                        [str(random.randint(1, 9)) for i in range(2)]),
                     type=0,
                     user_id=int(session['user_id']),
                     customer_id=form.customer_id.data,
@@ -2358,6 +2358,7 @@ def order_edit(id=None):
                     amount=form.amount.data,
                     discount=form.discount.data,
                     payment=form.payment.data,
+                    balance=form.balance.data,
                     debt=form.debt.data,
                     score=form.score.data,
                     status=0,
