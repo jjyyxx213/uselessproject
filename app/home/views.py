@@ -456,6 +456,7 @@ def cus_vip_add(id=None):
         # 保存客户与vip—id关系
         obj_customer.vip_id = max_vip_id
         obj_customer.balance = form.balance.data  # 20181024 余额记录在客户表中
+        obj_customer.summary = form.balance.data  # 20181224 累计消费记录在客户表中
         obj_oplog_cus = Oplog(
             user_id=session['user_id'],
             ip=request.remote_addr,
@@ -542,6 +543,7 @@ def cus_vip_list(vip_id=None):
         obj_customer.vip_id = None
         obj_customer.balance = 0  # 20181024 余额清空
         obj_customer.score = 0  # 20181024 积分清空
+        obj_customer.summary = 0 # 20181224 累计消费清零
         db.session.add(obj_customer)
         db.session.flush()
         db.session.query(Vipdetail).filter(Vipdetail.vip_id == vip_id).delete()
@@ -572,7 +574,10 @@ def cus_vip_deposit(vip_id=None):
             flash(u'充值金额与确认充值金额不一致！', 'err')
             return render_template('home/cus_vip_deposit.html', obj_vip=obj_vip, form=form)
 
+        # 记录余额和累计消费
         obj_customer.balance = float(form.sum_deposit.data)
+        obj_customer.summary = obj_customer.summary + float(form.deposit.data)
+
         obj_oplog_vip = Oplog(
             user_id=session['user_id'],
             ip=request.remote_addr,
