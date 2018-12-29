@@ -456,7 +456,8 @@ def cus_vip_add(id=None):
         # 保存客户与vip—id关系
         obj_customer.vip_id = max_vip_id
         obj_customer.balance = form.balance.data  # 20181024 余额记录在客户表中
-        obj_customer.summary = form.balance.data  # 20181224 累计消费记录在客户表中
+        obj_customer.summary = obj_customer.summary + float(form.payment.data) # 20181224 累计消费记录在客户表中
+        obj_customer.score = obj_customer.score + float(form.scorerule.data) * float(form.payment.data) # 20181229 充值记录积分
         obj_oplog_cus = Oplog(
             user_id=session['user_id'],
             ip=request.remote_addr,
@@ -577,6 +578,7 @@ def cus_vip_deposit(vip_id=None):
         # 记录余额和累计消费
         obj_customer.balance = float(form.sum_deposit.data)
         obj_customer.summary = obj_customer.summary + float(form.deposit.data)
+        obj_customer.score = obj_customer.score + obj_vip.scorerule * float(form.deposit.data)  # 20181229 充值记录积分
 
         obj_oplog_vip = Oplog(
             user_id=session['user_id'],
