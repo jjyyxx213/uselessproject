@@ -40,7 +40,7 @@ function modal_item(url) {
             valign: 'middle',
             sortable: true
         }, {
-            field: 'salesprice',
+            field: 'qty',
             title: '库存数量',
             valign: 'middle',
             sortable: true
