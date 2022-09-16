@@ -28,7 +28,7 @@ ipaddress==1.0.22
 itsdangerous==1.1.0
 Jinja2==2.10
 lxml==4.2.5
-Mako==1.0.7
+Mako==1.2.2
 MarkupSafe==1.0
 parsel==1.5.1
 pyasn1==0.4.4
